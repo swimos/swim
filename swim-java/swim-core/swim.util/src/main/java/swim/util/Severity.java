@@ -15,11 +15,11 @@
 package swim.util;
 
 import java.util.Objects;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
 
 /**
  * Discrete severity scale used for logging and diagnostic classification.
@@ -135,9 +135,8 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
   public Severity withLabel(String label) {
     if (this.label.equals(label)) {
       return this;
-    } else {
-      return Severity.of(this.value, label);
     }
+    return Severity.of(this.value, label);
   }
 
   public boolean filter(Severity that) {
@@ -168,9 +167,8 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
       return -1;
     } else if (this.value > that.value) {
       return 1;
-    } else {
-      return this.label.compareTo(that.label);
     }
+    return this.label.compareTo(that.label);
   }
 
   @Override
@@ -275,8 +273,8 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
     notation.reset();
   }
 
-  @IntoForm
   @Override
+  @Marshal
   public String toString() {
     return this.label;
   }
@@ -408,7 +406,7 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
    * @throws IllegalArgumentException if {@code label} is not
    *         a standard severity label.
    */
-  @FromForm
+  @Unmarshal
   public static Severity parse(String label) {
     Objects.requireNonNull(label);
     if (ALL_LABEL.equalsIgnoreCase(label)) {
@@ -429,9 +427,8 @@ public final class Severity implements Comparable<Severity>, ToMarkup, ToSource 
       return FATAL;
     } else if (OFF_LABEL.equalsIgnoreCase(label)) {
       return OFF;
-    } else {
-      throw new IllegalArgumentException("unknown severity label: " + label);
     }
+    throw new IllegalArgumentException("unknown severity label: " + label);
   }
 
 }

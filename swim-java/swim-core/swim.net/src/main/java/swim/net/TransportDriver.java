@@ -214,30 +214,29 @@ public class TransportDriver implements TransportService, NetEndpoint {
         // Try to acquire the config lock;
         // must happen before invoking the configuration function.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The config lock has been acquired.
-          status = newStatus;
-          configured = true;
-          try {
-            // Invoke the configuration function.
-            configuration.run();
-          } finally {
-            // Prepare to notify waiters upon releasing the config lock.
-            synchronized (this) {
-              // Release the config lock; must happen before notifying waiters.
-              status = (int) STATUS.compareAndExchangeAcquire(this, newStatus, oldStatus);
-              // Verify that the service status didn't change while configuring.
-              assert status == newStatus;
-              status = oldStatus;
-              // Notify waiters that the config lock has been released.
-              this.notifyAll();
-            }
-          }
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        // The config lock has been acquired.
+        status = newStatus;
+        configured = true;
+        try {
+          // Invoke the configuration function.
+          configuration.run();
+        } finally {
+          // Prepare to notify waiters upon releasing the config lock.
+          synchronized (this) {
+            // Release the config lock; must happen before notifying waiters.
+            status = (int) STATUS.compareAndExchangeAcquire(this, newStatus, oldStatus);
+            // Verify that the service status didn't change while configuring.
+            assert status == newStatus;
+            status = oldStatus;
+            // Notify waiters that the config lock has been released.
+            this.notifyAll();
+          }
+        }
+        break;
       } else if ((status & STATE_MASK) == CONFIG_LOCK) {
         // Another thread currently holds the config lock;
         // prepare to wait for the config lock to be released.
@@ -257,11 +256,10 @@ public class TransportDriver implements TransportService, NetEndpoint {
         }
         // Continue trying to acquire the config lock.
         continue;
-      } else {
-        // The service has already been started; to ensure consistent operation,
-        // configuration is no longer permitted.
-        break;
       }
+      // The service has already been started; to ensure consistent operation,
+      // configuration is no longer permitted.
+      break;
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service configuration.
@@ -285,17 +283,14 @@ public class TransportDriver implements TransportService, NetEndpoint {
             // Invoke didStart callback now that the selector thread has started.
             this.didStart();
           } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("didStart callback failed", cause);
-              // Stop the service on lifecycle callback failure.
-              this.stop();
-              // Reload service status after stop.
-              status = (int) STATUS.getOpaque(this);
-            } else {
-              // Rethrow the fatal exception.
+            if (Result.isFatal(cause)) {
               throw cause;
             }
+            this.log.error("didStart callback failed", cause);
+            // Stop the service on lifecycle callback failure.
+            this.stop();
+            // Reload service status after stop.
+            status = (int) STATUS.getOpaque(this);
           }
         }
         break;
@@ -327,41 +322,36 @@ public class TransportDriver implements TransportService, NetEndpoint {
         // Try to transition the service into the starting state;
         // must happen before initiating service startup.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The service has transitioned into the starting state.
-          status = newStatus;
-          causedStart = true;
-          try {
-            // Invoke willStart callback prior to starting the selector thread.
-            this.willStart();
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("willStart callback failed", cause);
-              // Stop the service on lifecycle callback failure.
-              this.stop();
-              // Reload service status after stop.
-              status = (int) STATUS.getOpaque(this);
-            } else {
-              // Rethrow the fatal exception.
-              throw cause;
-            }
-          }
-          // Start the selector thread.
-          this.thread.start();
-          // Continue startup sequence.
-          continue;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        // The service has transitioned into the starting state.
+        status = newStatus;
+        causedStart = true;
+        try {
+          // Invoke willStart callback prior to starting the selector thread.
+          this.willStart();
+        } catch (Throwable cause) {
+          if (Result.isFatal(cause)) {
+            throw cause;
+          }
+          this.log.error("willStart callback failed", cause);
+          // Stop the service on lifecycle callback failure.
+          this.stop();
+          // Reload service status after stop.
+          status = (int) STATUS.getOpaque(this);
+        }
+        // Start the selector thread.
+        this.thread.start();
+        // Continue startup sequence.
+        continue;
       } else if ((status & STATE_MASK) == STOPPING_STATE
               || (status & STATE_MASK) == STOPPED_STATE) {
         // The service is concurrently stopping, or has permanently stopped.
         break;
-      } else {
-        throw new AssertionError("unreachable");
       }
+      throw new AssertionError("unreachable");
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service startup.
@@ -426,13 +416,10 @@ public class TransportDriver implements TransportService, NetEndpoint {
             // Invoke didStop callback now that the selector thread has shutdown.
             this.didStop();
           } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("didStop callback failed", cause);
-            } else {
-              // Rethrow the fatal exception.
+            if (Result.isFatal(cause)) {
               throw cause;
             }
+            this.log.error("didStop callback failed", cause);
           }
         }
         break;
@@ -467,43 +454,38 @@ public class TransportDriver implements TransportService, NetEndpoint {
         // Try to transition the service into the stopping state;
         // must happen before initiating service shutdown.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The service has transitioned into the stopping state.
-          status = newStatus;
-          causedStop = true;
-          try {
-            // Invoke willStop callback prior to stopping the selector thread.
-            this.willStop();
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("willStop callback failed", cause);
-            } else {
-              // Rethrow the fatal exception.
-              throw cause;
-            }
-          }
-          // Stop the selector thread.
-          while (this.thread.isAlive()) {
-            // Interrupt the selector thread so it will wakeup and die.
-            this.thread.interrupt();
-            try {
-              // Wait for the selector thread to exit.
-              this.thread.join(100);
-            } catch (InterruptedException cause) {
-              // Defer thread interrupt.
-              interrupted = true;
-            }
-          }
-          // Continue shutdown sequence.
-          continue;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
-      } else {
-        throw new AssertionError("unreachable");
+        // The service has transitioned into the stopping state.
+        status = newStatus;
+        causedStop = true;
+        try {
+          // Invoke willStop callback prior to stopping the selector thread.
+          this.willStop();
+        } catch (Throwable cause) {
+          if (Result.isFatal(cause)) {
+            throw cause;
+          }
+          this.log.error("willStop callback failed", cause);
+        }
+        // Stop the selector thread.
+        while (this.thread.isAlive()) {
+          // Interrupt the selector thread so it will wakeup and die.
+          this.thread.interrupt();
+          try {
+            // Wait for the selector thread to exit.
+            this.thread.join(100);
+          } catch (InterruptedException cause) {
+            // Defer thread interrupt.
+            interrupted = true;
+          }
+        }
+        // Continue shutdown sequence.
+        continue;
       }
+      throw new AssertionError("unreachable");
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service shutdown.
@@ -878,9 +860,8 @@ final class TransportHandle implements TransportContext {
     if ((interestOps & SelectionKey.OP_ACCEPT) == 0) {
       ((Selector) TransportDriver.SELECTOR.getOpaque(this.service)).wakeup();
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   @Override
@@ -889,9 +870,8 @@ final class TransportHandle implements TransportContext {
     if ((interestOps & SelectionKey.OP_ACCEPT) != 0) {
       ((Selector) TransportDriver.SELECTOR.getOpaque(this.service)).wakeup();
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   /**
@@ -903,13 +883,10 @@ final class TransportHandle implements TransportContext {
       // Invoke the I/O callback.
       this.transport.dispatchAccept();
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.service.log.errorStatus("dispatchAccept callback failed", this.transport, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.service.log.errorStatus("dispatchAccept callback failed", this.transport, cause);
     }
   }
 
@@ -919,9 +896,8 @@ final class TransportHandle implements TransportContext {
     if ((interestOps & SelectionKey.OP_CONNECT) == 0) {
       ((Selector) TransportDriver.SELECTOR.getOpaque(this.service)).wakeup();
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   @Override
@@ -930,9 +906,8 @@ final class TransportHandle implements TransportContext {
     if ((interestOps & SelectionKey.OP_CONNECT) != 0) {
       ((Selector) TransportDriver.SELECTOR.getOpaque(this.service)).wakeup();
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   /**
@@ -944,13 +919,10 @@ final class TransportHandle implements TransportContext {
       // Invoke the I/O callback.
       this.transport.dispatchConnect();
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.service.log.errorStatus("dispatchConnect callback failed", this.transport, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.service.log.errorStatus("dispatchConnect callback failed", this.transport, cause);
     }
   }
 
@@ -960,9 +932,8 @@ final class TransportHandle implements TransportContext {
     if ((interestOps & SelectionKey.OP_READ) == 0) {
       ((Selector) TransportDriver.SELECTOR.getOpaque(this.service)).wakeup();
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   @Override
@@ -971,9 +942,8 @@ final class TransportHandle implements TransportContext {
     if ((interestOps & SelectionKey.OP_READ) != 0) {
       ((Selector) TransportDriver.SELECTOR.getOpaque(this.service)).wakeup();
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   /**
@@ -985,13 +955,10 @@ final class TransportHandle implements TransportContext {
       // Invoke the I/O callback.
       this.transport.dispatchRead();
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.service.log.errorStatus("dispatchRead callback failed", this.transport, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.service.log.errorStatus("dispatchRead callback failed", this.transport, cause);
     }
   }
 
@@ -1001,9 +968,8 @@ final class TransportHandle implements TransportContext {
     if ((interestOps & SelectionKey.OP_WRITE) == 0) {
       ((Selector) TransportDriver.SELECTOR.getOpaque(this.service)).wakeup();
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   @Override
@@ -1012,9 +978,8 @@ final class TransportHandle implements TransportContext {
     if ((interestOps & SelectionKey.OP_WRITE) != 0) {
       ((Selector) TransportDriver.SELECTOR.getOpaque(this.service)).wakeup();
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   /**
@@ -1026,13 +991,10 @@ final class TransportHandle implements TransportContext {
       // Invoke the I/O callback.
       this.transport.dispatchWrite();
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.service.log.errorStatus("dispatchWrite callback failed", this.transport, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.service.log.errorStatus("dispatchWrite callback failed", this.transport, cause);
     }
   }
 
@@ -1041,25 +1003,19 @@ final class TransportHandle implements TransportContext {
       // Invoke the I/O callback.
       this.transport.dispatchTimeout();
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.service.log.errorStatus("dispatchTimeout callback failed", this.transport, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.service.log.errorStatus("dispatchTimeout callback failed", this.transport, cause);
     }
     try {
       // Invoke service introspection callback.
       this.service.didTimeoutTransport(this.transport);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.service.log.errorStatus("didTimeoutTransport callback failed", this.transport, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.service.log.errorStatus("didTimeoutTransport callback failed", this.transport, cause);
     }
   }
 
@@ -1072,13 +1028,10 @@ final class TransportHandle implements TransportContext {
       // Invoke the I/O callback.
       this.transport.dispatchClose();
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.service.log.errorStatus("dispatchClose callback failed", this.transport, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.service.log.errorStatus("dispatchClose callback failed", this.transport, cause);
     }
   }
 
@@ -1123,20 +1076,21 @@ final class DriverThread extends Thread {
     final long timeout = Math.max(0L, nextIdleCheck - System.currentTimeMillis());
     // Wait for ready I/O events, or for the next idle check.
     final int selectedCount = selector.select(timeout);
-    if (selectedCount > 0) {
-      final Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
-      while (selectedKeys.hasNext()) {
-        // Get the next selected key.
-        final SelectionKey selectionKey = selectedKeys.next();
-        // Remove the key from the selected set.
-        selectedKeys.remove();
-        // Get the transport handle attached to the selected key.
-        final Object attachment = selectionKey.attachment();
-        if (attachment instanceof TransportHandle) {
-          final TransportHandle handle = (TransportHandle) attachment;
-          // Dispatch I/O readiness events for the selected transport.
-          this.dispatch(handle);
-        }
+    if (selectedCount <= 0) {
+      return;
+    }
+
+    final Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+    while (selectedKeys.hasNext()) {
+      // Get the next selected key.
+      final SelectionKey selectionKey = selectedKeys.next();
+      // Remove the key from the selected set.
+      selectedKeys.remove();
+      // Get the transport handle attached to the selected key.
+      final Object attachment = selectionKey.attachment();
+      if (attachment instanceof TransportHandle handle) {
+        // Dispatch I/O readiness events for the selected transport.
+        this.dispatch(handle);
       }
     }
   }
@@ -1215,29 +1169,29 @@ final class DriverThread extends Thread {
   void checkIdle() {
     final TransportOptions transportOptions = this.service.transportOptions;
     final long now = System.currentTimeMillis();
-    if (now - this.lastIdleCheck >= transportOptions.idleInterval) {
-      // Idle interval has elapsed since last timeout check;
-      // update the last timeout check time.
-      this.lastIdleCheck = now;
-      // Get a reference to the I/O selector.
-      final Selector selector = (Selector) TransportDriver.SELECTOR.getOpaque(this.service);
-      // Loop over all selection keys registered with the I/O selector.
-      for (SelectionKey selectionKey : selector.keys()) {
-        // Get the transport handle attached to the next key.
-        final Object attachment = selectionKey.attachment();
-        if (attachment instanceof TransportHandle) {
-          final TransportHandle handle = (TransportHandle) attachment;
-          // Ask the transport for its desired idle timeout.
-          long idleTimeout = handle.idleTimeout();
-          if (idleTimeout < 0L) {
-            // Negative idle timeout means use the default idle timeout.
-            idleTimeout = transportOptions.idleTimeout;
-          }
-          // Zero indicates no idle timeout.
-          if (idleTimeout > 0L && now - handle.lastSelectTime > idleTimeout) {
-            // Notify the transport that its idle timeout has elapsed.
-            handle.dispatchTimeout();
-          }
+    if (now - this.lastIdleCheck < transportOptions.idleInterval) {
+      return;
+    }
+    // Idle interval has elapsed since last timeout check;
+    // update the last timeout check time.
+    this.lastIdleCheck = now;
+    // Get a reference to the I/O selector.
+    final Selector selector = (Selector) TransportDriver.SELECTOR.getOpaque(this.service);
+    // Loop over all selection keys registered with the I/O selector.
+    for (SelectionKey selectionKey : selector.keys()) {
+      // Get the transport handle attached to the next key.
+      final Object attachment = selectionKey.attachment();
+      if (attachment instanceof TransportHandle handle) {
+        // Ask the transport for its desired idle timeout.
+        long idleTimeout = handle.idleTimeout();
+        if (idleTimeout < 0L) {
+          // Negative idle timeout means use the default idle timeout.
+          idleTimeout = transportOptions.idleTimeout;
+        }
+        // Zero indicates no idle timeout.
+        if (idleTimeout > 0L && now - handle.lastSelectTime > idleTimeout) {
+          // Notify the transport that its idle timeout has elapsed.
+          handle.dispatchTimeout();
         }
       }
     }
@@ -1252,8 +1206,7 @@ final class DriverThread extends Thread {
     for (SelectionKey selectionKey : selector.keys()) {
       // Get the transport handle attached to the next key.
       final Object attachment = selectionKey.attachment();
-      if (attachment instanceof TransportHandle) {
-        final TransportHandle handle = (TransportHandle) attachment;
+      if (attachment instanceof TransportHandle handle) {
         handle.dispatchClose();
       }
     }
@@ -1272,7 +1225,6 @@ final class DriverThread extends Thread {
         // Initialize the I/O selector.
         selector = Selector.open();
       } catch (IOException cause) {
-        // Report selector open failure.
         service.log.fatal("selector failed on open", cause);
         // Immediately exit the selector thread.
         return;
@@ -1311,26 +1263,21 @@ final class DriverThread extends Thread {
         // Shut down all registered transports before stopping the service.
         this.closeTransports();
       } catch (IOException cause) {
-        // Report the selector failure.
         service.log.fatal("selector failed", cause);
         // Shut down all registered transports before stopping the service.
         this.closeTransports();
       } catch (Throwable cause) {
-        if (Result.isNonFatal(cause)) {
-          // Report the non-fatal exception.
-          service.log.fatal("selector thread failed", cause);
-          // Shut down all registered transports.
-          this.closeTransports();
-        } else {
-          // Rethrow the fatal exception.
+        if (Result.isFatal(cause)) {
           throw cause;
         }
+        service.log.fatal("selector thread failed", cause);
+        // Shut down all registered transports.
+        this.closeTransports();
       } finally {
         try {
           // Close the I/O selector.
           selector.close();
         } catch (IOException cause) {
-          // Report selector close failure.
           service.log.warning("selector failed on close", cause);
         }
       }

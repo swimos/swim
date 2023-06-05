@@ -15,28 +15,28 @@
 package swim.waml;
 
 import org.junit.jupiter.api.Test;
+import swim.expr.AndExpr;
+import swim.expr.BitwiseAndExpr;
+import swim.expr.BitwiseNotExpr;
+import swim.expr.BitwiseOrExpr;
+import swim.expr.BitwiseXorExpr;
+import swim.expr.CondExpr;
 import swim.expr.ContextExpr;
-import swim.expr.operator.AndExpr;
-import swim.expr.operator.BitwiseAndExpr;
-import swim.expr.operator.BitwiseNotExpr;
-import swim.expr.operator.BitwiseOrExpr;
-import swim.expr.operator.BitwiseXorExpr;
-import swim.expr.operator.CondExpr;
-import swim.expr.operator.DivideExpr;
-import swim.expr.operator.EqExpr;
-import swim.expr.operator.GeExpr;
-import swim.expr.operator.GtExpr;
-import swim.expr.operator.LeExpr;
-import swim.expr.operator.LtExpr;
-import swim.expr.operator.MinusExpr;
-import swim.expr.operator.ModuloExpr;
-import swim.expr.operator.NeExpr;
-import swim.expr.operator.NegativeExpr;
-import swim.expr.operator.NotExpr;
-import swim.expr.operator.OrExpr;
-import swim.expr.operator.PlusExpr;
-import swim.expr.operator.PositiveExpr;
-import swim.expr.operator.TimesExpr;
+import swim.expr.DivideExpr;
+import swim.expr.EqExpr;
+import swim.expr.GeExpr;
+import swim.expr.GtExpr;
+import swim.expr.LeExpr;
+import swim.expr.LtExpr;
+import swim.expr.MinusExpr;
+import swim.expr.ModuloExpr;
+import swim.expr.NeExpr;
+import swim.expr.NegativeExpr;
+import swim.expr.NotExpr;
+import swim.expr.OrExpr;
+import swim.expr.PlusExpr;
+import swim.expr.PositiveExpr;
+import swim.expr.TimesExpr;
 import swim.repr.Repr;
 import swim.repr.TermRepr;
 
@@ -760,12 +760,12 @@ public class WamlOperatorWriterTests {
   }
 
   public static void assertWrites(String expected, Repr value, WamlWriterOptions options) {
-    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(options)));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.valueFormat().write(value, options));
   }
 
   public static void assertWrites(String expected, Repr value) {
-    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(WamlWriterOptions.readable())));
-    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(WamlWriterOptions.compact())));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.valueFormat().write(value, WamlWriterOptions.readable()));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.valueFormat().write(value, WamlWriterOptions.compact()));
   }
 
 }

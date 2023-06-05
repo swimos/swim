@@ -19,11 +19,11 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Binary;
+import swim.codec.Codec;
 import swim.codec.Decode;
 import swim.codec.Encode;
 import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
-import swim.codec.Transcoder;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -47,8 +47,8 @@ public final class HttpEmpty<T> extends HttpPayload<T> implements ToSource {
   }
 
   @Override
-  public Transcoder<T> transcoder() {
-    return Binary.blankTranscoder();
+  public Codec<T> codec() {
+    return Binary.blankCodec();
   }
 
   @Override

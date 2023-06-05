@@ -37,7 +37,7 @@ public abstract class UriSchemeMapper<T> extends UriMapper<T> {
   }
 
   abstract @Nullable T get(UriScheme scheme, UriAuthority authority, UriPath path,
-                 UriQuery query, UriFragment fragment);
+                           UriQuery query, UriFragment fragment);
 
   @Override
   public @Nullable T get(Uri uri) {
@@ -50,9 +50,8 @@ public abstract class UriSchemeMapper<T> extends UriMapper<T> {
   public UriMapper<T> merged(UriMapper<T> that) {
     if (that instanceof UriSchemeMapper<?>) {
       return this.merged((UriSchemeMapper<T>) that);
-    } else {
-      return that;
     }
+    return that;
   }
 
   abstract UriSchemeMapper<T> removed(UriScheme scheme, UriAuthority authority,
@@ -70,18 +69,17 @@ public abstract class UriSchemeMapper<T> extends UriMapper<T> {
   public UriMapper<T> unmerged(UriMapper<T> that) {
     if (that instanceof UriSchemeMapper<?>) {
       return this.unmerged((UriSchemeMapper<T>) that);
-    } else {
-      return this;
     }
+    return this;
   }
 
   public static <T> UriSchemeMapper<T> compile(Uri pattern, UriScheme scheme, UriAuthority authority,
                                                UriPath path, UriQuery query, UriFragment fragment, T value) {
-    if (scheme.isDefined()) {
-      return new UriSchemeMapping<T>(HashTrieMap.of(scheme.name(), UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value)));
-    } else {
-      return UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value);
+    final UriAuthorityMapper<T> authorityMapper = UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value);
+    if (!scheme.isDefined()) {
+      return authorityMapper;
     }
+    return new UriSchemeMapping<T>(HashTrieMap.of(scheme.name(), authorityMapper));
   }
 
 }

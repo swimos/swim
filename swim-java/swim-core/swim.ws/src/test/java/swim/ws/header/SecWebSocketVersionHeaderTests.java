@@ -52,7 +52,7 @@ public class SecWebSocketVersionHeaderTests {
   }
 
   @Test
-  public void writeSSecWebSocketVersionHeaders() {
+  public void writeSecWebSocketVersionHeaders() {
     assertWrites("Sec-WebSocket-Version: 13",
                  SecWebSocketVersionHeader.of(13));
     assertWrites("Sec-WebSocket-Version: 13, 0",

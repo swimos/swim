@@ -171,8 +171,7 @@ final class EncodeWsFrame<T> extends Encode<WsFrame<T>> {
   final @Nullable Encode<?> encode;
   final long offset;
 
-  EncodeWsFrame(WsEncoder encoder, WsFrame<T> frame,
-                @Nullable Encode<?> encode, long offset) {
+  EncodeWsFrame(WsEncoder encoder, WsFrame<T> frame, @Nullable Encode<?> encode, long offset) {
     this.encoder = encoder;
     this.frame = frame;
     this.encode = encode;
@@ -181,13 +180,11 @@ final class EncodeWsFrame<T> extends Encode<WsFrame<T>> {
 
   @Override
   public Encode<WsFrame<T>> produce(OutputBuffer<?> output) {
-    return EncodeWsFrame.encode(output, this.encoder, this.frame,
-                                this.encode, this.offset);
+    return EncodeWsFrame.encode(output, this.encoder, this.frame, this.encode, this.offset);
   }
 
   static <T> Encode<WsFrame<T>> encode(OutputBuffer<?> output, WsEncoder encoder,
-                                       WsFrame<T> frame, @Nullable Encode<?> encode,
-                                       long offset) {
+                                       WsFrame<T> frame, @Nullable Encode<?> encode, long offset) {
     final WsOpcode frameType = frame.frameType();
 
     // Capture the usable bounds of the output buffer.
@@ -217,7 +214,7 @@ final class EncodeWsFrame<T> extends Encode<WsFrame<T>> {
       // Encode a payload fragment into the output buffer.
       final Encode<?> encodePayload;
       if (encode == null) {
-        encodePayload = frame.transcoder().encode(output, Assume.conformsNullable(frame.get()));
+        encodePayload = frame.codec().encode(output, Assume.conformsNullable(frame.get()));
       } else {
         encodePayload = encode.produce(output);
       }

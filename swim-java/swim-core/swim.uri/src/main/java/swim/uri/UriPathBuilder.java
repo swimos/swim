@@ -50,22 +50,20 @@ public final class UriPathBuilder {
     Objects.requireNonNull(component);
     if (component.equals("/")) {
       return this.addSlash();
-    } else {
-      return this.addSegment(component);
     }
+    return this.addSegment(component);
   }
 
   public boolean addAll(Collection<? extends String> components) {
     Objects.requireNonNull(components);
     if (components instanceof UriPath) {
       return this.addPath((UriPath) components);
-    } else {
-      boolean modified = false;
-      for (String component : components) {
-        modified = this.add(component) || modified;
-      }
-      return modified;
     }
+    boolean modified = false;
+    for (String component : components) {
+      modified = this.add(component) || modified;
+    }
+    return modified;
   }
 
   public boolean addSlash() {
@@ -121,12 +119,11 @@ public final class UriPathBuilder {
       size += 1;
       do {
         final UriPath tail = path.tail();
-        if (!tail.isEmpty()) {
-          path = tail;
-          size += 1;
-        } else {
+        if (tail.isEmpty()) {
           break;
         }
+        path = tail;
+        size += 1;
       } while (true);
       this.last = path;
       this.size = size;
@@ -151,14 +148,13 @@ public final class UriPathBuilder {
         this.aliased = aliased - 1;
       }
       return first;
-    } else {
-      final UriPath last = this.dealias(size - 2);
-      last.setTail(UriPath.empty());
-      this.last = last;
-      this.size = size - 1;
-      this.aliased = aliased - 1;
-      return last.tail();
     }
+    final UriPath last = this.dealias(size - 2);
+    last.setTail(UriPath.empty());
+    this.last = last;
+    this.size = size - 1;
+    this.aliased = aliased - 1;
+    return last.tail();
   }
 
   public UriPath build() {

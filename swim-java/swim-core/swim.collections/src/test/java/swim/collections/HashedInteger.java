@@ -36,8 +36,7 @@ public final class HashedInteger {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HashedInteger) {
-      final HashedInteger that = (HashedInteger) other;
+    } else if (other instanceof HashedInteger that) {
       return this.value == that.value;
     }
     return false;

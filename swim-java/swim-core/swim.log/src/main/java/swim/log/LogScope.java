@@ -20,13 +20,13 @@ import java.lang.ref.SoftReference;
 import java.util.Map;
 import java.util.Objects;
 import swim.annotations.CheckReturnValue;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.collections.HashTrieMap;
-import swim.expr.Term;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
+import swim.term.Term;
 import swim.util.Notation;
 import swim.util.ToMarkup;
 import swim.util.ToSource;
@@ -97,23 +97,22 @@ public final class LogScope implements Term, ToMarkup, ToSource {
         // Child scope already exists.
         child = oldChild;
         break;
-      } else {
-        if (child == null) {
-          // Create the new child scope.
-          final String subpath = this.path.length() != 0 ? this.path + '.' + key : key;
-          child = new LogScope(this.depth + 1, key, subpath, this, HashTrieMap.empty(), null);
-          childRef = new SoftReference<LogScope>(child);
-        }
-        // Try to add the new child scope to the children map.
-        final HashTrieMap<String, SoftReference<LogScope>> oldChildren = children;
-        final HashTrieMap<String, SoftReference<LogScope>> newChildren = oldChildren.updated(key, childRef);
-        children = (HashTrieMap<String, SoftReference<LogScope>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
-        if (children == oldChildren) {
-          // Successfully inserted the new child scope.
-          children = newChildren;
-          break;
-        }
+      } else if (child == null) {
+        // Create the new child scope.
+        final String subpath = this.path.length() != 0 ? this.path + '.' + key : key;
+        child = new LogScope(this.depth + 1, key, subpath, this, HashTrieMap.empty(), null);
+        childRef = new SoftReference<LogScope>(child);
       }
+      // Try to add the new child scope to the children map.
+      final HashTrieMap<String, SoftReference<LogScope>> oldChildren = children;
+      final HashTrieMap<String, SoftReference<LogScope>> newChildren = oldChildren.updated(key, childRef);
+      children = (HashTrieMap<String, SoftReference<LogScope>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
+      if (children != oldChildren) {
+        // CAS failed; try again.
+        continue;
+      }
+      children = newChildren;
+      break;
     } while (true);
 
     // Periodically Help purge child scope references cleared by the GC.
@@ -208,7 +207,7 @@ public final class LogScope implements Term, ToMarkup, ToSource {
     notation.endInvoke();
   }
 
-  @IntoForm
+  @Marshal
   @Override
   public String toString() {
     return this.path;
@@ -274,7 +273,7 @@ public final class LogScope implements Term, ToMarkup, ToSource {
     return scope;
   }
 
-  @FromForm
+  @Unmarshal
   public static LogScope parse(String path) {
     Objects.requireNonNull(path);
     final int length = path.length();

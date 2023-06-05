@@ -66,9 +66,8 @@ public final class IntRepr implements NumberRepr, ToSource {
       return this;
     } else if (attrs == Attrs.empty()) {
       return IntRepr.of(this.value);
-    } else {
-      return new IntRepr(attrs, this.value);
     }
+    return new IntRepr(attrs, this.value);
   }
 
   @Override
@@ -288,28 +287,25 @@ public final class IntRepr implements NumberRepr, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof NumberRepr) {
-      final NumberRepr that = (NumberRepr) other;
-      if (this.attrs().equals(that.attrs())) {
-        if (this.isValidByte() && that.isValidByte()) {
-          return this.byteValue() == that.byteValue();
-        } else if (this.isValidShort() && that.isValidShort()) {
-          return this.shortValue() == that.shortValue();
-        } else if (this.isValidInt() && that.isValidInt()) {
-          return this.intValue() == that.intValue();
-        } else if (this.isValidLong() && that.isValidLong()) {
-          return this.longValue() == that.longValue();
-        } else if (this.isValidFloat() && that.isValidFloat()) {
-          final float x = this.floatValue();
-          final float y = that.floatValue();
-          return x == y || (Float.isNaN(x) && Float.isNaN(y));
-        } else if (this.isValidDouble() && that.isValidDouble()) {
-          final double x = this.doubleValue();
-          final double y = that.doubleValue();
-          return x == y || (Double.isNaN(x) && Double.isNaN(y));
-        } else {
-          return this.stringValue().equals(that.stringValue());
-        }
+    } else if (other instanceof NumberRepr that && this.attrs().equals(that.attrs())) {
+      if (this.isValidByte() && that.isValidByte()) {
+        return this.byteValue() == that.byteValue();
+      } else if (this.isValidShort() && that.isValidShort()) {
+        return this.shortValue() == that.shortValue();
+      } else if (this.isValidInt() && that.isValidInt()) {
+        return this.intValue() == that.intValue();
+      } else if (this.isValidLong() && that.isValidLong()) {
+        return this.longValue() == that.longValue();
+      } else if (this.isValidFloat() && that.isValidFloat()) {
+        final float x = this.floatValue();
+        final float y = that.floatValue();
+        return x == y || (Float.isNaN(x) && Float.isNaN(y));
+      } else if (this.isValidDouble() && that.isValidDouble()) {
+        final double x = this.doubleValue();
+        final double y = that.doubleValue();
+        return x == y || (Double.isNaN(x) && Double.isNaN(y));
+      } else {
+        return this.stringValue().equals(that.stringValue());
       }
     }
     return false;
@@ -350,23 +346,11 @@ public final class IntRepr implements NumberRepr, ToSource {
     return this.toSource();
   }
 
-  private static final IntRepr ZERO = new IntRepr(Attrs.empty(), 0);
+  static final IntRepr ZERO = new IntRepr(Attrs.empty(), 0);
 
-  static IntRepr zero() {
-    return ZERO;
-  }
+  static final IntRepr POSITIVE_ONE = new IntRepr(Attrs.empty(), 1);
 
-  private static final IntRepr POSITIVE_ONE = new IntRepr(Attrs.empty(), 1);
-
-  static IntRepr positiveOne() {
-    return POSITIVE_ONE;
-  }
-
-  private static final IntRepr NEGATIVE_ONE = new IntRepr(Attrs.empty(), -1);
-
-  static IntRepr negativeOne() {
-    return NEGATIVE_ONE;
-  }
+  static final IntRepr NEGATIVE_ONE = new IntRepr(Attrs.empty(), -1);
 
   public static IntRepr of(int value) {
     if (value == 0) {
@@ -375,9 +359,8 @@ public final class IntRepr implements NumberRepr, ToSource {
       return POSITIVE_ONE;
     } else if (value == -1) {
       return NEGATIVE_ONE;
-    } else {
-      return new IntRepr(Attrs.empty(), value);
     }
+    return new IntRepr(Attrs.empty(), value);
   }
 
 }

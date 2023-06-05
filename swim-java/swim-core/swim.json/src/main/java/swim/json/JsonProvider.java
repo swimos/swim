@@ -20,10 +20,10 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * A resolver of {@code JsonForm} instances from Java types.
+ * A resolver of {@code JsonFormat} instances from Java types.
  *
- * @see JsonForm
- * @see JsonCodec
+ * @see JsonFormat
+ * @see JsonMetaCodec
  */
 @Public
 @Since("5.0")
@@ -31,9 +31,9 @@ public interface JsonProvider {
 
   /**
    * Returns the precedence of this provider relative to all other providers
-   * registered with a {@link JsonCodec} instance. Higher priority providers
+   * registered with a {@link JsonMetaCodec} instance. Higher priority providers
    * are consulted before lower priority providers when resolving Java types
-   * to {@code JsonForm} instances.
+   * to {@code JsonFormat} instances.
    *
    * @return the priority of this provider; the greater the numeric value,
    *         the higher the priority
@@ -43,18 +43,18 @@ public interface JsonProvider {
   }
 
   /**
-   * Returns a {@code JsonForm} that transcodes JSON
-   * to instances of the given {@code javaType}.
+   * Returns a {@code JsonFormat} that transcodes JSON to instances of
+   * the given {@code type}.
    *
-   * @param javaType the type of {@code JsonForm} to resolve
-   * @return a {@code JsonForm<T>} whose type parameter {@code T} conforms
-   *         to the given {@code javaType}, or {@code null} if this provider
-   *         can't resolve the given {@code javaType}
-   * @throws JsonFormException if this provider could have resolved the given
-   *         {@code javaType}, but was unable to do so because of a potentially
-   *         inadvertent error
+   * @param type the type of {@code JsonFormat} to resolve
+   * @return a {@code JsonFormat<T>} whose type parameter {@code T} conforms
+   *         to the given {@code type}, or {@code null} if this provider
+   *         can't resolve the given {@code type}
+   * @throws JsonProviderException if this provider could have resolved
+   *         the given {@code type}, but was unable to do so because of
+   *         a potentially inadvertent error
    */
-  @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException;
+  @Nullable JsonFormat<?> resolveJsonFormat(Type type) throws JsonProviderException;
 
   static final int BUILTIN_PRIORITY = 100;
 

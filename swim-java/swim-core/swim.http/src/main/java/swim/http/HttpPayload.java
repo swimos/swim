@@ -17,10 +17,10 @@ package swim.http;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Codec;
 import swim.codec.Encode;
 import swim.codec.MediaType;
 import swim.codec.OutputBuffer;
-import swim.codec.Transcoder;
 
 @Public
 @Since("5.0")
@@ -37,10 +37,10 @@ public abstract class HttpPayload<T> {
 
   public abstract @Nullable T get();
 
-  public abstract Transcoder<T> transcoder();
+  public abstract Codec<T> codec();
 
   public MediaType contentType() {
-    return this.transcoder().mediaType();
+    return this.codec().mediaType();
   }
 
   public abstract HttpHeaders injectHeaders(HttpHeaders headers);

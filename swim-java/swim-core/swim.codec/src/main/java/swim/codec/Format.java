@@ -15,87 +15,24 @@
 package swim.codec;
 
 import java.lang.reflect.Type;
-import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A transcoder of values from/to non-blocking chunked input/output streams.
+ *
+ * @param <T> the type of values to parse/write
+ */
 @Public
 @Since("5.0")
-public interface Format extends Codec {
+public interface Format<T> extends Codec<T>, Parser<T>, Writer<T> {
 
-  @Override
-  default <T> Transcoder<T> getTranscoder(Type javaType) throws TranscoderException {
-    return this.getTranslator(javaType);
+  static <T> Format<T> get(MediaType mediaType, Type type) throws CodecException {
+    return MetaCodec.registry().getFormat(mediaType, type);
   }
 
-  <T> Translator<T> getTranslator(Type javaType) throws TranslatorException;
-
-  default <T> Parse<T> parse(Type javaType, Input input) {
-    final Translator<T> translator;
-    try {
-      translator = this.getTranslator(javaType);
-    } catch (TranslatorException cause) {
-      return Parse.error(cause);
-    }
-    return translator.parse(input);
-  }
-
-  default <T> Parse<T> parse(Type javaType) {
-    final Translator<T> translator;
-    try {
-      translator = this.getTranslator(javaType);
-    } catch (TranslatorException cause) {
-      return Parse.error(cause);
-    }
-    return translator.parse();
-  }
-
-  default <T> Parse<T> parse(Type javaType, String string) {
-    final Translator<T> translator;
-    try {
-      translator = this.getTranslator(javaType);
-    } catch (TranslatorException cause) {
-      return Parse.error(cause);
-    }
-    return translator.parse(string);
-  }
-
-  default <T> Write<?> write(Type javaType, Output<?> output, @Nullable T value) {
-    final Translator<T> translator;
-    try {
-      translator = this.getTranslator(javaType);
-    } catch (TranslatorException cause) {
-      return Write.error(cause);
-    }
-    return translator.write(output, value);
-  }
-
-  default <T> Write<?> write(Type javaType, @Nullable T value) {
-    final Translator<T> translator;
-    try {
-      translator = this.getTranslator(javaType);
-    } catch (TranslatorException cause) {
-      return Write.error(cause);
-    }
-    return translator.write(value);
-  }
-
-  default <T> String toString(Type javaType, @Nullable T value) {
-    final Translator<T> translator;
-    try {
-      translator = this.getTranslator(javaType);
-    } catch (TranslatorException cause) {
-      throw new IllegalArgumentException(cause);
-    }
-    return translator.toString(value);
-  }
-
-  static Format get(MediaType mediaType) throws FormatException {
-    return Codec.registry().getFormat(mediaType);
-  }
-
-  static Format get(String mediaType) throws FormatException {
-    return Codec.registry().getFormat(mediaType);
+  static <T> Format<T> get(String mediaType, Type type) throws CodecException {
+    return MetaCodec.registry().getFormat(mediaType, type);
   }
 
 }

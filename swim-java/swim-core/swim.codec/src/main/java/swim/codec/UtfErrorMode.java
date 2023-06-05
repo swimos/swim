@@ -73,7 +73,7 @@ public abstract class UtfErrorMode implements ToSource {
     return this.toSource();
   }
 
-  private static final UtfErrorMode FATAL = new UtfFatalErrorMode(false);
+  static final UtfErrorMode FATAL = new UtfFatalErrorMode(false);
 
   /**
    * Returns a {@code UtfErrorMode} that aborts Unicode decoding with an error
@@ -83,7 +83,7 @@ public abstract class UtfErrorMode implements ToSource {
     return FATAL;
   }
 
-  private static final UtfErrorMode FATAL_NON_ZERO = new UtfFatalErrorMode(true);
+  static final UtfErrorMode FATAL_NON_ZERO = new UtfFatalErrorMode(true);
 
   /**
    * Returns a {@code UtfErrorMode} that aborts Unicode decoding with an error
@@ -93,7 +93,7 @@ public abstract class UtfErrorMode implements ToSource {
     return FATAL_NON_ZERO;
   }
 
-  private static final UtfErrorMode REPLACEMENT = new UtfReplacementErrorMode(0xFFFD, false);
+  static final UtfErrorMode REPLACEMENT = new UtfReplacementErrorMode(0xFFFD, false);
 
   /**
    * Returns a {@code UtfErrorMode} that substitutes invalid code unit
@@ -115,7 +115,7 @@ public abstract class UtfErrorMode implements ToSource {
     }
   }
 
-  private static final UtfErrorMode REPLACEMENT_NON_ZERO = new UtfReplacementErrorMode(0xFFFD, true);
+  static final UtfErrorMode REPLACEMENT_NON_ZERO = new UtfReplacementErrorMode(0xFFFD, true);
 
   /**
    * Returns a {@code UtfErrorMode} that substitutes invalid code unit
@@ -172,8 +172,7 @@ final class UtfFatalErrorMode extends UtfErrorMode {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UtfFatalErrorMode) {
-      final UtfFatalErrorMode that = (UtfFatalErrorMode) other;
+    } else if (other instanceof UtfFatalErrorMode that) {
       return this.isNonZero == that.isNonZero;
     }
     return false;
@@ -241,8 +240,7 @@ final class UtfReplacementErrorMode extends UtfErrorMode {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UtfReplacementErrorMode) {
-      final UtfReplacementErrorMode that = (UtfReplacementErrorMode) other;
+    } else if (other instanceof UtfReplacementErrorMode that) {
       return this.replacementChar == that.replacementChar
           && this.isNonZero == that.isNonZero;
     }
@@ -266,9 +264,9 @@ final class UtfReplacementErrorMode extends UtfErrorMode {
       notation.beginInvoke("UtfErrorMode", "replacement");
     }
     if (this.replacementChar != 0xFFFD) {
-      notation.beginArgument();
-      notation.appendSourceCodePoint(this.replacementChar);
-      notation.endArgument();
+      notation.beginArgument()
+              .appendSourceCodePoint(this.replacementChar)
+              .endArgument();
     }
     notation.endInvoke();
   }

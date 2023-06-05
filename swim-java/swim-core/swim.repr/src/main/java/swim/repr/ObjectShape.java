@@ -31,23 +31,19 @@ import swim.util.ToSource;
 public final class ObjectShape implements ToMarkup, ToSource {
 
   final int size;
-  final int rank;
   final @Nullable String key;
   ObjectShape @Nullable [] fields;
-  Object @Nullable [] table; // [...(key: String | null, field: ObejctShape | null)*]
+  Object @Nullable [] table; // [...(key: String | null, field: ObjectShape | null)*]
   final @Nullable ObjectShape parent;
   HashTrieMap<String, SoftReference<ObjectShape>> children;
   @Nullable String purgeKey;
   long purgeTime;
 
-  ObjectShape(int size, int rank, @Nullable String key,
-              ObjectShape @Nullable [] fields,
-              Object @Nullable [] table,
-              @Nullable ObjectShape parent,
+  ObjectShape(int size, @Nullable String key, ObjectShape @Nullable [] fields,
+              Object @Nullable [] table, @Nullable ObjectShape parent,
               HashTrieMap<String, SoftReference<ObjectShape>> children,
               @Nullable String purgeKey) {
     this.size = size;
-    this.rank = rank;
     this.key = key;
     this.fields = fields;
     this.table = table;
@@ -59,10 +55,6 @@ public final class ObjectShape implements ToMarkup, ToSource {
 
   public int size() {
     return this.size;
-  }
-
-  public int rank() {
-    return this.rank;
   }
 
   ObjectShape[] fields() {
@@ -87,7 +79,7 @@ public final class ObjectShape implements ToMarkup, ToSource {
   Object[] table() {
     Object[] table = this.table;
     if (table == null) {
-      table = new Object[ObjectShape.expand(this.rank * 10 / 7) << 1];
+      table = new Object[ObjectShape.expand(this.size * 10 / 7) << 1];
       ObjectShape.buildTable(table, this);
       this.table = table;
     }
@@ -98,47 +90,46 @@ public final class ObjectShape implements ToMarkup, ToSource {
     if (field.parent != null) {
       ObjectShape.buildTable(table, field.parent);
     }
-    final String key = field.key;
-    if (field.size > 0 && key != null) {
-      final int hash = key.hashCode();
-      final int n = table.length >>> 1;
-      int x = Math.abs(hash % n);
-      do {
-        final int i = x << 1;
-        if (table[i] == null) {
-          table[i] = key;
-          table[i + 1] = field;
-          break;
-        } else {
-          x = (x + 1) % n;
-        }
-      } while (x != hash);
+    if (field.size <= 0 || field.key == null) {
+      return;
     }
+    final int hash = field.key.hashCode();
+    final int n = table.length >>> 1;
+    int x = Math.abs(hash % n);
+    do {
+      final int i = x << 1;
+      if (table[i] == null) {
+        table[i] = field.key;
+        table[i + 1] = field;
+        break;
+      }
+      x = (x + 1) % n;
+    } while (x != hash);
   }
 
   int lookup(String key) {
-    if (this.size > 0) {
-      final Object[] table = this.table();
-      final int hash = key.hashCode();
-      final int n = table.length >>> 1;
-      int x = Math.abs(hash % n);
-      do {
-        final int i = x << 1;
-        final String k = (String) table[i];
-        if (k == null) {
-          break;
-        } else if (key.equals(k)) {
-          return ((ObjectShape) table[i + 1]).size - 1;
-        } else {
-          x = (x + 1) % n;
-        }
-      } while (x != hash);
+    if (this.size <= 0) {
+      return -1;
     }
+    final Object[] table = this.table();
+    final int hash = key.hashCode();
+    final int n = table.length >>> 1;
+    int x = Math.abs(hash % n);
+    do {
+      final int i = x << 1;
+      final String k = (String) table[i];
+      if (k == null) {
+        break;
+      } else if (key.equals(k)) {
+        return ((ObjectShape) table[i + 1]).size - 1;
+      }
+      x = (x + 1) % n;
+    } while (x != hash);
     return -1;
   }
 
   @SuppressWarnings("ReferenceEquality")
-  ObjectShape getChild(@Nullable String key) {
+  ObjectShape getChild(String key) {
     final int size = this.size;
     // Check if this is the dictionary shape.
     if (size < 0) {
@@ -157,22 +148,22 @@ public final class ObjectShape implements ToMarkup, ToSource {
         // Child shape already exists.
         child = oldChild;
         break;
-      } else {
-        if (child == null) {
-          // Create the new child shape.
-          child = new ObjectShape(size + 1, key != null ? this.rank + 1 : this.rank, key, null, null, this, HashTrieMap.empty(), null);
-          childRef = new SoftReference<ObjectShape>(child);
-        }
-        // Try to add the new child shape to the children map.
-        final HashTrieMap<String, SoftReference<ObjectShape>> oldChildren = children;
-        final HashTrieMap<String, SoftReference<ObjectShape>> newChildren = oldChildren.updated(key, childRef);
-        children = (HashTrieMap<String, SoftReference<ObjectShape>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
-        if (children == oldChildren) {
-          // Successfully inserted the new child shape.
-          children = newChildren;
-          break;
-        }
+      } else if (child == null) {
+        // Create the new child shape.
+        child = new ObjectShape(size + 1, key, null, null, this, HashTrieMap.empty(), null);
+        childRef = new SoftReference<ObjectShape>(child);
       }
+      // Try to add the new child shape to the children map.
+      final HashTrieMap<String, SoftReference<ObjectShape>> oldChildren = children;
+      final HashTrieMap<String, SoftReference<ObjectShape>> newChildren = oldChildren.updated(key, childRef);
+      children = (HashTrieMap<String, SoftReference<ObjectShape>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
+      if (children != oldChildren) {
+        // CAS failed; try again.
+        continue;
+      }
+      // Successfully inserted the new child shape.
+      children = newChildren;
+      break;
     } while (true);
 
     // Periodically help purge child shape references cleared by the GC.
@@ -201,8 +192,7 @@ public final class ObjectShape implements ToMarkup, ToSource {
   public void writeMarkup(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginObject("ObjectShape")
-            .appendField("size", this.size)
-            .appendField("rank", this.rank);
+            .appendField("size", this.size);
     if (this.size > 0) {
       notation.appendKey("fields")
               .beginValue()
@@ -287,9 +277,9 @@ public final class ObjectShape implements ToMarkup, ToSource {
    */
   static final VarHandle PURGE_TIME;
 
-  private static final ObjectShape EMPTY;
+  static final ObjectShape EMPTY;
 
-  private static final ObjectShape DICTIONARY;
+  static final ObjectShape DICTIONARY;
 
   static {
     // Initialize var handles.
@@ -302,8 +292,8 @@ public final class ObjectShape implements ToMarkup, ToSource {
       throw new ExceptionInInitializerError(cause);
     }
 
-    EMPTY = new ObjectShape(0, 0, null, null, null, null, HashTrieMap.empty(), null);
-    DICTIONARY = new ObjectShape(-1, -1, null, null, null, null, HashTrieMap.empty(), null);
+    EMPTY = new ObjectShape(0, null, null, null, null, HashTrieMap.empty(), null);
+    DICTIONARY = new ObjectShape(-1, null, null, null, null, HashTrieMap.empty(), null);
   }
 
   static int expand(int n) {

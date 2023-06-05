@@ -88,7 +88,7 @@ public final class AllowHeader extends HttpHeader {
     return AllowHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<HttpMethod> parseValue(String value) throws HttpException {
+  static FingerTrieList<HttpMethod> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     FingerTrieList<HttpMethod> methods = FingerTrieList.empty();
@@ -136,7 +136,7 @@ public final class AllowHeader extends HttpHeader {
     return methods;
   }
 
-  private static String writeValue(Iterator<HttpMethod> methods) {
+  static String writeValue(Iterator<HttpMethod> methods) {
     final StringOutput output = new StringOutput();
     HttpMethod method = null;
     do {

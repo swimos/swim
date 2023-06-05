@@ -96,11 +96,10 @@ public class LogPrinter implements LogHandler {
         this.output.write(lineSeparator.codePointAt(i));
       }
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        cause.printStackTrace();
-      } else {
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      cause.printStackTrace();
     }
   }
 

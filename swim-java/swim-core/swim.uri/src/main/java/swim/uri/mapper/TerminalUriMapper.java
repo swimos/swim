@@ -41,18 +41,16 @@ public abstract class TerminalUriMapper<T> extends UriFragmentMapper<T> {
   TerminalUriMapper<T> merged(TerminalUriMapper<T> that) {
     if (that.isEmpty()) {
       return this;
-    } else {
-      return that;
     }
+    return that;
   }
 
   @Override
   UriFragmentMapper<T> merged(UriFragmentMapper<T> that) {
     if (that instanceof TerminalUriMapper<?>) {
       return this.merged((TerminalUriMapper<T>) that);
-    } else {
-      return that;
     }
+    return that;
   }
 
   public TerminalUriMapper<T> removed() {
@@ -72,9 +70,8 @@ public abstract class TerminalUriMapper<T> extends UriFragmentMapper<T> {
   UriFragmentMapper<T> unmerged(UriFragmentMapper<T> that) {
     if (that instanceof TerminalUriMapper<?>) {
       return this.unmerged((TerminalUriMapper<T>) that);
-    } else {
-      return this;
     }
+    return this;
   }
 
   public static <T> TerminalUriMapper<T> compile(Uri pattern, T value) {

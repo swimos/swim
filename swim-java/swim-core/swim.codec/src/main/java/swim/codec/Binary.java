@@ -35,74 +35,48 @@ public final class Binary {
 
   static final MediaType APPLICATION_OCTET_STREAM = MediaType.of("application", "octet-stream");
 
-  static final BlankTranscoder<?> BLANK_TRANSCODER = new BlankTranscoder<Object>(APPLICATION_OCTET_STREAM);
-
-  public static <T> Translator<T> blankTranscoder() {
-    return Assume.conforms(BLANK_TRANSCODER);
+  public static <T> Format<T> blankCodec() {
+    return Assume.conforms(BlankCodec.INSTANCE);
   }
 
-  public static <T> Translator<T> blankTranscoder(MediaType mediaType) {
+  public static <T> Format<T> blankCodec(MediaType mediaType) {
     if (APPLICATION_OCTET_STREAM.equals(mediaType)) {
-      return Assume.conforms(BLANK_TRANSCODER);
-    } else {
-      return new BlankTranscoder<T>(mediaType);
+      return Assume.conforms(BlankCodec.INSTANCE);
     }
+    return new BlankCodec<T>(mediaType);
   }
 
-  static final ByteArrayTranscoder BYTE_ARRAY_TRANSCODER = new ByteArrayTranscoder(APPLICATION_OCTET_STREAM);
-
-  public static Translator<byte[]> byteArrayTranscoder() {
-    return BYTE_ARRAY_TRANSCODER;
+  public static Format<byte[]> byteArrayCodec() {
+    return ByteArrayCodec.INSTANCE;
   }
 
-  public static Translator<byte[]> byteArrayTranscoder(MediaType mediaType) {
+  public static Format<byte[]> byteArrayCodec(MediaType mediaType) {
     if (APPLICATION_OCTET_STREAM.equals(mediaType)) {
-      return BYTE_ARRAY_TRANSCODER;
-    } else {
-      return new ByteArrayTranscoder(mediaType);
+      return ByteArrayCodec.INSTANCE;
     }
+    return new ByteArrayCodec(mediaType);
   }
 
-  static final ByteArrayCodec BYTE_ARRAY_CODEC = new ByteArrayCodec(BYTE_ARRAY_TRANSCODER);
-
-  public static Codec byteArrayCodec() {
-    return BYTE_ARRAY_CODEC;
+  public static Format<ByteBuffer> byteBufferCodec() {
+    return ByteBufferCodec.INSTANCE;
   }
 
-  public static Codec byteArrayCodec(Transcoder<byte[]> transcoder) {
-    if (BYTE_ARRAY_TRANSCODER.equals(transcoder)) {
-      return BYTE_ARRAY_CODEC;
-    } else {
-      return new ByteArrayCodec(transcoder);
-    }
-  }
-
-  static final ByteBufferTranscoder BYTE_BUFFER_TRANSCODER = new ByteBufferTranscoder(APPLICATION_OCTET_STREAM);
-
-  public static Translator<ByteBuffer> byteBufferTranscoder() {
-    return BYTE_BUFFER_TRANSCODER;
-  }
-
-  public static Translator<ByteBuffer> byteBufferTranscoder(MediaType mediaType) {
+  public static Format<ByteBuffer> byteBufferCodec(MediaType mediaType) {
     if (APPLICATION_OCTET_STREAM.equals(mediaType)) {
-      return BYTE_BUFFER_TRANSCODER;
-    } else {
-      return new ByteBufferTranscoder(mediaType);
+      return ByteBufferCodec.INSTANCE;
     }
+    return new ByteBufferCodec(mediaType);
   }
 
-  static final ByteBufferCodec BYTE_BUFFER_CODEC = new ByteBufferCodec(BYTE_BUFFER_TRANSCODER);
-
-  public static Codec byteBufferCodec() {
-    return BYTE_BUFFER_CODEC;
+  public static MetaCodec metaCodec() {
+    return BinaryMetaCodec.INSTANCE;
   }
 
-  public static Codec byteBufferCodec(Transcoder<ByteBuffer> transcoder) {
-    if (BYTE_BUFFER_TRANSCODER.equals(transcoder)) {
-      return BYTE_BUFFER_CODEC;
-    } else {
-      return new ByteBufferCodec(transcoder);
+  public static MetaCodec metaCodec(MediaType mediaType) {
+    if (APPLICATION_OCTET_STREAM.equals(mediaType)) {
+      return BinaryMetaCodec.INSTANCE;
     }
+    return new BinaryMetaCodec(mediaType);
   }
 
   public static <T> Parse<T> decode(Input input, Output<T> output) {
@@ -127,11 +101,11 @@ public final class Binary {
 
 }
 
-final class BlankTranscoder<T> implements Translator<T> {
+final class BlankCodec<T> implements Format<T>, ToSource {
 
   final MediaType mediaType;
 
-  BlankTranscoder(MediaType mediaType) {
+  BlankCodec(MediaType mediaType) {
     this.mediaType = mediaType;
   }
 
@@ -185,13 +159,30 @@ final class BlankTranscoder<T> implements Translator<T> {
     return Write.done();
   }
 
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.beginInvoke("Binary", "blankCodec");
+    if (!this.mediaType.equals(Binary.APPLICATION_OCTET_STREAM)) {
+      notation.appendArgument(this.mediaType);
+    }
+    notation.endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+  static final BlankCodec<?> INSTANCE = new BlankCodec<Object>(Binary.APPLICATION_OCTET_STREAM);
+
 }
 
-final class ByteArrayTranscoder implements Translator<byte[]>, ToSource {
+final class ByteArrayCodec implements Format<byte[]>, ToSource {
 
   final MediaType mediaType;
 
-  ByteArrayTranscoder(MediaType mediaType) {
+  ByteArrayCodec(MediaType mediaType) {
     this.mediaType = mediaType;
   }
 
@@ -202,11 +193,10 @@ final class ByteArrayTranscoder implements Translator<byte[]>, ToSource {
 
   @Override
   public long sizeOf(byte @Nullable [] value) {
-    if (value != null) {
-      return (long) value.length;
-    } else {
+    if (value == null) {
       return 0L;
     }
+    return (long) value.length;
   }
 
   @Override
@@ -216,11 +206,10 @@ final class ByteArrayTranscoder implements Translator<byte[]>, ToSource {
 
   @Override
   public Encode<?> encode(OutputBuffer<?> output, byte @Nullable [] value) {
-    if (value != null) {
-      return Binary.encode(output, new BinaryInput(value));
-    } else {
+    if (value == null) {
       return Encode.done();
     }
+    return Binary.encode(output, new BinaryInput(value));
   }
 
   @Override
@@ -230,17 +219,16 @@ final class ByteArrayTranscoder implements Translator<byte[]>, ToSource {
 
   @Override
   public Write<?> write(Output<?> output, byte @Nullable [] value) {
-    if (value != null) {
-      return Binary.encode(output, new BinaryInput(value));
-    } else {
+    if (value == null) {
       return Write.done();
     }
+    return Binary.encode(output, new BinaryInput(value));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Binary", "byteArrayTranscoder");
+    notation.beginInvoke("Binary", "byteArrayCodec");
     if (!this.mediaType.equals(Binary.APPLICATION_OCTET_STREAM)) {
       notation.appendArgument(this.mediaType);
     }
@@ -252,52 +240,15 @@ final class ByteArrayTranscoder implements Translator<byte[]>, ToSource {
     return this.toSource();
   }
 
-}
-
-final class ByteArrayCodec implements Codec, ToSource {
-
-  final Transcoder<byte[]> transcoder;
-
-  ByteArrayCodec(Transcoder<byte[]> transcoder) {
-    this.transcoder = transcoder;
-  }
-
-  @Override
-  public MediaType mediaType() {
-    return this.transcoder.mediaType();
-  }
-
-  @Override
-  public <T> Transcoder<T> getTranscoder(Type javaType) throws TranscoderException {
-    if (javaType instanceof Class<?>) {
-      final Class<?> javaClass = (Class<?>) javaType;
-      if (javaClass.isAssignableFrom(Byte.TYPE.arrayType())) {
-        return Assume.conforms(this.transcoder);
-      }
-    }
-    throw new TranscoderException("no byte array transcoder for type: " + javaType);
-  }
-
-  @Override
-  public void writeSource(Appendable output) {
-    final Notation notation = Notation.from(output);
-    notation.beginInvoke("Binary", "byteArrayCodec")
-            .appendArgument(this.transcoder)
-            .endInvoke();
-  }
-
-  @Override
-  public String toString() {
-    return this.toSource();
-  }
+  static final ByteArrayCodec INSTANCE = new ByteArrayCodec(Binary.APPLICATION_OCTET_STREAM);
 
 }
 
-final class ByteBufferTranscoder implements Translator<ByteBuffer>, ToSource {
+final class ByteBufferCodec implements Format<ByteBuffer>, ToSource {
 
   final MediaType mediaType;
 
-  ByteBufferTranscoder(MediaType mediaType) {
+  ByteBufferCodec(MediaType mediaType) {
     this.mediaType = mediaType;
   }
 
@@ -308,11 +259,10 @@ final class ByteBufferTranscoder implements Translator<ByteBuffer>, ToSource {
 
   @Override
   public long sizeOf(@Nullable ByteBuffer value) {
-    if (value != null) {
-      return (long) value.remaining();
-    } else {
+    if (value == null) {
       return 0L;
     }
+    return (long) value.remaining();
   }
 
   @Override
@@ -322,11 +272,10 @@ final class ByteBufferTranscoder implements Translator<ByteBuffer>, ToSource {
 
   @Override
   public Encode<?> encode(OutputBuffer<?> output, @Nullable ByteBuffer value) {
-    if (value != null) {
-      return Binary.encode(output, new BinaryInputBuffer(value.duplicate()));
-    } else {
+    if (value == null) {
       return Encode.done();
     }
+    return Binary.encode(output, new BinaryInputBuffer(value.duplicate()));
   }
 
   @Override
@@ -336,17 +285,16 @@ final class ByteBufferTranscoder implements Translator<ByteBuffer>, ToSource {
 
   @Override
   public Write<?> write(Output<?> output, @Nullable ByteBuffer value) {
-    if (value != null) {
-      return Binary.encode(output, new BinaryInputBuffer(value.duplicate()));
-    } else {
+    if (value == null) {
       return Write.done();
     }
+    return Binary.encode(output, new BinaryInputBuffer(value.duplicate()));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Binary", "byteBufferTranscoder");
+    notation.beginInvoke("Binary", "byteBufferCodec");
     if (!this.mediaType.equals(Binary.APPLICATION_OCTET_STREAM)) {
       notation.appendArgument(this.mediaType);
     }
@@ -358,44 +306,52 @@ final class ByteBufferTranscoder implements Translator<ByteBuffer>, ToSource {
     return this.toSource();
   }
 
+  static final ByteBufferCodec INSTANCE = new ByteBufferCodec(Binary.APPLICATION_OCTET_STREAM);
+
 }
 
-final class ByteBufferCodec implements Codec, ToSource {
+final class BinaryMetaCodec implements MetaFormat, ToSource {
 
-  final Transcoder<ByteBuffer> transcoder;
+  final MediaType mediaType;
 
-  ByteBufferCodec(Transcoder<ByteBuffer> transcoder) {
-    this.transcoder = transcoder;
+  BinaryMetaCodec(MediaType mediaType) {
+    this.mediaType = mediaType;
   }
 
   @Override
   public MediaType mediaType() {
-    return this.transcoder.mediaType();
+    return this.mediaType;
   }
 
   @Override
-  public <T> Transcoder<T> getTranscoder(Type javaType) throws TranscoderException {
-    if (javaType instanceof Class<?>) {
-      final Class<?> javaClass = (Class<?>) javaType;
-      if (javaClass.isAssignableFrom(ByteBuffer.class)) {
-        return Assume.conforms(this.transcoder);
+  public <T> Format<T> getFormat(Type type) throws CodecException {
+    if (type instanceof Class<?>) {
+      final Class<?> classType = (Class<?>) type;
+      if (classType.isAssignableFrom(Byte.TYPE.arrayType())) {
+        return Assume.conforms(ByteArrayCodec.INSTANCE);
+      } else if (classType.isAssignableFrom(ByteBuffer.class)) {
+        return Assume.conforms(ByteBufferCodec.INSTANCE);
       }
     }
-    throw new TranscoderException("no byte buffer transcoder for type: " + javaType);
+    throw new CodecException("no codec for " + type);
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Binary", "byteBufferCodec")
-            .appendArgument(this.transcoder)
-            .endInvoke();
+    notation.beginInvoke("Binary", "metaCodec");
+    if (!this.mediaType.equals(Binary.APPLICATION_OCTET_STREAM)) {
+      notation.appendArgument(this.mediaType);
+    }
+    notation.endInvoke();
   }
 
   @Override
   public String toString() {
     return this.toSource();
   }
+
+  static final BinaryMetaCodec INSTANCE = new BinaryMetaCodec(Binary.APPLICATION_OCTET_STREAM);
 
 }
 

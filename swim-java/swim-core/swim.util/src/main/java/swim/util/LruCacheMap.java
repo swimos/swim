@@ -63,14 +63,13 @@ public class LruCacheMap<K, V> extends CacheMap<K, V> implements ToMarkup {
   @Override
   public synchronized @Nullable V get(@Nullable K key) {
     final LruCacheMapEntry<K, V> entry = this.getEntry(Objects.hashCode(key), key);
-    if (entry != null) {
-      if (entry.prev != null) {
-        this.detachEntry(entry);
-        this.enqueueEntry(entry);
-      }
-      return entry.value;
+    if (entry == null) {
+      return null;
+    } else if (entry.prev != null) {
+      this.detachEntry(entry);
+      this.enqueueEntry(entry);
     }
-    return null;
+    return entry.value;
   }
 
   @Override
@@ -104,11 +103,12 @@ public class LruCacheMap<K, V> extends CacheMap<K, V> implements ToMarkup {
   @Override
   public synchronized @Nullable V remove(@Nullable K key) {
     final LruCacheMapEntry<K, V> entry = this.removeEntry(Objects.hashCode(key), key);
-    if (entry != null) {
-      this.detachEntry(entry);
-      this.size -= 1;
+    if (entry == null) {
+      return null;
     }
-    return null;
+    this.detachEntry(entry);
+    this.size -= 1;
+    return entry.value;
   }
 
   final @Nullable LruCacheMapEntry<K, V> getEntry(int hash, @Nullable K key) {
@@ -127,61 +127,52 @@ public class LruCacheMap<K, V> extends CacheMap<K, V> implements ToMarkup {
     final LruCacheMapEntry<K, V>[] table = this.table;
     final int index = Math.abs(entry.hash % table.length);
     LruCacheMapEntry<K, V> bucket = table[index];
-    if (bucket != null) {
-      if (Objects.equals(entry.key, bucket.key)) {
-        entry.nextCollision = bucket.nextCollision;
-        table[index] = bucket;
-      } else {
-        LruCacheMapEntry<K, V> prev = bucket;
-        do {
-          bucket = prev.nextCollision;
-          if (bucket != null) {
-            if (Objects.equals(entry.key, bucket.key)) {
-              entry.nextCollision = bucket.nextCollision;
-              prev.nextCollision = entry;
-              break;
-            } else {
-              prev = bucket;
-            }
-          } else {
-            prev.nextCollision = entry;
-            break;
-          }
-        } while (true);
-      }
-    } else {
+    if (bucket == null) {
       table[index] = entry;
+      return;
+    } else if (Objects.equals(entry.key, bucket.key)) {
+      entry.nextCollision = bucket.nextCollision;
+      table[index] = bucket;
+      return;
     }
+    LruCacheMapEntry<K, V> prev = bucket;
+    do {
+      bucket = prev.nextCollision;
+      if (bucket == null) {
+        prev.nextCollision = entry;
+        return;
+      } else if (Objects.equals(entry.key, bucket.key)) {
+        entry.nextCollision = bucket.nextCollision;
+        prev.nextCollision = entry;
+        return;
+      }
+      prev = bucket;
+    } while (true);
   }
 
   final @Nullable LruCacheMapEntry<K, V> removeEntry(int hash, @Nullable K key) {
     final LruCacheMapEntry<K, V>[] table = this.table;
     final int index = Math.abs(hash % table.length);
     LruCacheMapEntry<K, V> bucket = table[index];
-    if (bucket != null) {
-      if (Objects.equals(key, bucket.key)) {
-        table[index] = bucket.nextCollision;
+    if (bucket == null) {
+      return null;
+    } else if (Objects.equals(key, bucket.key)) {
+      table[index] = bucket.nextCollision;
+      bucket.nextCollision = null;
+      return bucket;
+    }
+    LruCacheMapEntry<K, V> prev = bucket;
+    do {
+      bucket = prev.nextCollision;
+      if (bucket == null) {
+        return null;
+      } else if (Objects.equals(key, bucket.key)) {
+        prev.nextCollision = bucket.nextCollision;
         bucket.nextCollision = null;
         return bucket;
-      } else {
-        LruCacheMapEntry<K, V> prev = bucket;
-        do {
-          bucket = prev.nextCollision;
-          if (bucket != null) {
-            if (Objects.equals(key, bucket.key)) {
-              prev.nextCollision = bucket.nextCollision;
-              bucket.nextCollision = null;
-              return bucket;
-            } else {
-              prev = bucket;
-            }
-          } else {
-            break;
-          }
-        } while (true);
       }
-    }
-    return null;
+      prev = bucket;
+    } while (true);
   }
 
   final void enqueueEntry(LruCacheMapEntry<K, V> entry) {
@@ -230,17 +221,17 @@ public class LruCacheMap<K, V> extends CacheMap<K, V> implements ToMarkup {
   public synchronized void writeMarkup(Appendable output) {
     final Notation notation = Notation.from(output);
     if (notation.options().verbose()) {
-      notation.beginObject("LruCacheMap");
-      notation.appendField("capacity", this.capacity);
-      notation.appendField("size", this.size);
+      notation.beginObject("LruCacheMap")
+              .appendField("capacity", this.capacity)
+              .appendField("size", this.size);
       if (this.head != null) {
         notation.appendField("headKey", this.head.key);
       }
       if (this.foot != null) {
         notation.appendField("footKey", this.foot.key);
       }
-      notation.appendField("table", this.table);
-      notation.endObject();
+      notation.appendField("table", this.table)
+              .endObject();
     } else {
       notation.beginObject("LruCacheMap");
       LruCacheMapEntry<K, V> entry = this.head;
@@ -294,8 +285,8 @@ final class LruCacheMapEntry<K, V> implements ToMarkup {
     if (notation.options().verbose()) {
       notation.appendField("hash", this.hash);
     }
-    notation.appendField("key", this.key);
-    notation.appendField("value", this.value);
+    notation.appendField("key", this.key)
+            .appendField("value", this.value);
     if (notation.options().verbose()) {
       if (this.prev != null) {
         notation.appendField("prevKey", this.prev.key);

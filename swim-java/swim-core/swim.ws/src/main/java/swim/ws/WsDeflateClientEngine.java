@@ -47,9 +47,8 @@ final class WsDeflateClientEngine extends WsDeflateEngine implements ToSource {
       return Ws.clientEngine();
     } else if (!this.options.equals(options)) {
       return Ws.deflateClientEngine(options);
-    } else {
-      return this;
     }
+    return this;
   }
 
   @Override

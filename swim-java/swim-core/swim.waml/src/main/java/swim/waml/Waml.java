@@ -14,6 +14,8 @@
 
 package swim.waml;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -22,7 +24,10 @@ import swim.codec.Input;
 import swim.codec.Output;
 import swim.codec.Parse;
 import swim.codec.Write;
+import swim.collections.HashTrieMap;
+import swim.decl.DeclAnnotation;
 import swim.repr.Repr;
+import swim.waml.decl.WamlAnnotation;
 
 /**
  * Factory for constructing WAML parsers and writers.
@@ -35,286 +40,190 @@ public final class Waml {
     // static
   }
 
-  private static final WamlCodec CODEC = new WamlCodec();
-
-  public static WamlCodec codec() {
-    return CODEC;
+  public static WamlMetaCodec metaCodec() {
+    return WamlMetaCodec.INSTANCE;
   }
 
-  public static <T> WamlForm<T> form(Type javaType) throws WamlFormException {
-    return Waml.codec().getWamlForm(javaType);
+  public static <T> Parse<T> parse(Type type, Input input, @Nullable WamlParserOptions options) {
+    return Waml.metaCodec().parse(type, input, options);
   }
 
-  public static <T> WamlForm<T> form(@Nullable T value) throws WamlFormException {
-    return Waml.codec().getWamlForm(value);
+  public static <T> Parse<T> parse(Type type, Input input) {
+    return Waml.metaCodec().parse(type, input);
   }
 
-  public static WamlParser parser(@Nullable WamlParserOptions options) {
-    if (options == null || WamlParserOptions.standard().equals(options)) {
-      return WamlParser.STANDARD;
-    } else if (WamlParserOptions.expressions().equals(options)) {
-      return WamlParser.EXPRESSIONS;
-    } else {
-      return new WamlParser(options);
-    }
+  public static <T> Parse<T> parse(Type type, @Nullable WamlParserOptions options) {
+    return Waml.metaCodec().parse(type, options);
   }
 
-  public static WamlParser parser() {
-    return WamlParser.STANDARD;
+  public static <T> Parse<T> parse(Type type) {
+    return Waml.metaCodec().parse(type);
   }
 
-  public static <T> Parse<T> parse(Type javaType, Input input, @Nullable WamlParserOptions options) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parse(input, Waml.parser(options));
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
+  public static <T> Parse<T> parse(Type type, String string, @Nullable WamlParserOptions options) {
+    return Waml.metaCodec().parse(type, string, options);
   }
 
-  public static <T> Parse<T> parse(Type javaType, Input input) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parse(input, Waml.parser());
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
-  }
-
-  public static <T> Parse<T> parse(Type javaType, @Nullable WamlParserOptions options) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parse(Waml.parser(options));
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
-  }
-
-  public static <T> Parse<T> parse(Type javaType) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parse(Waml.parser());
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
-  }
-
-  public static <T> Parse<T> parse(Type javaType, String waml, @Nullable WamlParserOptions options) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parse(waml, Waml.parser(options));
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
-  }
-
-  public static <T> Parse<T> parse(Type javaType, String waml) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parse(waml, Waml.parser());
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
+  public static <T> Parse<T> parse(Type type, String string) {
+    return Waml.metaCodec().parse(type, string);
   }
 
   public static Parse<Repr> parse(Input input, @Nullable WamlParserOptions options) {
-    return WamlReprs.reprForm().parse(input, Waml.parser(options));
+    if (options == null) {
+      options = WamlParserOptions.standard();
+    }
+    return WamlReprs.valueFormat().parse(input, options);
   }
 
   public static Parse<Repr> parse(Input input) {
-    return WamlReprs.reprForm().parse(input, Waml.parser());
+    return WamlReprs.valueFormat().parse(input, WamlParserOptions.standard());
   }
 
   public static Parse<Repr> parse(@Nullable WamlParserOptions options) {
-    return WamlReprs.reprForm().parse(Waml.parser(options));
+    if (options == null) {
+      options = WamlParserOptions.standard();
+    }
+    return WamlReprs.valueFormat().parse(options);
   }
 
   public static Parse<Repr> parse() {
-    return WamlReprs.reprForm().parse(Waml.parser());
+    return WamlReprs.valueFormat().parse(WamlParserOptions.standard());
   }
 
-  public static Parse<Repr> parse(String waml, @Nullable WamlParserOptions options) {
-    return WamlReprs.reprForm().parse(waml, Waml.parser(options));
-  }
-
-  public static Parse<Repr> parse(String waml) {
-    return WamlReprs.reprForm().parse(waml, Waml.parser());
-  }
-
-  public static <T> Parse<T> parseBlock(Type javaType, Input input, @Nullable WamlParserOptions options) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parseBlock(input, Waml.parser(options));
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
+  public static Parse<Repr> parse(String string, @Nullable WamlParserOptions options) {
+    if (options == null) {
+      options = WamlParserOptions.standard();
     }
+    return WamlReprs.valueFormat().parse(string, options);
   }
 
-  public static <T> Parse<T> parseBlock(Type javaType, Input input) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parseBlock(input, Waml.parser());
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
+  public static Parse<Repr> parse(String string) {
+    return WamlReprs.valueFormat().parse(string, WamlParserOptions.standard());
   }
 
-  public static <T> Parse<T> parseBlock(Type javaType, @Nullable WamlParserOptions options) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parseBlock(Waml.parser(options));
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
+  public static <T> Parse<T> parseBlock(Type type, Input input, @Nullable WamlParserOptions options) {
+    return Waml.metaCodec().parseBlock(type, input, options);
   }
 
-  public static <T> Parse<T> parseBlock(Type javaType) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parseBlock(Waml.parser());
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
+  public static <T> Parse<T> parseBlock(Type type, Input input) {
+    return Waml.metaCodec().parseBlock(type, input);
   }
 
-  public static <T> Parse<T> parseBlock(Type javaType, String waml, @Nullable WamlParserOptions options) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parseBlock(waml, Waml.parser(options));
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
+  public static <T> Parse<T> parseBlock(Type type, @Nullable WamlParserOptions options) {
+    return Waml.metaCodec().parseBlock(type, options);
   }
 
-  public static <T> Parse<T> parseBlock(Type javaType, String waml) {
-    try {
-      return Waml.codec().<T>getWamlForm(javaType).parseBlock(waml, Waml.parser());
-    } catch (WamlFormException cause) {
-      return Parse.error(cause);
-    }
+  public static <T> Parse<T> parseBlock(Type type) {
+    return Waml.metaCodec().parseBlock(type);
+  }
+
+  public static <T> Parse<T> parseBlock(Type type, String string, @Nullable WamlParserOptions options) {
+    return Waml.metaCodec().parseBlock(type, string, options);
+  }
+
+  public static <T> Parse<T> parseBlock(Type type, String string) {
+    return Waml.metaCodec().parseBlock(type, string);
   }
 
   public static Parse<Repr> parseBlock(Input input, @Nullable WamlParserOptions options) {
-    return WamlReprs.reprForm().parseBlock(input, Waml.parser(options));
+    if (options == null) {
+      options = WamlParserOptions.standard();
+    }
+    return WamlReprs.valueFormat().parseBlock(input, options);
   }
 
   public static Parse<Repr> parseBlock(Input input) {
-    return WamlReprs.reprForm().parseBlock(input, Waml.parser());
+    return WamlReprs.valueFormat().parseBlock(input, WamlParserOptions.standard());
   }
 
   public static Parse<Repr> parseBlock(@Nullable WamlParserOptions options) {
-    return WamlReprs.reprForm().parseBlock(Waml.parser(options));
+    if (options == null) {
+      options = WamlParserOptions.standard();
+    }
+    return WamlReprs.valueFormat().parseBlock(options);
   }
 
   public static Parse<Repr> parseBlock() {
-    return WamlReprs.reprForm().parseBlock(Waml.parser());
+    return WamlReprs.valueFormat().parseBlock(WamlParserOptions.standard());
   }
 
-  public static Parse<Repr> parseBlock(String waml, @Nullable WamlParserOptions options) {
-    return WamlReprs.reprForm().parseBlock(waml, Waml.parser(options));
-  }
-
-  public static Parse<Repr> parseBlock(String waml) {
-    return WamlReprs.reprForm().parseBlock(waml, Waml.parser());
-  }
-
-  static WamlWriter writer(@Nullable WamlWriterOptions options) {
-    if (options == null || WamlWriterOptions.readable().equals(options)) {
-      return WamlWriter.READABLE;
-    } else if (WamlWriterOptions.compact().equals(options)) {
-      return WamlWriter.COMPACT;
-    } else {
-      return new WamlWriter(options);
+  public static Parse<Repr> parseBlock(String string, @Nullable WamlParserOptions options) {
+    if (options == null) {
+      options = WamlParserOptions.standard();
     }
+    return WamlReprs.valueFormat().parseBlock(string, options);
   }
 
-  public static WamlWriter writer() {
-    return WamlWriter.READABLE;
+  public static Parse<Repr> parseBlock(String string) {
+    return WamlReprs.valueFormat().parseBlock(string, WamlParserOptions.standard());
   }
 
   public static Write<?> write(Output<?> output, @Nullable Object value, @Nullable WamlWriterOptions options) {
-    try {
-      return Waml.codec().getWamlForm(value).write(output, value, Waml.writer(options));
-    } catch (WamlFormException cause) {
-      return Write.error(cause);
-    }
+    return Waml.metaCodec().write(output, value, options);
   }
 
   public static Write<?> write(Output<?> output, @Nullable Object value) {
-    try {
-      return Waml.codec().getWamlForm(value).write(output, value, Waml.writer());
-    } catch (WamlFormException cause) {
-      return Write.error(cause);
-    }
+    return Waml.metaCodec().write(output, value);
   }
 
   public static Write<?> write(@Nullable Object value, @Nullable WamlWriterOptions options) {
-    try {
-      return Waml.codec().getWamlForm(value).write(value, Waml.writer(options));
-    } catch (WamlFormException cause) {
-      return Write.error(cause);
-    }
+    return Waml.metaCodec().write(value, options);
   }
 
   public static Write<?> write(@Nullable Object value) {
-    try {
-      return Waml.codec().getWamlForm(value).write(value, Waml.writer());
-    } catch (WamlFormException cause) {
-      return Write.error(cause);
-    }
+    return Waml.metaCodec().write(value);
   }
 
   public static String toString(@Nullable Object value, @Nullable WamlWriterOptions options) {
-    try {
-      return Waml.codec().getWamlForm(value).toString(value, Waml.writer(options));
-    } catch (WamlFormException cause) {
-      throw new IllegalArgumentException(cause);
-    }
+    return Waml.metaCodec().toString(value, options);
   }
 
   public static String toString(@Nullable Object value) {
-    try {
-      return Waml.codec().getWamlForm(value).toString(value, Waml.writer());
-    } catch (WamlFormException cause) {
-      throw new IllegalArgumentException(cause);
-    }
+    return Waml.metaCodec().toString(value);
   }
 
   public static Write<?> writeBlock(Output<?> output, @Nullable Object value, @Nullable WamlWriterOptions options) {
-    try {
-      return Waml.codec().getWamlForm(value).writeBlock(output, value, Waml.writer(options));
-    } catch (WamlFormException cause) {
-      return Write.error(cause);
-    }
+    return Waml.metaCodec().write(output, value, options);
   }
 
   public static Write<?> writeBlock(Output<?> output, @Nullable Object value) {
-    try {
-      return Waml.codec().getWamlForm(value).writeBlock(output, value, Waml.writer());
-    } catch (WamlFormException cause) {
-      return Write.error(cause);
-    }
+    return Waml.metaCodec().write(output, value);
   }
 
   public static Write<?> writeBlock(@Nullable Object value, @Nullable WamlWriterOptions options) {
-    try {
-      return Waml.codec().getWamlForm(value).writeBlock(value, Waml.writer(options));
-    } catch (WamlFormException cause) {
-      return Write.error(cause);
-    }
+    return Waml.metaCodec().write(value, options);
   }
 
   public static Write<?> writeBlock(@Nullable Object value) {
-    try {
-      return Waml.codec().getWamlForm(value).writeBlock(value, Waml.writer());
-    } catch (WamlFormException cause) {
-      return Write.error(cause);
-    }
+    return Waml.metaCodec().write(value);
   }
 
   public static String toBlockString(@Nullable Object value, @Nullable WamlWriterOptions options) {
-    try {
-      return Waml.codec().getWamlForm(value).toBlockString(value, Waml.writer(options));
-    } catch (WamlFormException cause) {
-      throw new IllegalArgumentException(cause);
-    }
+    return Waml.metaCodec().toString(value, options);
   }
 
   public static String toBlockString(@Nullable Object value) {
-    try {
-      return Waml.codec().getWamlForm(value).toBlockString(value, Waml.writer());
-    } catch (WamlFormException cause) {
-      throw new IllegalArgumentException(cause);
+    return Waml.metaCodec().toString(value);
+  }
+
+  static HashTrieMap<Class<?>, Annotation> resolveAnnotations(AnnotatedElement element) {
+    return Waml.resolveAnnotations(element, HashTrieMap.empty());
+  }
+
+  static HashTrieMap<Class<?>, Annotation> resolveAnnotations(AnnotatedElement element, HashTrieMap<Class<?>, Annotation> annotationMap) {
+    final Annotation[] annotations = element.getDeclaredAnnotations();
+    for (int i = 0; i < annotations.length; i += 1) {
+      final Annotation annotation = annotations[i];
+      final Class<? extends Annotation> annotationType = annotation.annotationType();
+      if (!annotationType.isAnnotationPresent(WamlAnnotation.class)
+          && !annotationType.isAnnotationPresent(DeclAnnotation.class)) {
+        continue;
+      }
+      annotationMap = annotationMap.updated(annotationType, annotation);
+      // Resolve meta-annotations.
+      annotationMap = Waml.resolveAnnotations(annotationType, annotationMap);
     }
+    return annotationMap;
   }
 
 }

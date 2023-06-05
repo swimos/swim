@@ -18,7 +18,10 @@ import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.expr.ExprWriterOptions;
+import swim.collections.HashTrieSet;
+import swim.term.Term;
+import swim.term.TermRegistry;
+import swim.term.TermWriterOptions;
 import swim.util.Murmur3;
 import swim.util.Notation;
 
@@ -27,34 +30,79 @@ import swim.util.Notation;
  */
 @Public
 @Since("5.0")
-public class WamlWriterOptions extends ExprWriterOptions {
+public class WamlWriterOptions extends TermWriterOptions {
 
-  public WamlWriterOptions(boolean whitespace,
+  public WamlWriterOptions(TermRegistry termRegistry,
+                           boolean implicitContext,
+                           boolean whitespace,
                            @Nullable String indentation,
-                           @Nullable String lineSeparator) {
-    super(whitespace, indentation, lineSeparator);
+                           @Nullable String lineSeparator,
+                           HashTrieSet<String> keywords) {
+    super(termRegistry, implicitContext, whitespace, indentation, lineSeparator, keywords);
   }
 
   @Override
-  public WamlWriterOptions whitespace(boolean whitespace) {
-    return this.copy(whitespace, this.indentation, this.lineSeparator);
+  public WamlWriterOptions withTermRegistry(TermRegistry termRegistry) {
+    return this.copy(termRegistry, this.implicitContext, this.whitespace, this.indentation,
+                     this.lineSeparator, this.keywords);
   }
 
   @Override
-  public WamlWriterOptions indentation(@Nullable String indentation) {
-    return this.copy(this.whitespace, indentation, this.lineSeparator);
+  public WamlWriterOptions withImplicitContext(boolean implicitContext) {
+    return this.copy(this.termRegistry, implicitContext, this.whitespace, this.indentation,
+                     this.lineSeparator, this.keywords);
   }
 
   @Override
-  public WamlWriterOptions lineSeparator(@Nullable String lineSeparator) {
-    return this.copy(this.whitespace, this.indentation, lineSeparator);
+  public WamlWriterOptions withWhitespace(boolean whitespace) {
+    return this.copy(this.termRegistry, this.implicitContext, whitespace, this.indentation,
+                     this.lineSeparator, this.keywords);
   }
 
   @Override
-  protected WamlWriterOptions copy(boolean whitespace,
+  public WamlWriterOptions withIndentation(@Nullable String indentation) {
+    return this.copy(this.termRegistry, this.implicitContext, this.whitespace, indentation,
+                     this.lineSeparator, this.keywords);
+  }
+
+  @Override
+  public WamlWriterOptions withLineSeparator(@Nullable String lineSeparator) {
+    return this.copy(this.termRegistry, this.implicitContext, this.whitespace, this.indentation,
+                     lineSeparator, this.keywords);
+  }
+
+  @Override
+  public WamlWriterOptions withKeywords(HashTrieSet<String> keywords) {
+    return this.copy(this.termRegistry, this.implicitContext, this.whitespace, this.indentation,
+                     this.lineSeparator, keywords);
+  }
+
+  public WamlWriterOptions withOptions(TermWriterOptions options) {
+    if (options instanceof WamlWriterOptions) {
+      return (WamlWriterOptions) options;
+    }
+    return this.copy(options.termRegistry(), options.implicitContext(), options.whitespace(),
+                     options.indentation(), options.lineSeparator(), options.keywords());
+  }
+
+  @SuppressWarnings("ReferenceEquality")
+  @Override
+  protected WamlWriterOptions copy(TermRegistry termRegistry,
+                                   boolean implicitContext,
+                                   boolean whitespace,
                                    @Nullable String indentation,
-                                   @Nullable String lineSeparator) {
-    return new WamlWriterOptions(whitespace, indentation, lineSeparator);
+                                   @Nullable String lineSeparator,
+                                   HashTrieSet<String> keywords) {
+    if (termRegistry == this.termRegistry
+        && implicitContext == this.implicitContext
+        && whitespace == this.whitespace
+        && indentation == this.indentation
+        && lineSeparator == this.lineSeparator
+        && keywords == this.keywords) {
+      return this;
+    }
+    return new WamlWriterOptions(termRegistry, implicitContext, whitespace, indentation,
+                                 lineSeparator, keywords);
   }
 
   @Override
@@ -66,12 +114,14 @@ public class WamlWriterOptions extends ExprWriterOptions {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WamlWriterOptions) {
-      final WamlWriterOptions that = (WamlWriterOptions) other;
+    } else if (other instanceof WamlWriterOptions that) {
       return that.canEqual(this)
+          && this.termRegistry.equals(that.termRegistry)
+          && this.implicitContext == that.implicitContext
           && this.whitespace == that.whitespace
           && Objects.equals(this.indentation, that.indentation)
-          && Objects.equals(this.lineSeparator, that.lineSeparator);
+          && Objects.equals(this.lineSeparator, that.lineSeparator)
+          && this.keywords.equals(that.keywords);
     }
     return false;
   }
@@ -80,9 +130,10 @@ public class WamlWriterOptions extends ExprWriterOptions {
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
-        Murmur3.hash(this.whitespace)), Murmur3.hash(this.indentation)),
-        Murmur3.hash(this.lineSeparator)));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        HASH_SEED, termRegistry.hashCode()), Murmur3.hash(this.whitespace)),
+        Murmur3.hash(this.implicitContext)), Murmur3.hash(this.indentation)),
+        Murmur3.hash(this.lineSeparator)), this.keywords.hashCode()));
   }
 
   @Override
@@ -96,26 +147,35 @@ public class WamlWriterOptions extends ExprWriterOptions {
       notation.beginInvoke("WamlWriterOptions", "pretty").endInvoke();
     } else {
       notation.beginInvokeNew("WamlWriterOptions")
+              .appendArgument(this.termRegistry)
+              .appendArgument(this.implicitContext)
               .appendArgument(this.whitespace)
               .appendArgument(this.indentation)
               .appendArgument(this.lineSeparator)
+              .appendArgument(this.keywords)
               .endInvoke();
     }
   }
 
-  private static final WamlWriterOptions COMPACT = new WamlWriterOptions(false, null, null);
+  private static final WamlWriterOptions COMPACT =
+      new WamlWriterOptions(Term.registry(), true, false, null, null,
+                            TermWriterOptions.compact().keywords());
 
   public static WamlWriterOptions compact() {
     return COMPACT;
   }
 
-  private static final WamlWriterOptions READABLE = new WamlWriterOptions(true, null, null);
+  private static final WamlWriterOptions READABLE =
+      new WamlWriterOptions(Term.registry(), true, true, null, null,
+                            TermWriterOptions.compact().keywords());
 
   public static WamlWriterOptions readable() {
     return READABLE;
   }
 
-  private static final WamlWriterOptions PRETTY = new WamlWriterOptions(true, "  ", System.lineSeparator());
+  private static final WamlWriterOptions PRETTY =
+      new WamlWriterOptions(Term.registry(), true, true, "  ", System.lineSeparator(),
+                            TermWriterOptions.compact().keywords());
 
   public static WamlWriterOptions pretty() {
     return PRETTY;

@@ -109,8 +109,7 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof SourceRange) {
-      final SourceRange that = (SourceRange) other;
+    } else if (other instanceof SourceRange that) {
       return this.start.equals(that.start) && this.end.equals(that.end);
     }
     return false;
@@ -127,19 +126,19 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("SourceRange", "of");
-    notation.appendArgument(this.start);
-    notation.appendArgument(this.end);
-    notation.endInvoke();
+    notation.beginInvoke("SourceRange", "of")
+            .appendArgument(this.start)
+            .appendArgument(this.end)
+            .endInvoke();
   }
 
   @Override
   public void writeMarkup(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginObject("SourceRange");
-    notation.appendField("start", this.start);
-    notation.appendField("end", this.end);
-    notation.endObject();
+    notation.beginObject("SourceRange")
+            .appendField("start", this.start)
+            .appendField("end", this.end)
+            .endObject();
   }
 
   @Override

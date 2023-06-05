@@ -177,13 +177,13 @@ public final class StringOutput extends Output<String> implements Appendable {
 
   @CheckReturnValue
   @Override
-  public @Nullable String getOr(@Nullable String defaultValue) {
+  public @Nullable String getOr(@Nullable String other) {
     return this.output.toString();
   }
 
   @CheckReturnValue
   @Override
-  public @NonNull String getNonNullOr(@NonNull String defaultValue) {
+  public @NonNull String getNonNullOr(@NonNull String other) {
     return this.output.toString();
   }
 

@@ -15,85 +15,86 @@
 package swim.json;
 
 import org.junit.jupiter.api.Test;
+import swim.expr.ChildExpr;
+import swim.expr.ChildrenExpr;
 import swim.expr.ContextExpr;
+import swim.expr.DescendantsExpr;
 import swim.expr.GlobalExpr;
-import swim.expr.operator.PlusExpr;
-import swim.expr.selector.ChildExpr;
-import swim.expr.selector.ChildrenExpr;
-import swim.expr.selector.DescendantsExpr;
-import swim.expr.selector.InvokeExpr;
-import swim.expr.selector.MemberExpr;
+import swim.expr.InvokeExpr;
+import swim.expr.MemberExpr;
+import swim.expr.PlusExpr;
 import swim.repr.ArrayRepr;
 import swim.repr.ObjectRepr;
 import swim.repr.Repr;
 import swim.repr.TermRepr;
+import swim.term.Term;
 
 public class JsonExprParserTests {
 
   @Test
   public void parseUnicodeIdentifiers() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("À"))), "À"); // U+C0
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("Ö"))), "Ö"); // U+D6
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("Ø"))), "Ø"); // U+D8
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("ö"))), "ö"); // U+F6
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("ø"))), "ø"); // U+F8
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("˿"))), "˿"); // U+2FF
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("Ͱ"))), "Ͱ"); // U+370
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("ͽ"))), "ͽ"); // U+37D
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("Ϳ"))), "Ϳ"); // U+37F
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("῿"))), "῿"); // U+1FFF
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("⁰"))), "⁰"); // U+2070
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("↏"))), "↏"); // U+218F
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("Ⰰ"))), "Ⰰ"); // U+2C00
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("⿯"))), "⿯"); // U+2FEF
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("、"))), "、"); // U+3001
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("퟿"))), "퟿"); // U+D7FF
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("豈"))), "豈"); // U+F900
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("﷏"))), "﷏"); // U+FDCF
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("ﷰ"))), "ﷰ"); // U+FDF0
-    //assertParses(TermRepr.of(ContextExpr.child(Repr.of("𐀀"))), "𐀀"); // U+10000
-    //assertParses(TermRepr.of(ContextExpr.child(Repr.of("󯿿"))), "󯿿"); // U+EFFFF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("À"))), "À"); // U+C0
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("Ö"))), "Ö"); // U+D6
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("Ø"))), "Ø"); // U+D8
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("ö"))), "ö"); // U+F6
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("ø"))), "ø"); // U+F8
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("˿"))), "˿"); // U+2FF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("Ͱ"))), "Ͱ"); // U+370
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("ͽ"))), "ͽ"); // U+37D
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("Ϳ"))), "Ϳ"); // U+37F
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("῿"))), "῿"); // U+1FFF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("⁰"))), "⁰"); // U+2070
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("↏"))), "↏"); // U+218F
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("Ⰰ"))), "Ⰰ"); // U+2C00
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("⿯"))), "⿯"); // U+2FEF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("、"))), "、"); // U+3001
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("퟿"))), "퟿"); // U+D7FF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("豈"))), "豈"); // U+F900
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("﷏"))), "﷏"); // U+FDCF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("ﷰ"))), "ﷰ"); // U+FDF0
+    //assertParses(TermRepr.of(ContextExpr.child(Term.of("𐀀"))), "𐀀"); // U+10000
+    //assertParses(TermRepr.of(ContextExpr.child(Term.of("󯿿"))), "󯿿"); // U+EFFFF
 
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_À"))), "_À"); // U+C0
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_Ö"))), "_Ö"); // U+D6
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_Ø"))), "_Ø"); // U+D8
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_ö"))), "_ö"); // U+F6
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_ø"))), "_ø"); // U+F8
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_˿"))), "_˿"); // U+2FF
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_Ͱ"))), "_Ͱ"); // U+370
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_ͽ"))), "_ͽ"); // U+37D
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_Ϳ"))), "_Ϳ"); // U+37F
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_῿"))), "_῿"); // U+1FFF
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_⁰"))), "_⁰"); // U+2070
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_↏"))), "_↏"); // U+218F
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_Ⰰ"))), "_Ⰰ"); // U+2C00
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_⿯"))), "_⿯"); // U+2FEF
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_、"))), "_、"); // U+3001
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_퟿"))), "_퟿"); // U+D7FF
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_豈"))), "_豈"); // U+F900
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_﷏"))), "_﷏"); // U+FDCF
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("_ﷰ"))), "_ﷰ"); // U+FDF0
-    //assertParses(TermRepr.of(ContextExpr.child(Repr.of("_𐀀"))), "_𐀀"); // U+10000
-    //assertParses(TermRepr.of(ContextExpr.child(Repr.of("_󯿿"))), "_󯿿"); // U+EFFFF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_À"))), "_À"); // U+C0
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_Ö"))), "_Ö"); // U+D6
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_Ø"))), "_Ø"); // U+D8
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_ö"))), "_ö"); // U+F6
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_ø"))), "_ø"); // U+F8
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_˿"))), "_˿"); // U+2FF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_Ͱ"))), "_Ͱ"); // U+370
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_ͽ"))), "_ͽ"); // U+37D
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_Ϳ"))), "_Ϳ"); // U+37F
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_῿"))), "_῿"); // U+1FFF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_⁰"))), "_⁰"); // U+2070
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_↏"))), "_↏"); // U+218F
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_Ⰰ"))), "_Ⰰ"); // U+2C00
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_⿯"))), "_⿯"); // U+2FEF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_、"))), "_、"); // U+3001
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_퟿"))), "_퟿"); // U+D7FF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_豈"))), "_豈"); // U+F900
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_﷏"))), "_﷏"); // U+FDCF
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("_ﷰ"))), "_ﷰ"); // U+FDF0
+    //assertParses(TermRepr.of(ContextExpr.child(Term.of("_𐀀"))), "_𐀀"); // U+10000
+    //assertParses(TermRepr.of(ContextExpr.child(Term.of("_󯿿"))), "_󯿿"); // U+EFFFF
   }
 
   @Test
   public void parseExprsInArrays() {
-    assertParses(ArrayRepr.of(TermRepr.of(ContextExpr.child(Repr.of("a")))),
+    assertParses(ArrayRepr.of(TermRepr.of(ContextExpr.child(Term.of("a")))),
                  "[a]");
-    assertParses(ArrayRepr.of(TermRepr.of(PlusExpr.of(ContextExpr.child(Repr.of("a")), ContextExpr.child(Repr.of("b"))))),
+    assertParses(ArrayRepr.of(TermRepr.of(PlusExpr.of(ContextExpr.child(Term.of("a")), ContextExpr.child(Term.of("b"))))),
                  "[a + b]");
-    assertParses(ArrayRepr.of(TermRepr.of(ContextExpr.child(Repr.of("a"))), TermRepr.of(ContextExpr.child(Repr.of("b")))),
+    assertParses(ArrayRepr.of(TermRepr.of(ContextExpr.child(Term.of("a"))), TermRepr.of(ContextExpr.child(Term.of("b")))),
                  "[a, b]");
   }
 
   @Test
   public void parseExprsInObjectValues() {
-    assertParses(ObjectRepr.of("x", TermRepr.of(ContextExpr.child(Repr.of("a")))),
+    assertParses(ObjectRepr.of("x", TermRepr.of(ContextExpr.child(Term.of("a")))),
                  "{x: a}");
-    assertParses(ObjectRepr.of("x", TermRepr.of(PlusExpr.of(ContextExpr.child(Repr.of("a")), ContextExpr.child(Repr.of("b"))))),
+    assertParses(ObjectRepr.of("x", TermRepr.of(PlusExpr.of(ContextExpr.child(Term.of("a")), ContextExpr.child(Term.of("b"))))),
                  "{x: a + b}");
-    assertParses(ObjectRepr.of("x", TermRepr.of(ContextExpr.child(Repr.of("a"))), "y", TermRepr.of(ContextExpr.child(Repr.of("b")))),
+    assertParses(ObjectRepr.of("x", TermRepr.of(ContextExpr.child(Term.of("a"))), "y", TermRepr.of(ContextExpr.child(Term.of("b")))),
                  "{x: a, y: b}");
   }
 
@@ -111,19 +112,19 @@ public class JsonExprParserTests {
 
   @Test
   public void parseArrayKeyLookups() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(ArrayRepr.of(Repr.of(1), Repr.of(2)))),
                  "foo[[1, 2]]");
   }
 
   @Test
   public void parseObjectKeyLookups() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  "foo[{x: 1, y: 2}]");
   }
 
   @Test
   public void parseLiteralInvokeArgs() {
-    assertParses(TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("foo")), ArrayRepr.of(Repr.of(1), Repr.of(2)), ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
+    assertParses(TermRepr.of(InvokeExpr.of(ContextExpr.child(Term.of("foo")), ArrayRepr.of(Repr.of(1), Repr.of(2)), ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)))),
                  "foo([1, 2], {x: 1, y: 2})");
   }
 
@@ -139,23 +140,23 @@ public class JsonExprParserTests {
   public void parseLiteralChildExprs() {
     assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of("world!"))),
                  "[1, 2][\"world!\"]");
-    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), GlobalExpr.child(Repr.of("id")))),
+    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), GlobalExpr.child(Term.of("id")))),
                  "{x: 1, y: 2}[$id]");
   }
 
   @Test
   public void parseLiteralFieldExprs() {
-    assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of("length"))),
+    assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Term.of("length"))),
                  "[1, 2].length");
-    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), Repr.of("x"))),
+    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), Term.of("x"))),
                  "{x: 1, y: 2}.x");
   }
 
   @Test
   public void parseLiteralIndexExprs() {
-    assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Repr.of(0))),
+    assertParses(TermRepr.of(ChildExpr.of(ArrayRepr.of(Repr.of(1), Repr.of(2)), Term.of(0))),
                  "[1, 2].0");
-    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), Repr.of(1))),
+    assertParses(TermRepr.of(ChildExpr.of(ObjectRepr.of("x", Repr.of(1), "y", Repr.of(2)), Term.of(1))),
                  "{x: 1, y: 2}.1");
   }
 

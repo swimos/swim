@@ -17,6 +17,7 @@ package swim.ws;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Codec;
 import swim.codec.Decode;
 import swim.codec.DecodeException;
 import swim.codec.Encode;
@@ -28,7 +29,6 @@ import swim.codec.OutputBuffer;
 import swim.codec.OutputException;
 import swim.codec.StringOutput;
 import swim.codec.Text;
-import swim.codec.Transcoder;
 import swim.codec.Utf8DecodedOutput;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -66,8 +66,7 @@ public final class WsStatus implements ToSource {
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WsStatus) {
-      final WsStatus that = (WsStatus) other;
+    } else if (other instanceof WsStatus that) {
       return this.code == that.code && this.reason.equals(that.reason);
     }
     return false;
@@ -111,10 +110,56 @@ public final class WsStatus implements ToSource {
     return new DecodeWsStatus(0, null, 1);
   }
 
-  static final WsStatusTranscoder TRANSCODER = new WsStatusTranscoder();
+  static final WsStatusCodec CODEC = new WsStatusCodec();
 
-  public static Transcoder<WsStatus> transcoder() {
-    return TRANSCODER;
+  public static Codec<WsStatus> codec() {
+    return CODEC;
+  }
+
+}
+
+final class WsStatusCodec implements Codec<WsStatus>, ToSource {
+
+  @Override
+  public MediaType mediaType() {
+    return MediaType.of("application", "octet-stream");
+  }
+
+  @Override
+  public Decode<WsStatus> decode(InputBuffer input) {
+    return WsStatus.decode(input);
+  }
+
+  @Override
+  public Decode<WsStatus> decode() {
+    return WsStatus.decode();
+  }
+
+  @Override
+  public Encode<?> encode(OutputBuffer<?> output, @Nullable WsStatus value) {
+    if (value == null) {
+      return Encode.done();
+    }
+    return value.encode(output);
+  }
+
+  @Override
+  public Encode<?> encode(@Nullable WsStatus value) {
+    if (value == null) {
+      return Encode.done();
+    }
+    return value.encode();
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.beginInvoke("WsStatus", "codec").endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
   }
 
 }
@@ -200,8 +245,7 @@ final class EncodeWsStatus extends Encode<Object> {
 
   @Override
   public Encode<Object> produce(OutputBuffer<?> output) {
-    return EncodeWsStatus.encode(output, this.code, this.reason,
-                                 this.encode, this.step);
+    return EncodeWsStatus.encode(output, this.code, this.reason, this.encode, this.step);
   }
 
   static Encode<Object> encode(OutputBuffer<?> output, int code, String reason,
@@ -216,7 +260,7 @@ final class EncodeWsStatus extends Encode<Object> {
     }
     if (step == 3) {
       if (encode == null) {
-        encode = Text.transcoder().encode(output, reason);
+        encode = Text.encode(output, reason);
       } else {
         encode = encode.produce(output);
       }
@@ -232,54 +276,6 @@ final class EncodeWsStatus extends Encode<Object> {
       return Encode.error(output.getError());
     }
     return new EncodeWsStatus(code, reason, encode, step);
-  }
-
-}
-
-final class WsStatusTranscoder implements Transcoder<WsStatus>, ToSource {
-
-  @Override
-  public MediaType mediaType() {
-    return MediaType.of("application", "octet-stream");
-  }
-
-  @Override
-  public Decode<WsStatus> decode(InputBuffer input) {
-    return WsStatus.decode(input);
-  }
-
-  @Override
-  public Decode<WsStatus> decode() {
-    return WsStatus.decode();
-  }
-
-  @Override
-  public Encode<?> encode(OutputBuffer<?> output, @Nullable WsStatus value) {
-    if (value != null) {
-      return value.encode(output);
-    } else {
-      return Encode.done();
-    }
-  }
-
-  @Override
-  public Encode<?> encode(@Nullable WsStatus value) {
-    if (value != null) {
-      return value.encode();
-    } else {
-      return Encode.done();
-    }
-  }
-
-  @Override
-  public void writeSource(Appendable output) {
-    final Notation notation = Notation.from(output);
-    notation.beginInvoke("WsStatus", "transcoder").endInvoke();
-  }
-
-  @Override
-  public String toString() {
-    return this.toSource();
   }
 
 }

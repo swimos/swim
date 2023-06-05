@@ -290,7 +290,7 @@ public final class BinaryOutput extends OutputBuffer<ByteBuffer> {
     return new BinaryOutput(this.array, this.index, this.limit, this.last);
   }
 
-  private static final byte[] EMPTY_ARRAY = new byte[0];
+  static final byte[] EMPTY_ARRAY = new byte[0];
 
   public static BinaryOutput full() {
     return new BinaryOutput(EMPTY_ARRAY, 0, 0, false);

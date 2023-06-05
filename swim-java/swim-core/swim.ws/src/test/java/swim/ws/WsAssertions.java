@@ -179,7 +179,7 @@ public final class WsAssertions {
     WsAssertions.assertEncodes(ByteBuffer.wrap(expected.getBytes(Charset.forName("UTF-8"))), encoder);
   }
 
-  static <T> void assertDecodes(WsDecoder decoder, WsCodec<T> codec,
+  static <T> void assertDecodes(WsDecoder decoder, WsSubprotocol<T> subprotocol,
                                 WsFrame<?> expected, ByteBuffer encoded) {
     for (int i = 0, n = encoded.remaining(); i <= n; i += 1) {
       // Frame decoding mutates the input buffer,
@@ -193,15 +193,15 @@ public final class WsAssertions {
 
       try {
         input.position(0).limit(i).asLast(false);
-        Decode<WsFrame<T>> decodeMessage = decoder.decodeMessage(input, codec).checkError();
+        Decode<WsFrame<T>> decodeMessage = decoder.decodeMessage(input, subprotocol).checkError();
         while (decodeMessage.isDone() && decodeMessage.get() instanceof WsFragment<?>) {
-          decodeMessage = decoder.decodeContinuation(input, codec, (WsFragment<T>) decodeMessage.getNonNull()).checkError();
+          decodeMessage = decoder.decodeContinuation(input, subprotocol, (WsFragment<T>) decodeMessage.getNonNull()).checkError();
         }
 
         input.limit(n).asLast(true);
         decodeMessage = decodeMessage.consume(input).checkError();
         while (decodeMessage.isDone() && decodeMessage.get() instanceof WsFragment<?>) {
-          decodeMessage = decoder.decodeContinuation(input, codec, (WsFragment<T>) decodeMessage.getNonNull()).checkError();
+          decodeMessage = decoder.decodeContinuation(input, subprotocol, (WsFragment<T>) decodeMessage.getNonNull()).checkError();
         }
 
         assertEquals(expected, decodeMessage.get());
@@ -212,7 +212,7 @@ public final class WsAssertions {
   }
 
   static void assertDecodes(WsDecoder decoder, WsFrame<?> expected, ByteBuffer encoded) {
-    assertDecodes(decoder, WsTestCodec.javaCodec(), expected, encoded);
+    assertDecodes(decoder, WsSubprotocol.generic(), expected, encoded);
   }
 
   static void assertEncodes(WsEncoder encoder, ByteBuffer expected,
@@ -247,7 +247,7 @@ public final class WsAssertions {
     final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
     final BinaryOutputBuffer output = new BinaryOutputBuffer(buffer).asLast(false);
     final BinaryInputBuffer input = new BinaryInputBuffer(buffer).asLast(false);
-    WsCodec<?> codec = null;
+    WsSubprotocol<?> subprotocol = null;
     Encode<?> encodeMessage = null;
     Decode<? extends WsFrame<?>> decodeMessage = null;
     FingerTrieList<WsFrame<?>> decodeQueue = FingerTrieList.empty();
@@ -276,10 +276,10 @@ public final class WsAssertions {
         } else if (decodeIndex < messageCount) {
           final WsFrame<?> message = Assume.nonNull(decodeQueue.head());
           if (decodeMessage == null) {
-            codec = WsTestCodec.of(message.transcoder(), message.transcoder());
-            decodeMessage = decoder.decodeMessage(input, codec).checkError();
+            subprotocol = WsSubprotocol.generic(message.codec(), message.codec());
+            decodeMessage = decoder.decodeMessage(input, subprotocol).checkError();
           } else {
-            decodeMessage = decoder.decodeContinuation(input, Assume.conformsNonNull(codec),
+            decodeMessage = decoder.decodeContinuation(input, Assume.conformsNonNull(subprotocol),
                                                        (WsFragment<?>) decodeMessage.getNonNull()).checkError();
           }
         }

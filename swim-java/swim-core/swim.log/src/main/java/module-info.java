@@ -23,10 +23,11 @@ import swim.annotations.Since;
 module swim.log {
 
   requires transitive swim.annotations;
+  requires transitive swim.decl;
   requires transitive swim.util;
   requires transitive swim.collections;
   requires transitive swim.codec;
-  requires transitive swim.expr;
+  requires transitive swim.term;
   requires swim.repr;
   requires swim.json;
   requires swim.waml;

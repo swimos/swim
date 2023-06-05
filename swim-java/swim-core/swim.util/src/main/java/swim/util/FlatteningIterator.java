@@ -22,17 +22,17 @@ import swim.annotations.Since;
 
 @Public
 @Since("5.0")
-public abstract class FlatteningIterator<P, T> implements Iterator<T> {
+public abstract class FlatteningIterator<S, T> implements Iterator<T> {
 
-  @Nullable Iterator<P> outer;
+  @Nullable Iterator<S> outer;
   @Nullable Iterator<T> inner;
 
-  protected FlatteningIterator(Iterator<P> outer) {
+  protected FlatteningIterator(Iterator<S> outer) {
     this.outer = outer;
     this.inner = null;
   }
 
-  protected abstract Iterator<T> childIterator(P parent);
+  protected abstract Iterator<T> childIterator(S outer);
 
   @Override
   public boolean hasNext() {

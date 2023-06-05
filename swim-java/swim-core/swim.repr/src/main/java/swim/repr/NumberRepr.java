@@ -302,26 +302,23 @@ public interface NumberRepr extends Repr, Comparable<NumberRepr> {
 
   static NumberRepr parse(String value) {
     if ("NaN".equals(value)) {
-      return DoubleRepr.nan();
-    } else {
+      return DoubleRepr.NaN;
+    }
+    try {
+      final long longValue = Long.parseLong(value);
+      if ((int) longValue == longValue) {
+        return NumberRepr.of((int) longValue);
+      }
+      return NumberRepr.of(longValue);
+    } catch (NumberFormatException cause1) {
       try {
-        final long longValue = Long.parseLong(value);
-        if ((int) longValue == longValue) {
-          return NumberRepr.of((int) longValue);
-        } else {
-          return NumberRepr.of(longValue);
+        final double doubleValue = Double.parseDouble(value);
+        if ((float) doubleValue == doubleValue) {
+          return NumberRepr.of((float) doubleValue);
         }
-      } catch (NumberFormatException cause1) {
-        try {
-          final double doubleValue = Double.parseDouble(value);
-          if ((float) doubleValue == doubleValue) {
-            return NumberRepr.of((float) doubleValue);
-          } else {
-            return NumberRepr.of(doubleValue);
-          }
-        } catch (NumberFormatException cause2) {
-          return NumberRepr.of(new BigInteger(value));
-        }
+        return NumberRepr.of(doubleValue);
+      } catch (NumberFormatException cause2) {
+        return NumberRepr.of(new BigInteger(value));
       }
     }
   }

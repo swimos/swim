@@ -18,6 +18,7 @@ import java.io.Flushable;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.Covariant;
 import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -75,9 +76,9 @@ import swim.util.Result;
  * <li>{@link #getNonNullUnchecked()}: returns the output value, if available
  *     and not {@code null}; otherwise throws an unchecked exception
  * <li>{@link #getOr(Object) getOr(T)}: returns the output value, if available;
- *     otherwise returns a default value
+ *     otherwise returns some other value
  * <li>{@link #getNonNullOr(Object) getNonNullOr(T)}: returns the output value,
- *     if available and not {@code null}; otherwise returns a default value
+ *     if available and not {@code null}; otherwise returns some other value
  * <li>{@link #getOrElse(Supplier)}: returns the output value, if available;
  *     otherwise returns a value supplied by a function
  * <li>{@link #getNonNullOrElse(Supplier)}: returns the output value,
@@ -94,12 +95,14 @@ import swim.util.Result;
  * in an implementation-defined manner. Not all {@code Output} implementations
  * support cloning.
  *
+ * @param <T> the type of value to output
+ *
  * @see Writer
  * @see OutputBuffer
  */
 @Public
 @Since("5.0")
-public abstract class Output<T> implements Flushable {
+public abstract class Output<@Covariant T> implements Flushable {
 
   /**
    * Constructs a new {@code Output} instance.
@@ -239,11 +242,10 @@ public abstract class Output<T> implements Flushable {
   @CheckReturnValue
   public @NonNull T getNonNull() throws OutputException {
     final T value = this.get();
-    if (value != null) {
-      return value;
-    } else {
+    if (value == null) {
       throw new NullPointerException("output value is null");
     }
+    return value;
   }
 
   /**
@@ -288,47 +290,46 @@ public abstract class Output<T> implements Flushable {
 
   /**
    * Returns the output value, if not in the {@code output-error} state;
-   * otherwise returns the given {@code defaultValue}. The default
-   * implementation delegates to {@link #get()}, catching any
-   * {@code OutputException} to instead return {@code defaultValue}.
+   * otherwise returns some {@code other}. The default implementation
+   * delegates to {@link #get()}, catching any {@code OutputException}
+   * to instead return {@code other}.
    *
-   * @param defaultValue returned when a current output value is not available
-   * @return either the current output value, or the {@code defaultValue}
+   * @param other returned when a current output value is not available
+   * @return either the current output value, or the {@code other} value
    */
   @CheckReturnValue
-  public @Nullable T getOr(@Nullable T defaultValue) {
+  public @Nullable T getOr(@Nullable T other) {
     try {
       return this.get();
     } catch (OutputException cause) {
-      return defaultValue;
+      return other;
     }
   }
 
   /**
    * Returns the output value, if not in the {@code output-error} state,
-   * and the output value is not {@code null}; otherwise returns the given
-   * non-{@code null} {@code defaultValue}. The default implementation
-   * delegates to {@link #getNonNull()}, catching any {@code OutputException},
-   * or {@code NullPointerException} to instead {@code null}-check and return
-   * the {@code defaultValue}.
+   * and the output value is not {@code null}; otherwise returns some
+   * non-{@code null} {@code other}. The default implementation delegates
+   * to {@link #getNonNull()}, catching any {@code OutputException},
+   * or {@code NullPointerException} to instead {@code null}-check
+   * and return the {@code other} value.
    *
-   * @param defaultValue non-{@code null} value returned when
+   * @param other non-{@code null} value returned when
    *        the output value is {@code null} or not available
    * @return either the current non-{@code null} output value,
-   *         or the non-{@code null} {@code defaultValue}
+   *         or the non-{@code null} {@code other}
    * @throws NullPointerException if the current output value
-   *         and the {@code defaultValue} are both {@code null}
+   *         and the {@code other} are both {@code null}
    */
   @CheckReturnValue
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+  public @NonNull T getNonNullOr(@NonNull T other) {
     try {
       return this.getNonNull();
     } catch (OutputException | NullPointerException cause) {
-      if (defaultValue != null) {
-        return defaultValue;
-      } else {
-        throw new NullPointerException("default value is null");
+      if (other == null) {
+        throw new NullPointerException("other value is null");
       }
+      return other;
     }
   }
 
@@ -375,11 +376,10 @@ public abstract class Output<T> implements Flushable {
       return this.getNonNull();
     } catch (OutputException | NullPointerException cause) {
       final T value = supplier.get();
-      if (value != null) {
-        return value;
-      } else {
+      if (value == null) {
         throw new NullPointerException("supplied value is null");
       }
+      return value;
     }
   }
 

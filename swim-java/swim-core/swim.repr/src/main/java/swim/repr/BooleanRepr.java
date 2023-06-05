@@ -64,9 +64,8 @@ public final class BooleanRepr implements Repr, Comparable<BooleanRepr>, ToSourc
       return this;
     } else if (attrs == Attrs.empty()) {
       return BooleanRepr.of(this.value);
-    } else {
-      return new BooleanRepr(attrs, this.value);
     }
+    return new BooleanRepr(attrs, this.value);
   }
 
   @Override
@@ -80,7 +79,7 @@ public final class BooleanRepr implements Repr, Comparable<BooleanRepr>, ToSourc
   }
 
   @Override
-  public boolean isDefinite() {
+  public boolean isDistinct() {
     return this.value;
   }
 
@@ -149,8 +148,7 @@ public final class BooleanRepr implements Repr, Comparable<BooleanRepr>, ToSourc
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof BooleanRepr) {
-      final BooleanRepr that = (BooleanRepr) other;
+    } else if (other instanceof BooleanRepr that) {
       return this.attrs.equals(that.attrs)
           && this.value == that.value;
     }
@@ -178,9 +176,9 @@ public final class BooleanRepr implements Repr, Comparable<BooleanRepr>, ToSourc
     return this.toSource();
   }
 
-  private static final BooleanRepr TRUE = new BooleanRepr(Attrs.empty(), true);
+  static final BooleanRepr TRUE = new BooleanRepr(Attrs.empty(), true);
 
-  private static final BooleanRepr FALSE = new BooleanRepr(Attrs.empty(), false);
+  static final BooleanRepr FALSE = new BooleanRepr(Attrs.empty(), false);
 
   public static BooleanRepr of(boolean value) {
     return value ? TRUE : FALSE;

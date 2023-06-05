@@ -16,8 +16,6 @@ package swim.uri;
 
 import java.io.IOException;
 import java.util.Objects;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -26,6 +24,8 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.codec.StringInput;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
@@ -60,8 +60,7 @@ public final class UriPort implements Comparable<UriPort>, ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UriPort) {
-      final UriPort that = (UriPort) other;
+    } else if (other instanceof UriPort that) {
       return this.number == that.number;
     }
     return false;
@@ -91,13 +90,13 @@ public final class UriPort implements Comparable<UriPort>, ToSource, ToString {
     output.append(Integer.toString(this.number));
   }
 
-  @IntoForm
+  @Marshal
   @Override
   public String toString() {
     return Integer.toString(this.number);
   }
 
-  private static final UriPort UNDEFINED = new UriPort(0);
+  static final UriPort UNDEFINED = new UriPort(0);
 
   public static UriPort undefined() {
     return UNDEFINED;
@@ -106,15 +105,13 @@ public final class UriPort implements Comparable<UriPort>, ToSource, ToString {
   public static UriPort number(int number) {
     if (number < 0) {
       throw new IllegalArgumentException(Integer.toString(number));
-    }
-    if (number != 0) {
-      return new UriPort(number);
-    } else {
+    } else if (number == 0) {
       return UriPort.undefined();
     }
+    return new UriPort(number);
   }
 
-  @FromForm
+  @Unmarshal
   public static @Nullable UriPort from(String value) {
     return UriPort.parse(value).getOr(null);
   }
@@ -137,7 +134,7 @@ public final class UriPort implements Comparable<UriPort>, ToSource, ToString {
     return parsePort;
   }
 
-  private static @Nullable CacheMap<String, Parse<UriPort>> cache;
+  static @Nullable CacheMap<String, Parse<UriPort>> cache;
 
   static CacheMap<String, Parse<UriPort>> cache() {
     // Global cache is used in lieu of thread-local cache due to small number

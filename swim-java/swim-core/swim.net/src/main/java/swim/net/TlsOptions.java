@@ -171,8 +171,7 @@ public class TlsOptions implements ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof TlsOptions) {
-      final TlsOptions that = (TlsOptions) other;
+    } else if (other instanceof TlsOptions that) {
       return that.canEqual(this)
           && Objects.equals(this.sslContext, that.sslContext)
           && this.clientAuth.equals(that.clientAuth)

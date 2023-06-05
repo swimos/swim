@@ -49,7 +49,7 @@ public final class FingerTrieListBuilder<T> {
     this.size = 0;
   }
 
-  private int getSkew() {
+  int getSkew() {
     return (this.prefix != null ? this.size - this.prefix.length : this.size) & 0x1F;
   }
 
@@ -83,12 +83,11 @@ public final class FingerTrieListBuilder<T> {
   public boolean addAll(Collection<? extends T> elems) {
     if (elems instanceof FingerTrieList<?>) {
       return this.addAll((FingerTrieList<? extends T>) elems);
-    } else {
-      for (T elem : elems) {
-        this.add(elem);
-      }
-      return true;
     }
+    for (T elem : elems) {
+      this.add(elem);
+    }
+    return true;
   }
 
   public boolean addAll(FingerTrieList<? extends T> that) {
@@ -152,20 +151,19 @@ public final class FingerTrieListBuilder<T> {
   public FingerTrieList<T> build() {
     if (this.size == 0) {
       return FingerTrieList.empty();
+    }
+    final int offset = this.getSkew();
+    if (offset != 0 && offset != Assume.nonNull(this.buffer).length) {
+      final Object[] suffix = new Object[offset];
+      System.arraycopy(this.buffer, 0, suffix, 0, offset);
+      this.buffer = suffix;
+    }
+    if (this.prefix == null) {
+      return new FingerTrieList<T>(this.size, Assume.nonNull(this.buffer), FingerTrieList.empty(), FingerTrieList.EMPTY_LEAF);
+    } else if (this.branch == null) {
+      return new FingerTrieList<T>(this.size, this.prefix, FingerTrieList.empty(), Assume.nonNull(this.buffer));
     } else {
-      final int offset = this.getSkew();
-      if (offset != 0 && offset != Assume.nonNull(this.buffer).length) {
-        final Object[] suffix = new Object[offset];
-        System.arraycopy(this.buffer, 0, suffix, 0, offset);
-        this.buffer = suffix;
-      }
-      if (this.prefix == null) {
-        return new FingerTrieList<T>(this.size, Assume.nonNull(this.buffer), FingerTrieList.empty(), FingerTrieList.EMPTY_LEAF);
-      } else if (this.branch == null) {
-        return new FingerTrieList<T>(this.size, this.prefix, FingerTrieList.empty(), Assume.nonNull(this.buffer));
-      } else {
-        return new FingerTrieList<T>(this.size, this.prefix, this.branch.build(), Assume.nonNull(this.buffer));
-      }
+      return new FingerTrieList<T>(this.size, this.prefix, this.branch.build(), Assume.nonNull(this.buffer));
     }
   }
 

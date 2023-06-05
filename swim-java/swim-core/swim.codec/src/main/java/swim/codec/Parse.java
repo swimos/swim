@@ -16,8 +16,10 @@ package swim.codec;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.Covariant;
 import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -96,9 +98,9 @@ import swim.util.ToSource;
  * <li>{@link #getNonNullUnchecked()}: returns the parsed value, if available
  *     and not {@code null}; otherwise throws an unchecked exception
  * <li>{@link #getOr(Object) getOr(T)}: returns the parsed value, if available;
- *     otherwise returns a default value
+ *     otherwise returns some other value
  * <li>{@link #getNonNullOr(Object) getNonNullOr(T)}: returns the parsed value,
- *     if available and not {@code null}; otherwise returns a default value
+ *     if available and not {@code null}; otherwise returns some other value
  * <li>{@link #getOrElse(Supplier)}: returns the parsed value, if available;
  *     otherwise returns a value supplied by a function
  * <li>{@link #getNonNullOrElse(Supplier)}: returns the parsed value,
@@ -158,12 +160,14 @@ import swim.util.ToSource;
  * ownership of its input when invoked, and leaves the input in a state
  * that's consistent with the returned {@code Parse} continuation.
  *
+ * @param <T> the type of parsed value
+ *
  * @see Input
  * @see Parser
  */
 @Public
 @Since("5.0")
-public abstract class Parse<T> extends Decode<T> {
+public abstract class Parse<@Covariant T> extends Decode<T> {
 
   /**
    * Constructs a {@code Parse} instance in the {@code parse-cont} state.
@@ -285,10 +289,10 @@ public abstract class Parse<T> extends Decode<T> {
    * {@code parse-backoff} state and invoke {@code consume} with a
    * terminated input in order to terminate a parse operation.
    * <p>
-   * Consider the example of a proxy translator that parses one input,
+   * Consider the example of a proxy stream that parses one input,
    * and writes another output. There's no point invoking {@code consume}
-   * on the parse end of the translator if the write end's output is full.
-   * Such a translator can wait for output capacity to become available
+   * on the parse end of the stream if the write end's output is full.
+   * Such a stream can wait for output capacity to become available
    * before calling {@code future.requestInput()}.
    *
    * @param future an input future that will trigger an invocation of
@@ -332,11 +336,10 @@ public abstract class Parse<T> extends Decode<T> {
   @Override
   public @NonNull T getNonNull() throws ParseException {
     final T value = this.get();
-    if (value != null) {
-      return value;
-    } else {
+    if (value == null) {
       throw new NullPointerException("parsed value is null");
     }
+    return value;
   }
 
   /**
@@ -385,50 +388,48 @@ public abstract class Parse<T> extends Decode<T> {
 
   /**
    * Returns the parsed value, if in the {@code parse-done} state;
-   * otherwise returns the given {@code defaultValue}. The default
-   * implementation delegates to {@link #get()}, catching any
-   * {@code ParseException} or {@code IllegalStateException}
-   * to instead return {@code defaultValue}.
+   * otherwise returns some {@code other} value. The default implementation
+   * delegates to {@link #get()}, catching any {@code ParseException}
+   * or {@code IllegalStateException} to instead return {@code other}.
    *
-   * @param defaultValue returned when a parsed value is not available
-   * @return either the parsed value, or the {@code defaultValue}
+   * @param other returned when a parsed value is not available
+   * @return either the parsed value, or the {@code other} value
    */
   @CheckReturnValue
   @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
+  public @Nullable T getOr(@Nullable T other) {
     try {
       return this.get();
     } catch (ParseException | IllegalStateException cause) {
-      return defaultValue;
+      return other;
     }
   }
 
   /**
-   * Returns the parsed value, if in the {@code parse-done} state and
-   * the parsed value is not {@code null}; otherwise returns the given
-   * non-{@code null} {@code defaultValue}. The default implementation
-   * delegates to {@link #getNonNull()}, catching any {@code ParseException},
+   * Returns the parsed value, if in the {@code parse-done} state
+   * and the parsed value is not {@code null}; otherwise returns some
+   * non-{@code null} {@code other}. The default implementation delegates
+   * to {@link #getNonNull()}, catching any {@code ParseException},
    * {@code IllegalStateException}, or {@code NullPointerException}
-   * to instead {@code null}-check and return the {@code defaultValue}.
+   * to instead {@code null}-check and return the {@code other} value.
    *
-   * @param defaultValue non-{@code null} value returned when
+   * @param other non-{@code null} value returned when
    *        the parsed value is {@code null} or not available
    * @return either the non-{@code null} parsed value,
-   *         or the non-{@code null} {@code defaultValue}
+   *         or the non-{@code null} {@code other} value
    * @throws NullPointerException if the parsed value and
-   *         the {@code defaultValue} are both {@code null}
+   *         the {@code other} value are both {@code null}
    */
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+  public @NonNull T getNonNullOr(@NonNull T other) {
     try {
       return this.getNonNull();
     } catch (ParseException | IllegalStateException | NullPointerException cause) {
-      if (defaultValue != null) {
-        return defaultValue;
-      } else {
-        throw new NullPointerException("default value is null");
+      if (other == null) {
+        throw new NullPointerException("other value is null");
       }
+      return other;
     }
   }
 
@@ -477,11 +478,10 @@ public abstract class Parse<T> extends Decode<T> {
       return this.getNonNull();
     } catch (ParseException | IllegalStateException | NullPointerException cause) {
       final T value = supplier.get();
-      if (value != null) {
-        return value;
-      } else {
+      if (value == null) {
         throw new NullPointerException("supplied value is null");
       }
+      return value;
     }
   }
 
@@ -559,6 +559,12 @@ public abstract class Parse<T> extends Decode<T> {
   @Override
   public Parse<T> assertDone() {
     throw new AssertionError("incomplete parse");
+  }
+
+  @CheckReturnValue
+  @Override
+  public <U> Parse<U> map(Function<? super T, ? extends U> mapper) {
+    return new ParseMapper<T, U>(this, mapper);
   }
 
   /**
@@ -703,7 +709,7 @@ public abstract class Parse<T> extends Decode<T> {
 
 }
 
-final class ParseDone<T> extends Parse<T> implements ToSource {
+final class ParseDone<@Covariant T> extends Parse<T> implements ToSource {
 
   final @Nullable T value;
 
@@ -746,11 +752,10 @@ final class ParseDone<T> extends Parse<T> implements ToSource {
   @CheckReturnValue
   @Override
   public @NonNull T getNonNull() {
-    if (this.value != null) {
-      return this.value;
-    } else {
+    if (this.value == null) {
       throw new NullPointerException("parsed value is null");
     }
+    return this.value;
   }
 
   @CheckReturnValue
@@ -762,28 +767,27 @@ final class ParseDone<T> extends Parse<T> implements ToSource {
   @CheckReturnValue
   @Override
   public @NonNull T getNonNullUnchecked() {
-    if (this.value != null) {
-      return this.value;
-    } else {
+    if (this.value == null) {
       throw new NullPointerException("parsed value is null");
     }
-  }
-
-  @CheckReturnValue
-  @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
     return this.value;
   }
 
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+  public @Nullable T getOr(@Nullable T other) {
+    return this.value;
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOr(@NonNull T other) {
     if (this.value != null) {
       return this.value;
-    } else if (defaultValue != null) {
-      return defaultValue;
+    } else if (other != null) {
+      return other;
     } else {
-      throw new NullPointerException("default value is null");
+      throw new NullPointerException("other value is null");
     }
   }
 
@@ -800,11 +804,10 @@ final class ParseDone<T> extends Parse<T> implements ToSource {
       return this.value;
     } else {
       final T value = supplier.get();
-      if (value != null) {
-        return value;
-      } else {
+      if (value == null) {
         throw new NullPointerException("supplied value is null");
       }
+      return value;
     }
   }
 
@@ -820,13 +823,28 @@ final class ParseDone<T> extends Parse<T> implements ToSource {
 
   @CheckReturnValue
   @Override
+  public <U> Parse<U> map(Function<? super T, ? extends U> mapper) {
+    try {
+      return Parse.done(mapper.apply(this.value));
+    } catch (Throwable cause) {
+      if (Result.isFatal(cause)) {
+        throw cause;
+      }
+      return Parse.error(cause);
+    }
+  }
+
+  @CheckReturnValue
+  @Override
   public Result<T> toResult() {
     return Result.ok(this.value);
   }
 
   @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof ParseDone<?> that) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof ParseDone<?> that) {
       return Objects.equals(this.value, that.value);
     }
     return false;
@@ -856,7 +874,7 @@ final class ParseDone<T> extends Parse<T> implements ToSource {
 
 }
 
-final class ParseError<T> extends Parse<T> implements ToSource {
+final class ParseError<@Covariant T> extends Parse<T> implements ToSource {
 
   final Throwable error;
 
@@ -918,18 +936,17 @@ final class ParseError<T> extends Parse<T> implements ToSource {
 
   @CheckReturnValue
   @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
-    return defaultValue;
+  public @Nullable T getOr(@Nullable T other) {
+    return other;
   }
 
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
-    if (defaultValue != null) {
-      return defaultValue;
-    } else {
-      throw new NullPointerException("default value is null");
+  public @NonNull T getNonNullOr(@NonNull T other) {
+    if (other == null) {
+      throw new NullPointerException("other value is null");
     }
+    return other;
   }
 
   @CheckReturnValue
@@ -942,11 +959,10 @@ final class ParseError<T> extends Parse<T> implements ToSource {
   @Override
   public @NonNull T getNonNullOrElse(Supplier<? extends T> supplier) {
     final T value = supplier.get();
-    if (value != null) {
-      return value;
-    } else {
+    if (value == null) {
       throw new NullPointerException("supplied value is null");
     }
+    return value;
   }
 
   @Override
@@ -984,13 +1000,21 @@ final class ParseError<T> extends Parse<T> implements ToSource {
 
   @CheckReturnValue
   @Override
+  public <U> Parse<U> map(Function<? super T, ? extends U> mapper) {
+    return Assume.conforms(this);
+  }
+
+  @CheckReturnValue
+  @Override
   public Result<T> toResult() {
     return Result.error(this.error);
   }
 
   @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof ParseError<?> that) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof ParseError<?> that) {
       return this.error.equals(that.error);
     }
     return false;
@@ -1008,6 +1032,43 @@ final class ParseError<T> extends Parse<T> implements ToSource {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("Parse", "error")
             .appendArgument(this.error)
+            .endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+}
+
+final class ParseMapper<S, T> extends Parse<T> implements ToSource {
+
+  final Parse<S> parse;
+  final Function<? super S, ? extends T> mapper;
+
+  ParseMapper(Parse<S> parse, Function<? super S, ? extends T> mapper) {
+    this.parse = parse;
+    this.mapper = mapper;
+  }
+
+  @Override
+  public Parse<T> consume(Input input) {
+    return this.parse.consume(input).map(this.mapper);
+  }
+
+  @CheckReturnValue
+  @Override
+  public <U> Parse<U> map(Function<? super T, ? extends U> mapper) {
+    return new ParseMapper<S, U>(this.parse, this.mapper.andThen(mapper));
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.appendSource(this.parse)
+            .beginInvoke("map")
+            .appendArgument(this.mapper)
             .endInvoke();
   }
 

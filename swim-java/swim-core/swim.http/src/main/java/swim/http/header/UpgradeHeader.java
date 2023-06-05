@@ -107,7 +107,7 @@ public final class UpgradeHeader extends HttpHeader {
     return UpgradeHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<HttpUpgrade> parseValue(String value) throws HttpException {
+  static FingerTrieList<HttpUpgrade> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     FingerTrieList<HttpUpgrade> upgrades = FingerTrieList.empty();
@@ -155,7 +155,7 @@ public final class UpgradeHeader extends HttpHeader {
     return upgrades;
   }
 
-  private static String writeValue(Iterator<HttpUpgrade> upgrades) {
+  static String writeValue(Iterator<HttpUpgrade> upgrades) {
     final StringOutput output = new StringOutput();
     HttpUpgrade upgrade = null;
     do {

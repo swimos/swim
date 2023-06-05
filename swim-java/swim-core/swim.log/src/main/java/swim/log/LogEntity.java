@@ -44,9 +44,8 @@ public interface LogEntity {
   static @Nullable Object of(@Nullable Object object, Severity level) {
     if (object instanceof LogEntity) {
       return ((LogEntity) object).toLogEntity(level);
-    } else {
-      return null;
     }
+    return null;
   }
 
 }

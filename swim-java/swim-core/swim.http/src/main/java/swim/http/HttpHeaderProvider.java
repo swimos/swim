@@ -41,6 +41,10 @@ public interface HttpHeaderProvider {
 
   void registerHeaderTypes(HttpHeaderRegistry registry);
 
+  static final int BUILTIN_PRIORITY = 100;
+
   static final int DEFAULT_PRIORITY = 0;
+
+  static final int GENERIC_PRIORITY = -100;
 
 }

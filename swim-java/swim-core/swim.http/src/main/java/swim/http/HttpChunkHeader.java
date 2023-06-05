@@ -89,8 +89,7 @@ public final class HttpChunkHeader implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpChunkHeader) {
-      final HttpChunkHeader that = (HttpChunkHeader) other;
+    } else if (other instanceof HttpChunkHeader that) {
       return this.size == that.size && this.exts.equals(that.exts);
     }
     return false;
@@ -134,7 +133,7 @@ public final class HttpChunkHeader implements ToSource, ToString {
     return output.get();
   }
 
-  private static final HttpChunkHeader LAST = new HttpChunkHeader(0L, ArrayMap.empty());
+  static final HttpChunkHeader LAST = new HttpChunkHeader(0L, ArrayMap.empty());
 
   public static HttpChunkHeader last() {
     return LAST;
@@ -341,14 +340,14 @@ final class ParseHttpChunkHeader extends Parse<HttpChunkHeader> {
 final class WriteHttpChunkHeader extends Write<Object> {
 
   final long size;
-  final Iterator<? extends Map.Entry<String, String>> exts;
+  final Iterator<Map.Entry<String, String>> exts;
   final @Nullable String key;
   final @Nullable String value;
   final int index;
   final int escape;
   final int step;
 
-  WriteHttpChunkHeader(long size, Iterator<? extends Map.Entry<String, String>> exts,
+  WriteHttpChunkHeader(long size, Iterator<Map.Entry<String, String>> exts,
                        @Nullable String key, @Nullable String value,
                        int index, int escape, int step) {
     this.size = size;
@@ -368,7 +367,7 @@ final class WriteHttpChunkHeader extends Write<Object> {
   }
 
   static Write<Object> write(Output<?> output, long size,
-                             Iterator<? extends Map.Entry<String, String>> exts,
+                             Iterator<Map.Entry<String, String>> exts,
                              @Nullable String key, @Nullable String value,
                              int index, int escape, int step) {
     int c = 0;

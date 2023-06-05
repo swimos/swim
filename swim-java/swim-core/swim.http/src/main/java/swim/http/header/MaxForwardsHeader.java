@@ -83,7 +83,7 @@ public final class MaxForwardsHeader extends HttpHeader {
     return MaxForwardsHeader.of(NAME, value);
   }
 
-  private static int parseValue(String value) throws HttpException {
+  static int parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     int count = 0;

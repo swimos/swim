@@ -335,17 +335,16 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
       final Object[] slots = new Object[1];
       slots[0] = this.merge(elem0, hash0, elem1, hash1, shift + 5);
       return new HashTrieSet<T>(slotMap, 0, 2, slots);
-    } else {
-      final Object[] slots = new Object[2];
-      if (((branch0 - 1) & branch1) == 0) {
-        slots[0] = elem0;
-        slots[1] = elem1;
-      } else {
-        slots[0] = elem1;
-        slots[1] = elem0;
-      }
-      return new HashTrieSet<T>(0, slotMap, 2, slots);
     }
+    final Object[] slots = new Object[2];
+    if (((branch0 - 1) & branch1) == 0) {
+      slots[0] = elem0;
+      slots[1] = elem1;
+    } else {
+      slots[0] = elem1;
+      slots[1] = elem0;
+    }
+    return new HashTrieSet<T>(0, slotMap, 2, slots);
   }
 
   int getBranchType(int branch) {
@@ -620,7 +619,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
   static final int TREE = 2;
   static final int KNOT = 3;
 
-  private static final HashTrieSet<Object> EMPTY = new HashTrieSet<Object>(0, 0, 0, new Object[0]);
+  static final HashTrieSet<Object> EMPTY = new HashTrieSet<Object>(0, 0, 0, new Object[0]);
 
   public static <T> HashTrieSet<T> empty() {
     return Assume.conforms(EMPTY);
@@ -757,8 +756,10 @@ final class HashTrieSetIterator<T> implements Iterator<T> {
             default:
               throw new AssertionError("unreachable");
           }
+          continue;
         } else if (this.depth > 0) {
           this.pop();
+          continue;
         } else {
           return false;
         }
@@ -768,10 +769,10 @@ final class HashTrieSetIterator<T> implements Iterator<T> {
           return true;
         } else {
           this.pop();
+          continue;
         }
-      } else {
-        throw new AssertionError("unreachable");
       }
+      throw new AssertionError("unreachable");
     } while (true);
   }
 
@@ -806,11 +807,12 @@ final class HashTrieSetIterator<T> implements Iterator<T> {
             default:
               throw new AssertionError("unreachable");
           }
+          continue;
         } else if (this.depth > 0) {
           this.pop();
-        } else {
-          throw new NoSuchElementException();
+          continue;
         }
+        throw new NoSuchElementException();
       } else if (node instanceof ArraySet<?>) {
         final ArraySet<T> knot = Assume.conforms(node);
         final int slotIndex = this.getSlotIndex();
@@ -820,10 +822,10 @@ final class HashTrieSetIterator<T> implements Iterator<T> {
           return elem;
         } else {
           this.pop();
+          continue;
         }
-      } else {
-        throw new AssertionError("unreachable");
       }
+      throw new AssertionError("unreachable");
     } while (true);
   }
 

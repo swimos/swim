@@ -75,33 +75,30 @@ public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, Updatabl
   }
 
   public Map.@Nullable Entry<K, V> head() {
-    if (this.slots.length > 1) {
-      return new SimpleImmutableEntry<K, V>(Assume.conformsNullable(this.slots[0]),
-                                            Assume.conformsNullable(this.slots[1]));
-    } else {
+    if (this.slots.length == 0) {
       return null;
     }
+    return new SimpleImmutableEntry<K, V>(Assume.conformsNullable(this.slots[0]),
+                                          Assume.conformsNullable(this.slots[1]));
   }
 
   public @Nullable K headKey() {
-    if (this.slots.length > 1) {
-      return Assume.conformsNullable(this.slots[0]);
-    } else {
+    if (this.slots.length == 0) {
       return null;
     }
+    return Assume.conformsNullable(this.slots[0]);
   }
 
   public @Nullable V headValue() {
-    if (this.slots.length > 1) {
-      return Assume.conformsNullable(this.slots[1]);
-    } else {
+    if (this.slots.length == 0) {
       return null;
     }
+    return Assume.conformsNullable(this.slots[1]);
   }
 
   public Map.@Nullable Entry<K, V> next(@Nullable Object key) {
     final int n = this.slots.length;
-    if (n > 1 && key == null) {
+    if (n != 0 && key == null) {
       return new SimpleImmutableEntry<K, V>(Assume.conformsNullable(this.slots[0]),
                                             Assume.conformsNullable(this.slots[1]));
     }
@@ -116,7 +113,7 @@ public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, Updatabl
 
   public @Nullable K nextKey(@Nullable Object key) {
     final int n = this.slots.length;
-    if (n > 1 && key == null) {
+    if (n != 0 && key == null) {
       return Assume.conformsNullable(this.slots[0]);
     }
     for (int i = 0; i < n; i += 2) {
@@ -129,7 +126,7 @@ public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, Updatabl
 
   public @Nullable V nextValue(@Nullable Object key) {
     final int n = this.slots.length;
-    if (n > 1 && key == null) {
+    if (n != 0 && key == null) {
       return Assume.conformsNullable(this.slots[1]);
     }
     for (int i = 0; i < n; i += 2) {
@@ -208,7 +205,7 @@ public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, Updatabl
     for (int i = 0, n = slots.length; i < n; i += 1) {
       if (Objects.equals(key, slots[i])) {
         if (n == 2) {
-          return empty();
+          return ArrayMap.empty();
         } else {
           final Object[] newSlots = new Object[n - 2];
           System.arraycopy(slots, 0, newSlots, 0, i);
@@ -338,18 +335,17 @@ public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, Updatabl
     return this.toSource();
   }
 
-  private static final ArrayMap<Object, Object> EMPTY = new ArrayMap<Object, Object>(new Object[0]);
+  static final ArrayMap<Object, Object> EMPTY = new ArrayMap<Object, Object>(new Object[0]);
 
   public static <K, V> ArrayMap<K, V> empty() {
     return Assume.conforms(EMPTY);
   }
 
   public static <K, V> ArrayMap<K, V> of(@Nullable Object... keyValuePairs) {
-    Objects.requireNonNull(keyValuePairs);
-    if (keyValuePairs.length % 2 != 0) {
+    if (Assume.nonNull(keyValuePairs).length % 2 != 0) {
       throw new IllegalArgumentException("odd number of key-value pairs");
     }
-    return new ArrayMap<K, V>(keyValuePairs);
+    return new ArrayMap<K, V>(Assume.nonNull(keyValuePairs));
   }
 
 }

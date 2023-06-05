@@ -21,9 +21,11 @@ import swim.codec.Output;
 import swim.codec.ParseException;
 import swim.codec.Write;
 import swim.codec.Writer;
-import swim.expr.Evaluator;
 import swim.expr.FormatExpr;
+import swim.term.Evaluator;
 import swim.util.Notation;
+import swim.waml.Waml;
+import swim.waml.WamlParserOptions;
 
 @Public
 @Since("5.0")
@@ -41,15 +43,14 @@ public class LogFormat implements Writer<LogEvent> {
 
   @Override
   public Write<?> write(Output<?> output, @Nullable LogEvent event) {
-    if (event != null) {
-      final Evaluator evaluator = new Evaluator(LogEnv.TERM, event);
-      return this.formatExpr.writeFormat(output, evaluator);
-    } else {
+    if (event == null) {
       return Write.done();
     }
+    final Evaluator evaluator = new Evaluator(LogEnv.TERM, event);
+    return this.formatExpr.writeFormat(output, evaluator);
   }
 
-  private static final String DEFAULT_FORMAT = "{time}{topic ? \" \" : \"\"}{topic}{focus ? \" \" : \"\"}{focus}{scope ? \" \" : \"\"}{scope} {level}: {message}{detail ? \"; \" : \"\"}{detail ? $::toWamlBlock(detail) : \"\"}{cause ? \"; \" : \"\"}{cause ? cause : \"\"}";
+  static final String DEFAULT_FORMAT = "{time}{topic ? \" \" : \"\"}{topic}{focus ? \" \" : \"\"}{focus}{scope ? \" \" : \"\"}{scope} {level}: {message}{detail ? \"; \" : \"\"}{detail ? $::toWamlBlock(detail) : \"\"}{cause ? \"; \" : \"\"}{cause ? cause : \"\"}";
 
   private static @Nullable LogFormat provider;
 
@@ -59,7 +60,7 @@ public class LogFormat implements Writer<LogEvent> {
       FormatExpr formatExpr = null;
       if (formatString != null) {
         try {
-          formatExpr = FormatExpr.parse(formatString).getNonNull();
+          formatExpr = FormatExpr.parse(formatString, Waml.metaCodec(), WamlParserOptions.expressions()).getNonNull();
         } catch (ParseException cause) {
           System.err.println(Notation.of("invalid swim.log.format: ")
                                      .appendSource(formatString)
@@ -67,7 +68,7 @@ public class LogFormat implements Writer<LogEvent> {
         }
       }
       if (formatExpr == null) {
-        formatExpr = FormatExpr.parse(DEFAULT_FORMAT).assertDone().getNonNullUnchecked();
+        formatExpr = FormatExpr.parse(DEFAULT_FORMAT, Waml.metaCodec(), WamlParserOptions.expressions()).assertDone().getNonNullUnchecked();
       }
       LogFormat.provider = new LogFormat(formatExpr);
     }

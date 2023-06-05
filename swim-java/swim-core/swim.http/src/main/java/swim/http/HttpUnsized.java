@@ -18,12 +18,12 @@ import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Codec;
 import swim.codec.Decode;
 import swim.codec.Encode;
 import swim.codec.EncodeException;
 import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
-import swim.codec.Transcoder;
 import swim.http.header.ContentTypeHeader;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -34,11 +34,11 @@ import swim.util.ToSource;
 public final class HttpUnsized<T> extends HttpPayload<T> implements ToSource {
 
   final @Nullable T value;
-  final Transcoder<T> transcoder;
+  final Codec<T> codec;
 
-  HttpUnsized(@Nullable T value, Transcoder<T> transcoder) {
+  HttpUnsized(@Nullable T value, Codec<T> codec) {
     this.value = value;
-    this.transcoder = transcoder;
+    this.codec = codec;
   }
 
   @Override
@@ -52,8 +52,8 @@ public final class HttpUnsized<T> extends HttpPayload<T> implements ToSource {
   }
 
   @Override
-  public Transcoder<T> transcoder() {
-    return this.transcoder;
+  public Codec<T> codec() {
+    return this.codec;
   }
 
   @Override
@@ -81,10 +81,9 @@ public final class HttpUnsized<T> extends HttpPayload<T> implements ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpUnsized<?>) {
-      final HttpUnsized<?> that = (HttpUnsized<?>) other;
+    } else if (other instanceof HttpUnsized<?> that) {
       return Objects.equals(this.value, that.value)
-          && this.transcoder.equals(that.transcoder);
+          && this.codec.equals(that.codec);
     }
     return false;
   }
@@ -94,7 +93,7 @@ public final class HttpUnsized<T> extends HttpPayload<T> implements ToSource {
   @Override
   public int hashCode() {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
-        Objects.hashCode(this.value)), this.transcoder.hashCode()));
+        Objects.hashCode(this.value)), this.codec.hashCode()));
   }
 
   @Override
@@ -102,7 +101,7 @@ public final class HttpUnsized<T> extends HttpPayload<T> implements ToSource {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("HttpUnsized", "of")
             .appendArgument(this.value)
-            .appendArgument(this.transcoder)
+            .appendArgument(this.codec)
             .endInvoke();
   }
 
@@ -111,51 +110,51 @@ public final class HttpUnsized<T> extends HttpPayload<T> implements ToSource {
     return this.toSource();
   }
 
-  public static <T> HttpUnsized<T> of(@Nullable T value, Transcoder<T> transcoder) {
-    return new HttpUnsized<T>(value, transcoder);
+  public static <T> HttpUnsized<T> of(@Nullable T value, Codec<T> codec) {
+    return new HttpUnsized<T>(value, codec);
   }
 
-  public static <T> Decode<HttpUnsized<T>> decode(InputBuffer input, Transcoder<T> transcoder) {
-    return DecodeHttpUnsized.decode(input, transcoder, null);
+  public static <T> Decode<HttpUnsized<T>> decode(InputBuffer input, Codec<T> codec) {
+    return DecodeHttpUnsized.decode(input, codec, null);
   }
 
-  public static <T> Decode<HttpUnsized<T>> decode(Transcoder<T> transcoder) {
-    return new DecodeHttpUnsized<T>(transcoder, null);
+  public static <T> Decode<HttpUnsized<T>> decode(Codec<T> codec) {
+    return new DecodeHttpUnsized<T>(codec, null);
   }
 
 }
 
 final class DecodeHttpUnsized<T> extends Decode<HttpUnsized<T>> {
 
-  final Transcoder<T> transcoder;
+  final Codec<T> codec;
   final @Nullable Decode<T> decodePayload;
 
-  DecodeHttpUnsized(Transcoder<T> transcoder, @Nullable Decode<T> decodePayload) {
-    this.transcoder = transcoder;
+  DecodeHttpUnsized(Codec<T> codec, @Nullable Decode<T> decodePayload) {
+    this.codec = codec;
     this.decodePayload = decodePayload;
   }
 
   @Override
   public Decode<HttpUnsized<T>> consume(InputBuffer input) {
-    return DecodeHttpUnsized.decode(input, this.transcoder, this.decodePayload);
+    return DecodeHttpUnsized.decode(input, this.codec, this.decodePayload);
   }
 
-  static <T> Decode<HttpUnsized<T>> decode(InputBuffer input, Transcoder<T> transcoder,
+  static <T> Decode<HttpUnsized<T>> decode(InputBuffer input, Codec<T> codec,
                                            @Nullable Decode<T> decodePayload) {
     if (decodePayload == null) {
-      decodePayload = transcoder.decode(input);
+      decodePayload = codec.decode(input);
     } else {
       decodePayload = decodePayload.consume(input);
     }
     if (decodePayload.isDone()) {
-      return Decode.done(HttpUnsized.of(decodePayload.getUnchecked(), transcoder));
+      return Decode.done(HttpUnsized.of(decodePayload.getUnchecked(), codec));
     } else if (decodePayload.isError()) {
       return decodePayload.asError();
     }
     if (input.isError()) {
       return Decode.error(input.getError());
     }
-    return new DecodeHttpUnsized<T>(transcoder, decodePayload);
+    return new DecodeHttpUnsized<T>(codec, decodePayload);
   }
 
 }
@@ -178,7 +177,7 @@ final class EncodeHttpUnsized<T> extends Encode<HttpUnsized<T>> {
   static <T> Encode<HttpUnsized<T>> encode(OutputBuffer<?> output, HttpUnsized<T> payload,
                                            @Nullable Encode<?> encode) {
     if (encode == null) {
-      encode = payload.transcoder.encode(output, payload.value);
+      encode = payload.codec.encode(output, payload.value);
     } else {
       encode = encode.produce(output);
     }

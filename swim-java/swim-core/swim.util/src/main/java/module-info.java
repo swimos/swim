@@ -24,6 +24,7 @@ import swim.annotations.Since;
 module swim.util {
 
   requires transitive swim.annotations;
+  requires transitive swim.decl;
 
   exports swim.util;
 

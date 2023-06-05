@@ -15,13 +15,19 @@
 package swim.codec;
 
 import java.util.Objects;
+import swim.annotations.Covariant;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A parser of values from non-blocking chunked input streams.
+ *
+ * @param <T> the type of values to parse
+ */
 @Public
 @Since("5.0")
 @FunctionalInterface
-public interface Parser<T> extends Decoder<T> {
+public interface Parser<@Covariant T> extends Decoder<T> {
 
   @Override
   default Decode<T> decode(InputBuffer input) {

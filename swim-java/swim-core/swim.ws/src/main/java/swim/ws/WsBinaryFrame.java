@@ -20,7 +20,7 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Binary;
-import swim.codec.Transcoder;
+import swim.codec.Codec;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -30,11 +30,11 @@ import swim.util.ToSource;
 public final class WsBinaryFrame<T> extends WsDataFrame<T> implements ToSource {
 
   final @Nullable T payload;
-  final Transcoder<T> transcoder;
+  final Codec<T> codec;
 
-  WsBinaryFrame(@Nullable T payload, Transcoder<T> transcoder) {
+  WsBinaryFrame(@Nullable T payload, Codec<T> codec) {
     this.payload = payload;
-    this.transcoder = transcoder;
+    this.codec = codec;
   }
 
   @Override
@@ -49,24 +49,22 @@ public final class WsBinaryFrame<T> extends WsDataFrame<T> implements ToSource {
 
   @Override
   public T getNonNull() {
-    if (this.payload != null) {
-      return this.payload;
-    } else {
+    if (this.payload == null) {
       throw new NullPointerException("null websocket payload");
     }
+    return this.payload;
   }
 
   @Override
-  public Transcoder<T> transcoder() {
-    return this.transcoder;
+  public Codec<T> codec() {
+    return this.codec;
   }
 
   @Override
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WsBinaryFrame<?>) {
-      final WsBinaryFrame<?> that = (WsBinaryFrame<?>) other;
+    } else if (other instanceof WsBinaryFrame<?> that) {
       return Objects.equals(this.payload, that.payload);
     }
     return false;
@@ -84,7 +82,7 @@ public final class WsBinaryFrame<T> extends WsDataFrame<T> implements ToSource {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("WsBinaryFrame", "of")
             .appendArgument(this.payload)
-            .appendArgument(this.transcoder)
+            .appendArgument(this.codec)
             .endInvoke();
   }
 
@@ -93,19 +91,19 @@ public final class WsBinaryFrame<T> extends WsDataFrame<T> implements ToSource {
     return this.toSource();
   }
 
-  public static <T> WsBinaryFrame<T> of(@Nullable T payload, Transcoder<T> transcoder) {
-    return new WsBinaryFrame<T>(payload, transcoder);
+  public static <T> WsBinaryFrame<T> of(@Nullable T payload, Codec<T> codec) {
+    return new WsBinaryFrame<T>(payload, codec);
   }
 
   public static WsBinaryFrame<byte[]> of(byte @Nullable [] payload) {
-    return new WsBinaryFrame<byte[]>(payload, Binary.byteArrayTranscoder());
+    return new WsBinaryFrame<byte[]>(payload, Binary.byteArrayCodec());
   }
 
   public static WsBinaryFrame<ByteBuffer> of(@Nullable ByteBuffer payload) {
     if (payload != null) {
       payload = payload.duplicate();
     }
-    return new WsBinaryFrame<ByteBuffer>(payload, Binary.byteBufferTranscoder());
+    return new WsBinaryFrame<ByteBuffer>(payload, Binary.byteBufferCodec());
   }
 
 }

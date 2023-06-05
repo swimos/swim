@@ -16,8 +16,6 @@ package swim.uri;
 
 import java.io.IOException;
 import java.util.Objects;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -29,6 +27,8 @@ import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8DecodedOutput;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
 import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
@@ -64,8 +64,7 @@ public final class UriFragment extends UriPart implements Comparable<UriFragment
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UriFragment) {
-      final UriFragment that = (UriFragment) other;
+    } else if (other instanceof UriFragment that) {
       return Objects.equals(this.identifier, that.identifier);
     }
     return false;
@@ -106,27 +105,26 @@ public final class UriFragment extends UriPart implements Comparable<UriFragment
     }
   }
 
-  @IntoForm
+  @Marshal
   @Override
   public String toString() {
     return this.toString(null);
   }
 
-  private static final UriFragment UNDEFINED = new UriFragment(null);
+  static final UriFragment UNDEFINED = new UriFragment(null);
 
   public static UriFragment undefined() {
     return UNDEFINED;
   }
 
   public static UriFragment identifier(@Nullable String identifier) {
-    if (identifier != null) {
-      return new UriFragment(identifier);
-    } else {
+    if (identifier == null) {
       return UriFragment.undefined();
     }
+    return new UriFragment(identifier);
   }
 
-  @FromForm
+  @Unmarshal
   public static @Nullable UriFragment from(String value) {
     return UriFragment.parse(value).getOr(null);
   }
@@ -149,10 +147,10 @@ public final class UriFragment extends UriPart implements Comparable<UriFragment
     return parseFragment;
   }
 
-  private static final ThreadLocal<CacheMap<String, Parse<UriFragment>>> CACHE =
+  static final ThreadLocal<CacheMap<String, Parse<UriFragment>>> CACHE =
       new ThreadLocal<CacheMap<String, Parse<UriFragment>>>();
 
-  private static CacheMap<String, Parse<UriFragment>> cache() {
+  static CacheMap<String, Parse<UriFragment>> cache() {
     CacheMap<String, Parse<UriFragment>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;

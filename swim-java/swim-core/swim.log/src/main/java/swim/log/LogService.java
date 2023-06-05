@@ -115,25 +115,23 @@ public class LogService implements LogHandler {
         // Try to transition the service into the starting state;
         // must happen before initiating service startup.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The service has transitioned into the starting state.
-          status = newStatus;
-          causedStart = true;
-          // Start the timer thread.
-          this.thread.start();
-          // Continue startup sequence.
-          continue;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        // The service has transitioned into the starting state.
+        status = newStatus;
+        causedStart = true;
+        // Start the timer thread.
+        this.thread.start();
+        // Continue startup sequence.
+        continue;
       } else if ((status & STATE_MASK) == STOPPING_STATE
               || (status & STATE_MASK) == STOPPED_STATE) {
         // The service is concurrently stopping, or has permanently stopped.
         break;
-      } else {
-        throw new AssertionError("unreachable");
       }
+      throw new AssertionError("unreachable");
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service startup.
@@ -182,31 +180,29 @@ public class LogService implements LogHandler {
         // Try to transition the service into the stopping state;
         // must happen before initiating service shutdown.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The service has transitioned into the stopping state.
-          status = newStatus;
-          causedStop = true;
-          // Stop the timer thread.
-          while (this.thread.isAlive()) {
-            // Interrupt the timer thread so it will wakeup and die.
-            this.thread.interrupt();
-            try {
-              // Wait for the timer thread to exit.
-              this.thread.join(100);
-            } catch (InterruptedException cause) {
-              // Defer thread interrupt.
-              interrupted = true;
-            }
-          }
-          // Continue shutdown sequence.
-          continue;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
-      } else {
-        throw new AssertionError("unreachable");
+        // The service has transitioned into the stopping state.
+        status = newStatus;
+        causedStop = true;
+        // Stop the timer thread.
+        while (this.thread.isAlive()) {
+          // Interrupt the timer thread so it will wakeup and die.
+          this.thread.interrupt();
+          try {
+            // Wait for the timer thread to exit.
+            this.thread.join(100);
+          } catch (InterruptedException cause) {
+            // Defer thread interrupt.
+            interrupted = true;
+          }
+        }
+        // Continue shutdown sequence.
+        continue;
       }
+      throw new AssertionError("unreachable");
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service shutdown.
@@ -234,16 +230,18 @@ public class LogService implements LogHandler {
         return false;
       }
       writeIndex = (int) WRITE_INDEX.compareAndExchangeAcquire(this, oldWriteIndex, newWriteIndex);
-      if (writeIndex == oldWriteIndex) {
-        // Successfully acquired a slot in the event queue;
-        // release the event into the queue.
-        QUEUE.setRelease(this.queue, oldWriteIndex, event);
-        // Notify the log thread of the new event.
-        synchronized (this.thread) {
-          this.thread.notifyAll();
-        }
-        return true;
+      if (writeIndex != oldWriteIndex) {
+        // CAS failed; try again.
+        continue;
       }
+      // Successfully acquired a slot in the event queue;
+      // release the event into the queue.
+      QUEUE.setRelease(this.queue, oldWriteIndex, event);
+      // Notify the log thread of the new event.
+      synchronized (this.thread) {
+        this.thread.notifyAll();
+      }
+      return true;
     } while (true);
   }
 
@@ -260,14 +258,14 @@ public class LogService implements LogHandler {
     do {
       // Try to atomically acquire and clear the event at the head of the queue.
       final LogEvent event = (LogEvent) QUEUE.getAndSetAcquire(this.queue, readIndex, null);
-      if (event != null) {
-        // Increment the read index to free up the dequeued event's old slot.
-        READ_INDEX.setRelease(this, (readIndex + 1) % this.queue.length);
-        return event;
-      } else {
+      if (event == null) {
         // The next event is being concurrently enqueue; spin and try again.
         Thread.onSpinWait();
+        continue;
       }
+      // Increment the read index to free up the dequeued event's old slot.
+      READ_INDEX.setRelease(this, (readIndex + 1) % this.queue.length);
+      return event;
     } while (true);
   }
 
@@ -289,14 +287,16 @@ public class LogService implements LogHandler {
       final int oldStatus = status;
       final int newStatus = oldStatus | FLUSH_REQUEST;
       status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        if (oldStatus != newStatus) {
-          synchronized (this.thread) {
-            this.thread.notifyAll();
-          }
-        }
-        break;
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
       }
+      if (oldStatus != newStatus) {
+        synchronized (this.thread) {
+          this.thread.notifyAll();
+        }
+      }
+      break;
     } while (true);
   }
 
@@ -352,8 +352,7 @@ public class LogService implements LogHandler {
   static final int FLUSH_REQUEST = 1 << STATE_BITS;
 
   /**
-   * {@code VarHandle} for atomically accessing elements of a
-   * {@link LogEvent} array.
+   * {@code VarHandle} for atomically accessing elements of a {@link LogEvent} array.
    */
   static final VarHandle QUEUE;
 
@@ -424,39 +423,40 @@ final class LogThread extends Thread {
         if (event != null) {
           // Publish the dequeued event to the service handler.
           handler.publish(event);
-        } else {
-          // Queue is empty; re-check service status.
-          int status = (int) LogService.STATUS.getAcquire(service);
-          do {
-            // Check if a flush has been requested.
-            if ((status & LogService.FLUSH_REQUEST) != 0) {
-              // A flush has been requested.
-              final int oldStatus = status;
-              final int newStatus = oldStatus & ~LogService.FLUSH_REQUEST;
-              // Clear the flush request flag.
-              status = (int) LogService.STATUS.compareAndExchangeRelease(service, oldStatus, newStatus);
-              if (status == oldStatus) {
-                status = newStatus;
-                // Flush the service handler.
-                handler.flush();
-                break;
-              }
-            } else {
-              // No flush requested.
-              break;
-            }
-          } while (true);
-          // Check if the service has exited the started state.
-          if ((status & LogService.STATE_MASK) != LogService.STARTED_STATE) {
-            // The service is shutting down; terminate the thread.
+          continue;
+        }
+        // Queue is empty; re-check service status.
+        int status = (int) LogService.STATUS.getAcquire(service);
+        do {
+          // Check if a flush has been requested.
+          if ((status & LogService.FLUSH_REQUEST) == 0) {
+            // No flush requested.
             break;
           }
-          // Wait for another event.
-          try {
-            service.await();
-          } catch (InterruptedException cause) {
-            // Don't terminate the thread until the queue has been drained.
+          // A flush has been requested.
+          final int oldStatus = status;
+          final int newStatus = oldStatus & ~LogService.FLUSH_REQUEST;
+          // Clear the flush request flag.
+          status = (int) LogService.STATUS.compareAndExchangeRelease(service, oldStatus, newStatus);
+          if (status != oldStatus) {
+            // CAS failed; try again.
+            continue;
           }
+          status = newStatus;
+          // Flush the service handler.
+          handler.flush();
+          break;
+        } while (true);
+        // Check if the service has exited the started state.
+        if ((status & LogService.STATE_MASK) != LogService.STARTED_STATE) {
+          // The service is shutting down; terminate the thread.
+          break;
+        }
+        // Wait for another event.
+        try {
+          service.await();
+        } catch (InterruptedException cause) {
+          // Don't terminate the thread until the queue has been drained.
         }
       } while (true);
     } finally {

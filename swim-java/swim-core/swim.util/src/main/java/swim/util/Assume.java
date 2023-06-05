@@ -28,23 +28,57 @@ public final class Assume {
   }
 
   @SuppressWarnings({"TypeParameterUnusedInFormals", "unchecked"})
-  public static <T> @NonNull T conforms(@NonNull Object value) {
-    return (T) value;
+  public static <U> @NonNull U conforms(@NonNull Object value) {
+    return (U) value;
   }
 
   @SuppressWarnings({"NullAway", "TypeParameterUnusedInFormals", "unchecked"})
-  public static <T> @NonNull T conformsNonNull(@Nullable Object value) {
-    return (T) value;
+  public static <U> @NonNull U conformsNonNull(@Nullable Object value) {
+    return (U) value;
   }
 
   @SuppressWarnings({"TypeParameterUnusedInFormals", "unchecked"})
-  public static <T> @Nullable T conformsNullable(@Nullable Object value) {
-    return (T) value;
+  public static <U> @Nullable U conformsNullable(@Nullable Object value) {
+    return (U) value;
   }
 
   @SuppressWarnings("NullAway")
   public static <T> @NonNull T nonNull(@Nullable T value) {
     return value;
+  }
+
+  /**
+   * Covariantly casts {@code C<T>} to {@code C<U>}, where {@code C<_>} is
+   * a type constructor with a covariant type parameter, and {@code U} is
+   * a supertype of {@code T}. Casting {@code C<T>} to {@code C<U>} is
+   * safe when {@code C} only uses type {@code T} in covariant positions.
+   * <p>
+   * Because Java lacks variance annotations and higher kinded types,
+   * this method is unable to verify the correctness of the cast.
+   *
+   * @param value the instance to covariantly cast
+   * @return a covariantly casted reference to {@code value}
+   */
+  @SuppressWarnings({"TypeParameterUnusedInFormals", "unchecked"})
+  public static <U> @NonNull U covariant(@NonNull Object value) {
+    return (U) value;
+  }
+
+  /**
+   * Contravariantly casts {@code C<T>} to {@code C<U>}, where {@code C<_>} is
+   * a type constructor with a contravariant type parameter, and {@code U} is
+   * a subtype of {@code T}. Casting {@code C<T>} to {@code C<U>} is safe
+   * when {@code C} only uses type {@code T} in contravariant positions.
+   * <p>
+   * Because Java lacks variance annotations and higher kinded types,
+   * this method is unable to verify the correctness of the cast.
+   *
+   * @param value the instance to contravariantly cast
+   * @return a contravariantly casted reference to {@code value}
+   */
+  @SuppressWarnings({"TypeParameterUnusedInFormals", "unchecked"})
+  public static <U> @NonNull U contravariant(@NonNull Object value) {
+    return (U) value;
   }
 
 }

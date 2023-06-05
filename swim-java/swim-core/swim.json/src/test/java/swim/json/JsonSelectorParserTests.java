@@ -17,27 +17,28 @@ package swim.json;
 import org.junit.jupiter.api.Test;
 import swim.expr.ContextExpr;
 import swim.expr.GlobalExpr;
-import swim.expr.selector.InvokeExpr;
+import swim.expr.InvokeExpr;
 import swim.repr.Repr;
 import swim.repr.TermRepr;
+import swim.term.Term;
 
 public class JsonSelectorParserTests {
 
   @Test
   public void parseInvokeExprs() {
-    assertParses(TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("foo")))),
+    assertParses(TermRepr.of(InvokeExpr.of(ContextExpr.child(Term.of("foo")))),
                  "foo()");
-    assertParses(TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("bar")), ContextExpr.child(Repr.of("x")))),
+    assertParses(TermRepr.of(InvokeExpr.of(ContextExpr.child(Term.of("bar")), ContextExpr.child(Term.of("x")))),
                  "bar(x)");
-    assertParses(TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("baz")), ContextExpr.child(Repr.of("x")), ContextExpr.child(Repr.of("y")))),
+    assertParses(TermRepr.of(InvokeExpr.of(ContextExpr.child(Term.of("baz")), ContextExpr.child(Term.of("x")), ContextExpr.child(Term.of("y")))),
                  "baz(x, y)");
   }
 
   @Test
   public void parseMemberExprs() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).member("children")),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).member("children")),
                  "foo::children");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).member("first").member("children")),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).member("first").member("children")),
                  "foo::first::children");
 
     assertParses(TermRepr.of(ContextExpr.member("children")),
@@ -53,13 +54,13 @@ public class JsonSelectorParserTests {
 
   @Test
   public void parseChildExprs() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of("world!"))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Repr.of("world!"))),
                  "foo[\"world!\"]");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of(-42))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Repr.of(-42))),
                  "foo[-42]");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of(true)).child(Repr.of(false))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Repr.of(true)).child(Repr.of(false))),
                  "foo[true][false]");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(GlobalExpr.child(Repr.of("id")))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(GlobalExpr.child(Term.of("id")))),
                  "foo[$id]");
 
     assertParses(TermRepr.of(ContextExpr.child(Repr.of("world!"))),
@@ -75,75 +76,75 @@ public class JsonSelectorParserTests {
 
   @Test
   public void parseFieldExprs() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo"))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo"))),
                  "foo");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of("bar"))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Term.of("bar"))),
                  "foo.bar");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of("bar")).child(Repr.of("baz"))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Term.of("bar")).child(Term.of("baz"))),
                  "foo.bar.baz");
 
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo"))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo"))),
                  "%foo");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of("bar"))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Term.of("bar"))),
                  "%foo.bar");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of("bar")).child(Repr.of("baz"))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Term.of("bar")).child(Term.of("baz"))),
                  "%foo.bar.baz");
 
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo"))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo"))),
                  "%.foo");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of("bar"))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Term.of("bar"))),
                  "%.foo.bar");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of("bar")).child(Repr.of("baz"))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Term.of("bar")).child(Term.of("baz"))),
                  "%.foo.bar.baz");
 
-    assertParses(TermRepr.of(GlobalExpr.child(Repr.of("foo"))),
+    assertParses(TermRepr.of(GlobalExpr.child(Term.of("foo"))),
                  "$foo");
-    assertParses(TermRepr.of(GlobalExpr.child(Repr.of("foo")).child(Repr.of("bar"))),
+    assertParses(TermRepr.of(GlobalExpr.child(Term.of("foo")).child(Term.of("bar"))),
                  "$foo.bar");
-    assertParses(TermRepr.of(GlobalExpr.child(Repr.of("foo")).child(Repr.of("bar")).child(Repr.of("baz"))),
+    assertParses(TermRepr.of(GlobalExpr.child(Term.of("foo")).child(Term.of("bar")).child(Term.of("baz"))),
                  "$foo.bar.baz");
 
-    assertParses(TermRepr.of(GlobalExpr.child(Repr.of("foo"))),
+    assertParses(TermRepr.of(GlobalExpr.child(Term.of("foo"))),
                  "$.foo");
-    assertParses(TermRepr.of(GlobalExpr.child(Repr.of("foo")).child(Repr.of("bar"))),
+    assertParses(TermRepr.of(GlobalExpr.child(Term.of("foo")).child(Term.of("bar"))),
                  "$.foo.bar");
-    assertParses(TermRepr.of(GlobalExpr.child(Repr.of("foo")).child(Repr.of("bar")).child(Repr.of("baz"))),
+    assertParses(TermRepr.of(GlobalExpr.child(Term.of("foo")).child(Term.of("bar")).child(Term.of("baz"))),
                  "$.foo.bar.baz");
   }
 
   @Test
   public void parseIndexExprs() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of(0))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Term.of(0))),
                  "foo.0");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).child(Repr.of(4)).child(Repr.of(2))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).child(Term.of(4)).child(Term.of(2))),
                  "foo.4.2");
 
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of(0))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of(0))),
                  "%0");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of(4)).child(Repr.of(2))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of(4)).child(Term.of(2))),
                  "%4.2");
 
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of(0))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of(0))),
                  "%.0");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of(4)).child(Repr.of(2))),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of(4)).child(Term.of(2))),
                  "%.4.2");
 
-    assertParses(TermRepr.of(GlobalExpr.child(Repr.of(0))),
+    assertParses(TermRepr.of(GlobalExpr.child(Term.of(0))),
                  "$0");
-    assertParses(TermRepr.of(GlobalExpr.child(Repr.of(4)).child(Repr.of(2))),
+    assertParses(TermRepr.of(GlobalExpr.child(Term.of(4)).child(Term.of(2))),
                  "$4.2");
 
-    assertParses(TermRepr.of(GlobalExpr.child(Repr.of(0))),
+    assertParses(TermRepr.of(GlobalExpr.child(Term.of(0))),
                  "$.0");
-    assertParses(TermRepr.of(GlobalExpr.child(Repr.of(4)).child(Repr.of(2))),
+    assertParses(TermRepr.of(GlobalExpr.child(Term.of(4)).child(Term.of(2))),
                  "$.4.2");
   }
 
   @Test
   public void parseChildrenExprs() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).children()),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).children()),
                  "foo.*");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).children().children()),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).children().children()),
                  "foo.*.*");
 
     assertParses(TermRepr.of(ContextExpr.children()),
@@ -174,9 +175,9 @@ public class JsonSelectorParserTests {
 
   @Test
   public void parseDescendantsExprs() {
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).descendants()),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).descendants()),
                  "foo.**");
-    assertParses(TermRepr.of(ContextExpr.child(Repr.of("foo")).descendants().descendants()),
+    assertParses(TermRepr.of(ContextExpr.child(Term.of("foo")).descendants().descendants()),
                  "foo.**.**");
 
     assertParses(TermRepr.of(ContextExpr.descendants()),

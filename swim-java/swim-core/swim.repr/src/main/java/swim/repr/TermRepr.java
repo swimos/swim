@@ -18,9 +18,9 @@ import java.math.BigInteger;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.expr.Evaluator;
-import swim.expr.Term;
-import swim.expr.TermGenerator;
+import swim.term.Evaluator;
+import swim.term.Term;
+import swim.term.TermGenerator;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -69,9 +69,8 @@ public final class TermRepr implements Repr, ToSource {
       return this;
     } else if (attrs == Attrs.empty()) {
       return TermRepr.of(this.term);
-    } else {
-      return new TermRepr(attrs, this.term);
     }
+    return new TermRepr(attrs, this.term);
   }
 
   @Override
@@ -378,11 +377,15 @@ public final class TermRepr implements Repr, ToSource {
   }
 
   @Override
+  public Term flatten() {
+    return this.term.flatten();
+  }
+
+  @Override
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof TermRepr) {
-      final TermRepr that = (TermRepr) other;
+    } else if (other instanceof TermRepr that) {
       return this.attrs.equals(that.attrs)
           && this.term.equals(that.term);
     }
@@ -416,9 +419,8 @@ public final class TermRepr implements Repr, ToSource {
   public static TermRepr of(Term term) {
     if (term instanceof TermRepr) {
       return (TermRepr) term;
-    } else {
-      return new TermRepr(Attrs.empty(), term);
     }
+    return new TermRepr(Attrs.empty(), term);
   }
 
 }

@@ -62,9 +62,8 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
   public @Nullable T get(Object key) {
     if (key instanceof Uri) {
       return this.get((Uri) key);
-    } else {
-      return null;
     }
+    return null;
   }
 
   @Override
@@ -144,7 +143,7 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
     return this.toSource();
   }
 
-  private static final UriMapper<Object> EMPTY = new EmptyUriMapping<Object>();
+  static final UriMapper<Object> EMPTY = new EmptyUriMapping<Object>();
 
   public static <T> UriMapper<T> empty() {
     return Assume.conforms(EMPTY);

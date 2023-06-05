@@ -112,7 +112,7 @@ public final class Base16 {
     return WriteBase16Integer.write(output, this, input, 0, 0, 1);
   }
 
-  private static final Base16 LOWERCASE = new Base16("0123456789abcdef");
+  static final Base16 LOWERCASE = new Base16("0123456789abcdef");
 
   /**
    * Returns the {@code Base16} encoding with lowercase alphanumeric digits.
@@ -121,7 +121,7 @@ public final class Base16 {
     return LOWERCASE;
   }
 
-  private static final Base16 UPPERCASE = new Base16("0123456789ABCDEF");
+  static final Base16 UPPERCASE = new Base16("0123456789ABCDEF");
 
   /**
    * Returns the {@code Base16} encoding with uppercase alphanumeric digits.
@@ -134,7 +134,7 @@ public final class Base16 {
    * Returns a {@code Parse} that decodes base-16 (hexadecimal) encoded input,
    * and writes the decoded bytes to {@code output}.
    */
-  public static <T> Parse<T> parser(Output<T> output) {
+  public static <T> Parse<T> parse(Output<T> output) {
     return new ParseBase16<T>(output, 0, 1);
   }
 

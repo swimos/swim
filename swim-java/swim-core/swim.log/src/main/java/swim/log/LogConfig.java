@@ -48,9 +48,8 @@ public interface LogConfig {
       return ((LogConfig) object).toLogConfig(level);
     } else if (object instanceof LogEntity) {
       return ((LogEntity) object).toLogEntity(level);
-    } else {
-      return null;
     }
+    return null;
   }
 
 }

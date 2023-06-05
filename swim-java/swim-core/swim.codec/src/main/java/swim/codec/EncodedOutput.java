@@ -16,6 +16,7 @@ package swim.codec;
 
 import java.util.function.Supplier;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.Covariant;
 import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -24,7 +25,7 @@ import swim.util.Assume;
 
 @Public
 @Since("5.0")
-public abstract class EncodedOutput<T> extends Output<T> {
+public abstract class EncodedOutput<@Covariant T> extends Output<T> {
 
   protected EncodedOutput() {
     // nop
@@ -90,14 +91,14 @@ final class WriteEncodedOutput<T> extends Write<T> {
 
   @CheckReturnValue
   @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
-    return this.write.getOr(defaultValue);
+  public @Nullable T getOr(@Nullable T other) {
+    return this.write.getOr(other);
   }
 
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
-    return this.write.getNonNullOr(defaultValue);
+  public @NonNull T getNonNullOr(@NonNull T other) {
+    return this.write.getNonNullOr(other);
   }
 
   @CheckReturnValue

@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -29,6 +27,8 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.codec.ParseException;
 import swim.codec.StringInput;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
@@ -77,11 +77,10 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
 
   @SuppressWarnings("ReferenceEquality")
   public Uri withScheme(UriScheme scheme) {
-    if (scheme != this.scheme) {
-      return Uri.of(scheme, this.authority, this.path, this.query, this.fragment);
-    } else {
+    if (scheme == this.scheme) {
       return this;
     }
+    return Uri.of(scheme, this.authority, this.path, this.query, this.fragment);
   }
 
   public String schemePart() {
@@ -112,11 +111,10 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
 
   @SuppressWarnings("ReferenceEquality")
   public Uri withAuthority(UriAuthority authority) {
-    if (authority != this.authority) {
-      return Uri.of(this.scheme, authority, this.path, this.query, this.fragment);
-    } else {
+    if (authority == this.authority) {
       return this;
     }
+    return Uri.of(this.scheme, authority, this.path, this.query, this.fragment);
   }
 
   public String authorityPart() {
@@ -244,11 +242,10 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
 
   @SuppressWarnings("ReferenceEquality")
   public Uri withPath(UriPath path) {
-    if (path != this.path) {
-      return Uri.of(this.scheme, this.authority, path, this.query, this.fragment);
-    } else {
+    if (path == this.path) {
       return this;
     }
+    return Uri.of(this.scheme, this.authority, path, this.query, this.fragment);
   }
 
   public Uri withPath(String... components) {
@@ -335,11 +332,10 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
 
   @SuppressWarnings("ReferenceEquality")
   public Uri withQuery(UriQuery query) {
-    if (query != this.query) {
-      return Uri.of(this.scheme, this.authority, this.path, query, this.fragment);
-    } else {
+    if (query == this.query) {
       return this;
     }
+    return Uri.of(this.scheme, this.authority, this.path, query, this.fragment);
   }
 
   public Uri withQuery(@Nullable String... keyValuePairs) {
@@ -406,11 +402,10 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
 
   @SuppressWarnings("ReferenceEquality")
   public Uri withFragment(UriFragment fragment) {
-    if (fragment != this.fragment) {
-      return Uri.of(this.scheme, this.authority, this.path, this.query, fragment);
-    } else {
+    if (fragment == this.fragment) {
       return this;
     }
+    return Uri.of(this.scheme, this.authority, this.path, this.query, fragment);
   }
 
   public String fragmentPart() {
@@ -436,11 +431,10 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
   }
 
   public Uri endpoint() {
-    if (this.path.isDefined() || this.query.isDefined() || this.fragment.isDefined()) {
-      return Uri.of(this.scheme, this.authority, null, null, null);
-    } else {
+    if (!this.path.isDefined() && !this.query.isDefined() && !this.fragment.isDefined()) {
       return this;
     }
+    return Uri.of(this.scheme, this.authority, null, null, null);
   }
 
   public Uri parent() {
@@ -490,13 +484,12 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
                     relative.path.removeDotSegments(),
                     relative.query,
                     relative.fragment);
-    } else {
-      return Uri.of(this.scheme,
-                    this.authority,
-                    this.merge(relative.path).removeDotSegments(),
-                    relative.query,
-                    relative.fragment);
     }
+    return Uri.of(this.scheme,
+                  this.authority,
+                  this.merge(relative.path).removeDotSegments(),
+                  relative.query,
+                  relative.fragment);
   }
 
   UriPath merge(UriPath relative) {
@@ -504,21 +497,19 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
       return relative.prependedSlash();
     } else if (this.path.isEmpty()) {
       return relative;
-    } else {
-      return this.path.merge(relative);
     }
+    return this.path.merge(relative);
   }
 
   public Uri unresolve(Uri absolute) {
     if (!this.scheme.equals(absolute.scheme) || !this.authority.equals(absolute.authority)) {
       return absolute;
-    } else {
-      return Uri.of(UriScheme.undefined(),
-                    UriAuthority.undefined(),
-                    this.path.unmerge(absolute.path),
-                    absolute.query,
-                    absolute.fragment);
     }
+    return Uri.of(UriScheme.undefined(),
+                  UriAuthority.undefined(),
+                  this.path.unmerge(absolute.path),
+                  absolute.query,
+                  absolute.fragment);
   }
 
   @Override
@@ -530,8 +521,7 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Uri) {
-      final Uri that = (Uri) other;
+    } else if (other instanceof Uri that) {
       return this.toString().equals(that.toString());
     }
     return false;
@@ -608,28 +598,28 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
   public void writeString(Appendable output) throws IOException {
     if (this.string != null) {
       output.append(this.string);
-    } else {
-      if (this.scheme.isDefined()) {
-        this.scheme.writeString(output);
-        output.append(':');
-      }
-      if (this.authority.isDefined()) {
-        output.append('/').append('/');
-        this.authority.writeString(output);
-      }
-      this.path.writeString(output);
-      if (this.query.isDefined()) {
-        output.append('?');
-        this.query.writeString(output);
-      }
-      if (this.fragment.isDefined()) {
-        output.append('#');
-        this.fragment.writeString(output);
-      }
+      return;
+    }
+    if (this.scheme.isDefined()) {
+      this.scheme.writeString(output);
+      output.append(':');
+    }
+    if (this.authority.isDefined()) {
+      output.append('/').append('/');
+      this.authority.writeString(output);
+    }
+    this.path.writeString(output);
+    if (this.query.isDefined()) {
+      output.append('?');
+      this.query.writeString(output);
+    }
+    if (this.fragment.isDefined()) {
+      output.append('#');
+      this.fragment.writeString(output);
     }
   }
 
-  @IntoForm
+  @Marshal
   @Override
   public String toString() {
     if (this.string == null) {
@@ -638,11 +628,11 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
     return this.string;
   }
 
-  private static final Uri EMPTY = new Uri(UriScheme.undefined(),
-                                           UriAuthority.undefined(),
-                                           UriPath.empty(),
-                                           UriQuery.undefined(),
-                                           UriFragment.undefined());
+  static final Uri EMPTY = new Uri(UriScheme.undefined(),
+                                   UriAuthority.undefined(),
+                                   UriPath.empty(),
+                                   UriQuery.undefined(),
+                                   UriFragment.undefined());
 
   public static Uri empty() {
     return EMPTY;
@@ -668,12 +658,11 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
     if (fragment == null) {
       fragment = UriFragment.undefined();
     }
-    if (scheme.isDefined() || authority.isDefined() || path.isDefined()
-        || query.isDefined() || fragment.isDefined()) {
-      return new Uri(scheme, authority, path, query, fragment);
-    } else {
+    if (!scheme.isDefined() && !authority.isDefined() && !path.isDefined()
+        && !query.isDefined() && !fragment.isDefined()) {
       return Uri.empty();
     }
+    return new Uri(scheme, authority, path, query, fragment);
   }
 
   public static Uri scheme(@Nullable UriScheme scheme) {
@@ -765,7 +754,7 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
     return Uri.of(null, null, null, null, UriFragment.identifier(identifier));
   }
 
-  @FromForm
+  @Unmarshal
   public static @Nullable Uri from(String value) {
     return Uri.parse(value).getOr(null);
   }
@@ -791,10 +780,10 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
     return parseUri;
   }
 
-  private static final ThreadLocal<CacheMap<String, Parse<Uri>>> CACHE =
+  static final ThreadLocal<CacheMap<String, Parse<Uri>>> CACHE =
       new ThreadLocal<CacheMap<String, Parse<Uri>>>();
 
-  private static CacheMap<String, Parse<Uri>> cache() {
+  static CacheMap<String, Parse<Uri>> cache() {
     CacheMap<String, Parse<Uri>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;

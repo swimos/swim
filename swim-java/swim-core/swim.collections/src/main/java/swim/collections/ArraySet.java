@@ -71,16 +71,15 @@ public final class ArraySet<T> implements UpdatableSet<T>, ToMarkup, ToSource {
   }
 
   public @Nullable T head() {
-    if (this.slots.length > 0) {
-      return Assume.conformsNullable(this.slots[0]);
-    } else {
+    if (this.slots.length == 0) {
       return null;
     }
+    return Assume.conformsNullable(this.slots[0]);
   }
 
   public @Nullable T next(@Nullable Object elem) {
     final int n = this.slots.length;
-    if (n > 0 && elem == null) {
+    if (n != 0 && elem == null) {
       return Assume.conformsNullable(this.slots[0]);
     }
     for (int i = 0; i < n; i += 1) {
@@ -150,7 +149,7 @@ public final class ArraySet<T> implements UpdatableSet<T>, ToMarkup, ToSource {
     for (int i = 0, n = slots.length; i < n; i += 1) {
       if (Objects.equals(elem, slots[i])) {
         if (n == 1) {
-          return empty();
+          return ArraySet.empty();
         } else {
           final Object[] newSlots = new Object[n - 1];
           System.arraycopy(slots, 0, newSlots, 0, i);
@@ -214,9 +213,8 @@ public final class ArraySet<T> implements UpdatableSet<T>, ToMarkup, ToSource {
     if (this == other) {
       return true;
     } else if (other instanceof Set<?> that && this.size() == that.size()) {
-      final Iterator<?> those = that.iterator();
-      while (those.hasNext()) {
-        if (!this.contains(those.next())) {
+      for (Object elem : that) {
+        if (!this.contains(elem)) {
           return false;
         }
       }
@@ -271,7 +269,7 @@ public final class ArraySet<T> implements UpdatableSet<T>, ToMarkup, ToSource {
     return this.toSource();
   }
 
-  private static final ArraySet<Object> EMPTY = new ArraySet<Object>(new Object[0]);
+  static final ArraySet<Object> EMPTY = new ArraySet<Object>(new Object[0]);
 
   public static <T> ArraySet<T> empty() {
     return Assume.conforms(EMPTY);

@@ -16,8 +16,6 @@ package swim.uri;
 
 import java.io.IOException;
 import java.util.Objects;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -25,6 +23,8 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
 import swim.codec.StringInput;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
 import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
@@ -60,8 +60,7 @@ public final class UriScheme extends UriPart implements Comparable<UriScheme>, T
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UriScheme) {
-      final UriScheme that = (UriScheme) other;
+    } else if (other instanceof UriScheme that) {
       return Objects.equals(this.name, that.name);
     }
     return false;
@@ -97,46 +96,43 @@ public final class UriScheme extends UriPart implements Comparable<UriScheme>, T
       throw new IOException("blank scheme");
     }
     char c = name.charAt(0);
-    if (Uri.isAlpha(c)) {
-      output.append(c);
-    } else {
+    if (!Uri.isAlpha(c)) {
       throw new IOException(Notation.of("invalid scheme: ")
                                     .appendSource(name)
                                     .toString());
     }
+    output.append(c);
     for (int i = 1; i < n; i += 1) {
       c = name.charAt(i);
-      if (Uri.isSchemeChar(c)) {
-        output.append(c);
-      } else {
+      if (!Uri.isSchemeChar(c)) {
         throw new IOException(Notation.of("invalid scheme: ")
                                       .appendSource(name)
                                       .toString());
       }
+      output.append(c);
     }
   }
 
-  @IntoForm
+  @Marshal
   @Override
   public String toString() {
     return this.name != null ? this.name : "";
   }
 
-  private static final UriScheme UNDEFINED = new UriScheme(null);
+  static final UriScheme UNDEFINED = new UriScheme(null);
 
   public static UriScheme undefined() {
     return UNDEFINED;
   }
 
   public static UriScheme name(@Nullable String name) {
-    if (name != null) {
-      return new UriScheme(name);
-    } else {
+    if (name == null) {
       return UriScheme.undefined();
     }
+    return new UriScheme(name);
   }
 
-  @FromForm
+  @Unmarshal
   public static @Nullable UriScheme from(String value) {
     return UriScheme.parse(value).getOr(null);
   }
@@ -159,7 +155,7 @@ public final class UriScheme extends UriPart implements Comparable<UriScheme>, T
     return parseScheme;
   }
 
-  private static @Nullable CacheMap<String, Parse<UriScheme>> cache;
+  static @Nullable CacheMap<String, Parse<UriScheme>> cache;
 
   static CacheMap<String, Parse<UriScheme>> cache() {
     // Global cache is used in lieu of thread-local cache due to small number

@@ -63,8 +63,7 @@ public final class HttpCookie implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpCookie) {
-      final HttpCookie that = (HttpCookie) other;
+    } else if (other instanceof HttpCookie that) {
       return this.name.equals(that.name) && this.value.equals(that.value);
     }
     return false;

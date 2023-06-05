@@ -63,8 +63,7 @@ public final class HttpVersion implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpVersion) {
-      final HttpVersion that = (HttpVersion) other;
+    } else if (other instanceof HttpVersion that) {
       return this.major == that.major && this.minor == that.minor;
     }
     return false;
@@ -113,9 +112,8 @@ public final class HttpVersion implements ToSource, ToString {
       return HttpVersion.HTTP_1_0;
     } else if (major >= 0 && minor >= 0) {
       return new HttpVersion(major, minor);
-    } else {
-      throw new IllegalArgumentException(major + ", " + minor);
     }
+    throw new IllegalArgumentException(major + ", " + minor);
   }
 
   public static Parse<HttpVersion> parse(Input input) {

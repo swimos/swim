@@ -16,8 +16,10 @@ package swim.codec;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.Covariant;
 import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -82,9 +84,9 @@ import swim.util.ToSource;
  * <li>{@link #getNonNullUnchecked()}: returns the decoded value, if available
  *     and not {@code null}; otherwise throws an unchecked exception
  * <li>{@link #getOr(Object) getOr(T)}: returns the decoded value, if available;
- *     otherwise returns a default value
+ *     otherwise returns some other value
  * <li>{@link #getNonNullOr(Object) getNonNullOr(T)}: returns the decoded value,
- *     if available and not {@code null}; otherwise returns a default value
+ *     if available and not {@code null}; otherwise returns some other value
  * <li>{@link #getOrElse(Supplier)}: returns the decoded value, if available;
  *     otherwise returns a value supplied by a function
  * <li>{@link #getNonNullOrElse(Supplier)}: returns the decoded value,
@@ -125,12 +127,14 @@ import swim.util.ToSource;
  * A {@code Decode} instance should only mutate its internal state when it's
  * essential to do so, such as for critical performance optimizations.
  *
+ * @param <T> the type of decoded value
+ *
  * @see InputBuffer
  * @see Decoder
  */
 @Public
 @Since("5.0")
-public abstract class Decode<T> {
+public abstract class Decode<@Covariant T> {
 
   /**
    * Constructs a {@code Decode} instance in the {@code decode-cont} state.
@@ -239,10 +243,10 @@ public abstract class Decode<T> {
    * {@code decode-backoff} state and invoke {@code consume} with a
    * terminated input in order to terminate a decode operation.
    * <p>
-   * Consider the example of a proxy transcoder that decodes one input,
+   * Consider the example of a proxy stream that decodes one input,
    * and encodes another output. There's no point invoking {@code consume}
-   * on the decode end of the transcoder if the encode end's output is full.
-   * Such a transcoder can wait for output capacity to become available
+   * on the decode end of the stream if the encode end's output is full.
+   * Such a stream can wait for output capacity to become available
    * before calling {@code future.requestInput()}.
    *
    * @param future an input future that will trigger an invocation of
@@ -283,11 +287,10 @@ public abstract class Decode<T> {
   @CheckReturnValue
   public @NonNull T getNonNull() throws DecodeException {
     final T value = this.get();
-    if (value != null) {
-      return value;
-    } else {
+    if (value == null) {
       throw new NullPointerException("decoded value is null");
     }
+    return value;
   }
 
   /**
@@ -334,48 +337,46 @@ public abstract class Decode<T> {
 
   /**
    * Returns the decoded value, if in the {@code decode-done} state;
-   * otherwise returns the given {@code defaultValue}. The default
-   * implementation delegates to {@link #get()}, catching any
-   * {@code DecodeException} or {@code IllegalStateException}
-   * to instead returning {@code defaultValue}.
+   * otherwise returns some {@code other} value. The default implementation
+   * delegates to {@link #get()}, catching any {@code DecodeException}
+   * or {@code IllegalStateException} to instead return {@code other}.
    *
-   * @param defaultValue returned when a decoded value is not available
-   * @return either the decoded value, or the {@code defaultValue}
+   * @param other returned when a decoded value is not available
+   * @return either the decoded value, or the {@code other} value
    */
   @CheckReturnValue
-  public @Nullable T getOr(@Nullable T defaultValue) {
+  public @Nullable T getOr(@Nullable T other) {
     try {
       return this.get();
     } catch (DecodeException | IllegalStateException cause) {
-      return defaultValue;
+      return other;
     }
   }
 
   /**
-   * Returns the decoded value, if in the {@code decode-done} state and
-   * the decoded value is not {@code null}; otherwise returns the given
-   * non-{@code null} {@code defaultValue}. The default implementation
-   * delegates to {@link #getNonNull()}, catching any {@code DecodeException},
+   * Returns the decoded value, if in the {@code decode-done} state
+   * and the decoded value is not {@code null}; otherwise returns some
+   * non-{@code null} {@code other}. The default implementation delegates
+   * to {@link #getNonNull()}, catching any {@code DecodeException},
    * {@code IllegalStateException}, or {@code NullPointerException}
-   * to instead {@code null}-check and return the {@code defaultValue}.
+   * to instead {@code null}-check and return the {@code other} value.
    *
-   * @param defaultValue non-{@code null} value returned when
+   * @param other non-{@code null} value returned when
    *        the decoded value is {@code null} or not available
    * @return either the non-{@code null} decoded value,
-   *         or the non-{@code null} {@code defaultValue}
+   *         or the non-{@code null} {@code other} value
    * @throws NullPointerException if the decoded value and
-   *         the {@code defaultValue} are both {@code null}
+   *         the {@code other} value are both {@code null}
    */
   @CheckReturnValue
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+  public @NonNull T getNonNullOr(@NonNull T other) {
     try {
       return this.getNonNull();
     } catch (DecodeException | IllegalStateException | NullPointerException cause) {
-      if (defaultValue != null) {
-        return defaultValue;
-      } else {
-        throw new NullPointerException("default value is null");
+      if (other == null) {
+        throw new NullPointerException("other value is null");
       }
+      return other;
     }
   }
 
@@ -422,11 +423,10 @@ public abstract class Decode<T> {
       return this.getNonNull();
     } catch (DecodeException | IllegalStateException | NullPointerException cause) {
       final T value = supplier.get();
-      if (value != null) {
-        return value;
-      } else {
+      if (value == null) {
         throw new NullPointerException("supplied value is null");
       }
+      return value;
     }
   }
 
@@ -499,6 +499,11 @@ public abstract class Decode<T> {
    */
   public Decode<T> assertDone() {
     throw new AssertionError("incomplete decode");
+  }
+
+  @CheckReturnValue
+  public <U> Decode<U> map(Function<? super T, ? extends U> mapper) {
+    return new DecodeMapper<T, U>(this, mapper);
   }
 
   /**
@@ -579,7 +584,7 @@ public abstract class Decode<T> {
 
 }
 
-final class DecodeDone<T> extends Decode<T> implements ToSource {
+final class DecodeDone<@Covariant T> extends Decode<T> implements ToSource {
 
   final @Nullable T value;
 
@@ -622,11 +627,10 @@ final class DecodeDone<T> extends Decode<T> implements ToSource {
   @CheckReturnValue
   @Override
   public @NonNull T getNonNull() {
-    if (this.value != null) {
-      return this.value;
-    } else {
+    if (this.value == null) {
       throw new NullPointerException("decoded value is null");
     }
+    return this.value;
   }
 
   @CheckReturnValue
@@ -638,28 +642,27 @@ final class DecodeDone<T> extends Decode<T> implements ToSource {
   @CheckReturnValue
   @Override
   public @NonNull T getNonNullUnchecked() {
-    if (this.value != null) {
-      return this.value;
-    } else {
+    if (this.value == null) {
       throw new NullPointerException("decoded value is null");
     }
-  }
-
-  @CheckReturnValue
-  @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
     return this.value;
   }
 
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+  public @Nullable T getOr(@Nullable T other) {
+    return this.value;
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOr(@NonNull T other) {
     if (this.value != null) {
       return this.value;
-    } else if (defaultValue != null) {
-      return defaultValue;
+    } else if (other != null) {
+      return other;
     } else {
-      throw new NullPointerException("default value is null");
+      throw new NullPointerException("other value is null");
     }
   }
 
@@ -676,11 +679,10 @@ final class DecodeDone<T> extends Decode<T> implements ToSource {
       return this.value;
     } else {
       final T value = supplier.get();
-      if (value != null) {
-        return value;
-      } else {
+      if (value == null) {
         throw new NullPointerException("supplied value is null");
       }
+      return value;
     }
   }
 
@@ -696,13 +698,28 @@ final class DecodeDone<T> extends Decode<T> implements ToSource {
 
   @CheckReturnValue
   @Override
+  public <U> Decode<U> map(Function<? super T, ? extends U> mapper) {
+    try {
+      return Decode.done(mapper.apply(this.value));
+    } catch (Throwable cause) {
+      if (Result.isFatal(cause)) {
+        throw cause;
+      }
+      return Decode.error(cause);
+    }
+  }
+
+  @CheckReturnValue
+  @Override
   public Result<T> toResult() {
     return Result.ok(this.value);
   }
 
   @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof DecodeDone<?> that) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof DecodeDone<?> that) {
       return Objects.equals(this.value, that.value);
     }
     return false;
@@ -732,7 +749,7 @@ final class DecodeDone<T> extends Decode<T> implements ToSource {
 
 }
 
-final class DecodeError<T> extends Decode<T> implements ToSource {
+final class DecodeError<@Covariant T> extends Decode<T> implements ToSource {
 
   final Throwable error;
 
@@ -794,18 +811,17 @@ final class DecodeError<T> extends Decode<T> implements ToSource {
 
   @CheckReturnValue
   @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
-    return defaultValue;
+  public @Nullable T getOr(@Nullable T other) {
+    return other;
   }
 
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
-    if (defaultValue != null) {
-      return defaultValue;
-    } else {
-      throw new NullPointerException("default value is null");
+  public @NonNull T getNonNullOr(@NonNull T other) {
+    if (other == null) {
+      throw new NullPointerException("other value is null");
     }
+    return other;
   }
 
   @CheckReturnValue
@@ -818,11 +834,10 @@ final class DecodeError<T> extends Decode<T> implements ToSource {
   @Override
   public @NonNull T getNonNullOrElse(Supplier<? extends T> supplier) {
     final T value = supplier.get();
-    if (value != null) {
-      return value;
-    } else {
+    if (value == null) {
       throw new NullPointerException("supplied value is null");
     }
+    return value;
   }
 
   @Override
@@ -860,13 +875,21 @@ final class DecodeError<T> extends Decode<T> implements ToSource {
 
   @CheckReturnValue
   @Override
+  public <U> Decode<U> map(Function<? super T, ? extends U> mapper) {
+    return Assume.conforms(this);
+  }
+
+  @CheckReturnValue
+  @Override
   public Result<T> toResult() {
     return Result.error(this.error);
   }
 
   @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof DecodeError<?> that) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof DecodeError<?> that) {
       return this.error.equals(that.error);
     }
     return false;
@@ -884,6 +907,42 @@ final class DecodeError<T> extends Decode<T> implements ToSource {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("Decode", "error")
             .appendArgument(this.error)
+            .endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+}
+
+final class DecodeMapper<S, T> extends Decode<T> implements ToSource {
+
+  final Decode<S> decode;
+  final Function<? super S, ? extends T> mapper;
+
+  DecodeMapper(Decode<S> decode, Function<? super S, ? extends T> mapper) {
+    this.decode = decode;
+    this.mapper = mapper;
+  }
+
+  @Override
+  public Decode<T> consume(InputBuffer input) {
+    return this.decode.consume(input).map(this.mapper);
+  }
+
+  @Override
+  public <U> Decode<U> map(Function<? super T, ? extends U> mapper) {
+    return new DecodeMapper<S, U>(this.decode, this.mapper.andThen(mapper));
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.appendSource(this.decode)
+            .beginInvoke("map")
+            .appendArgument(this.mapper)
             .endInvoke();
   }
 

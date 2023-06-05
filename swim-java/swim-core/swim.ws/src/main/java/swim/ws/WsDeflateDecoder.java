@@ -21,10 +21,10 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.BinaryInputBuffer;
+import swim.codec.Codec;
 import swim.codec.Decode;
 import swim.codec.DecodeException;
 import swim.codec.InputBuffer;
-import swim.codec.Transcoder;
 import swim.util.Assume;
 import swim.util.Notation;
 
@@ -62,40 +62,39 @@ public class WsDeflateDecoder extends WsDecoder {
   }
 
   @Override
-  public <T> Decode<WsFrame<T>> decodeContinuationFrame(InputBuffer input, WsCodec<T> codec,
+  public <T> Decode<WsFrame<T>> decodeContinuationFrame(InputBuffer input, WsSubprotocol<T> subprotocol,
                                                         int finRsvOp, WsOpcode frameType,
-                                                        Transcoder<?> transcoder,
-                                                        Decode<?> decodePayload) {
+                                                        Codec<?> codec, Decode<?> decodePayload) {
     if (this.decompressing) { // compressed message continuation
-      return DecodeWsDeflateFrame.decode(input, this, codec, frameType, transcoder,
-                                         decodePayload, 0L, 0L, 0, 0, 1);
+      return DecodeWsDeflateFrame.decode(input, this, subprotocol, frameType,
+                                         codec, decodePayload, 0L, 0L, 0, 0, 1);
     } else { // uncompressed message continuation
-      return super.decodeContinuationFrame(input, codec, finRsvOp, frameType,
-                                           transcoder, decodePayload);
+      return super.decodeContinuationFrame(input, subprotocol, finRsvOp, frameType,
+                                           codec, decodePayload);
     }
   }
 
   @Override
-  public <T> Decode<WsFrame<T>> decodeTextFrame(InputBuffer input, WsCodec<T> codec, int finRsvOp) {
+  public <T> Decode<WsFrame<T>> decodeTextFrame(InputBuffer input, WsSubprotocol<T> subprotocol, int finRsvOp) {
     if ((finRsvOp & 0x40) != 0) { // compressed message
       this.decompressing = (finRsvOp & 0x80) == 0;
-      return DecodeWsDeflateFrame.decode(input, this, codec, WsOpcode.TEXT,
+      return DecodeWsDeflateFrame.decode(input, this, subprotocol, WsOpcode.TEXT,
                                          null, null, 0L, 0L, 0, 0, 1);
     } else { // uncompressed message
       this.decompressing = false;
-      return super.decodeTextFrame(input, codec, finRsvOp);
+      return super.decodeTextFrame(input, subprotocol, finRsvOp);
     }
   }
 
   @Override
-  public <T> Decode<WsFrame<T>> decodeBinaryFrame(InputBuffer input, WsCodec<T> codec, int finRsvOp) {
+  public <T> Decode<WsFrame<T>> decodeBinaryFrame(InputBuffer input, WsSubprotocol<T> subprotocol, int finRsvOp) {
     if ((finRsvOp & 0x40) != 0) { // compressed message
       this.decompressing = (finRsvOp & 0x80) == 0;
-      return DecodeWsDeflateFrame.decode(input, this, codec, WsOpcode.BINARY,
+      return DecodeWsDeflateFrame.decode(input, this, subprotocol, WsOpcode.BINARY,
                                          null, null, 0L, 0L, 0, 0, 1);
     } else { // uncompressed message
       this.decompressing = false;
-      return super.decodeBinaryFrame(input, codec, finRsvOp);
+      return super.decodeBinaryFrame(input, subprotocol, finRsvOp);
     }
   }
 
@@ -130,9 +129,9 @@ public class WsDeflateDecoder extends WsDecoder {
 final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
 
   final WsDeflateDecoder decoder;
-  final WsCodec<T> codec;
+  final WsSubprotocol<T> subprotocol;
   final @Nullable WsOpcode frameType;
-  final @Nullable Transcoder<?> transcoder;
+  final @Nullable Codec<?> codec;
   final @Nullable Decode<?> decodePayload;
   final long offset;
   final long length;
@@ -140,14 +139,14 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
   final int maskingKey;
   final int step;
 
-  DecodeWsDeflateFrame(WsDeflateDecoder decoder, WsCodec<T> codec,
-                       @Nullable WsOpcode frameType, @Nullable Transcoder<?> transcoder,
+  DecodeWsDeflateFrame(WsDeflateDecoder decoder, WsSubprotocol<T> subprotocol,
+                       @Nullable WsOpcode frameType, @Nullable Codec<?> codec,
                        @Nullable Decode<?> decodePayload, long offset, long length,
                        int finRsvOp, int maskingKey, int step) {
     this.decoder = decoder;
-    this.codec = codec;
+    this.subprotocol = subprotocol;
     this.frameType = frameType;
-    this.transcoder = transcoder;
+    this.codec = codec;
     this.decodePayload = decodePayload;
     this.offset = offset;
     this.length = length;
@@ -158,17 +157,14 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
 
   @Override
   public Decode<WsFrame<T>> consume(InputBuffer input) {
-    return DecodeWsDeflateFrame.decode(input, this.decoder, this.codec,
-                                       this.frameType, this.transcoder,
-                                       this.decodePayload, this.offset,
-                                       this.length, this.finRsvOp,
-                                       this.maskingKey, this.step);
+    return DecodeWsDeflateFrame.decode(input, this.decoder, this.subprotocol, this.frameType,
+                                       this.codec, this.decodePayload, this.offset, this.length,
+                                       this.finRsvOp, this.maskingKey, this.step);
   }
 
   static <T> Decode<WsFrame<T>> decode(InputBuffer input, WsDeflateDecoder decoder,
-                                       WsCodec<T> codec, @Nullable WsOpcode frameType,
-                                       @Nullable Transcoder<?> transcoder,
-                                       @Nullable Decode<?> decodePayload,
+                                       WsSubprotocol<T> subprotocol, @Nullable WsOpcode frameType,
+                                       @Nullable Codec<?> codec, @Nullable Decode<?> decodePayload,
                                        long offset, long length, int finRsvOp,
                                        int maskingKey, int step) {
     if (step == 1) { // finRsvOp byte
@@ -371,11 +367,11 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
         inflateBuffer.flip();
         if (decodePayload == null) {
           try {
-            transcoder = codec.getPayloadTranscoder(WsOpcode.of(finRsvOp & 0xF));
+            codec = subprotocol.messageCodec(WsOpcode.of(finRsvOp & 0xF));
           } catch (WsException cause) {
             return Decode.error(cause);
           }
-          decodePayload = transcoder.decode(inflateBuffer);
+          decodePayload = codec.decode(inflateBuffer);
         } else {
           decodePayload = decodePayload.consume(inflateBuffer);
         }
@@ -414,10 +410,10 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
               final Object payload = decodePayload.getUnchecked();
               if (frameType.code < 0x8) { // data frame
                 frame = decoder.dataFrame(frameType, Assume.conformsNullable(payload),
-                                          Assume.conformsNonNull(transcoder));
+                                          Assume.conformsNonNull(codec));
               } else { // control frame
                 frame = decoder.controlFrame(frameType, Assume.conformsNullable(payload),
-                                             Assume.nonNull(transcoder));
+                                             Assume.nonNull(codec));
               }
             } catch (WsException cause) {
               return Decode.error(cause);
@@ -427,7 +423,7 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
             return Decode.error(new DecodeException("truncated payload"));
           }
         } else if ((finRsvOp & 0xF) < 0x8) { // fragment frame
-          return Decode.done(WsFragment.of(frameType, Assume.conformsNonNull(transcoder),
+          return Decode.done(WsFragment.of(frameType, Assume.conformsNonNull(codec),
                                            Assume.conforms(decodePayload)));
         } else {
           return Decode.error(new DecodeException("fragmented control frame"));
@@ -439,10 +435,10 @@ final class DecodeWsDeflateFrame<T> extends Decode<WsFrame<T>> {
     if (input.isError()) {
       return Decode.error(input.getError());
     }
-    return new DecodeWsDeflateFrame<T>(decoder, codec, frameType, transcoder, decodePayload,
+    return new DecodeWsDeflateFrame<T>(decoder, subprotocol, frameType, codec, decodePayload,
                                        offset, length, finRsvOp, maskingKey, step);
   }
 
-  private static final byte[] EMPTY_BLOCK = {(byte) 0x00, (byte) 0x00, (byte) 0xff, (byte) 0xff};
+  static final byte[] EMPTY_BLOCK = {(byte) 0x00, (byte) 0x00, (byte) 0xff, (byte) 0xff};
 
 }

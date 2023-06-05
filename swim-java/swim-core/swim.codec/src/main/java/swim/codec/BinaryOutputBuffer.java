@@ -275,7 +275,7 @@ public final class BinaryOutputBuffer extends OutputBuffer<ByteBuffer> {
     return new BinaryOutputBuffer(this.buffer, this.last);
   }
 
-  private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
+  static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
 
   public static BinaryOutputBuffer full() {
     return new BinaryOutputBuffer(EMPTY_BUFFER, false);

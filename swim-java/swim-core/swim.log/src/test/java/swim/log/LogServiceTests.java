@@ -15,15 +15,15 @@
 package swim.log;
 
 import org.junit.jupiter.api.Test;
-import swim.json.Json;
-import swim.json.JsonFormException;
+import swim.json.JsonFormat;
+import swim.json.JsonProviderException;
 import swim.util.Severity;
 
 public class LogServiceTests {
 
   @Test
-  public void testLogService() throws JsonFormException, InterruptedException {
-    final LogPrinter log = new LogPrinter(Json.form(LogEvent.class));
+  public void testLogService() throws JsonProviderException, InterruptedException {
+    final LogPrinter log = new LogPrinter(JsonFormat.get(LogEvent.class));
     final LogService service = new LogService(log, 1024);
     service.start();
     int i = 0;

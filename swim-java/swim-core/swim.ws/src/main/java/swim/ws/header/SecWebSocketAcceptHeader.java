@@ -80,7 +80,7 @@ public final class SecWebSocketAcceptHeader extends HttpHeader {
     return SecWebSocketAcceptHeader.of(NAME, value);
   }
 
-  private static byte[] parseValue(String value) throws HttpException {
+  static byte[] parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     final Parse<byte[]> parseDigest = Base64.standard().parseByteArray(input);
     if (parseDigest.isDone()) {
@@ -92,7 +92,7 @@ public final class SecWebSocketAcceptHeader extends HttpHeader {
     }
   }
 
-  private static String writeValue(byte[] digest) {
+  static String writeValue(byte[] digest) {
     final StringOutput output = new StringOutput();
     Base64.standard().writeByteArray(output, digest).assertDone();
     return output.get();

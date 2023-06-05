@@ -17,6 +17,9 @@ package swim.json;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.term.Term;
+import swim.term.TermParserOptions;
+import swim.term.TermRegistry;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -26,12 +29,19 @@ import swim.util.ToSource;
  */
 @Public
 @Since("5.0")
-public class JsonParserOptions implements ToSource {
+public class JsonParserOptions extends TermParserOptions implements ToSource {
 
   protected final boolean exprsEnabled;
 
-  public JsonParserOptions(boolean exprsEnabled) {
+  public JsonParserOptions(TermRegistry termRegistry,
+                           boolean exprsEnabled) {
+    super(termRegistry);
     this.exprsEnabled = exprsEnabled;
+  }
+
+  @Override
+  public JsonParserOptions withTermRegistry(TermRegistry termRegistry) {
+    return this.copy(termRegistry, this.exprsEnabled);
   }
 
   /**
@@ -45,23 +55,32 @@ public class JsonParserOptions implements ToSource {
    * Returns a copy of these options configured to enable JSON expressions
    * when {@code exprsEnabled} is {@code true}.
    */
-  public JsonParserOptions exprsEnabled(boolean exprsEnabled) {
-    return this.copy(exprsEnabled);
+  public JsonParserOptions withExprsEnabled(boolean exprsEnabled) {
+    return this.copy(this.termRegistry, exprsEnabled);
   }
 
-  /**
-   * Returns a copy of these options with the specified parameters.
-   * Subclasses may override this method to ensure the proper class
-   * is instantiated when updating options.
-   */
-  protected JsonParserOptions copy(boolean exprsEnabled) {
-    return new JsonParserOptions(exprsEnabled);
+  public JsonParserOptions withOptions(TermParserOptions options) {
+    if (options instanceof JsonParserOptions) {
+      return (JsonParserOptions) options;
+    }
+    return this.copy(options.termRegistry(), this.exprsEnabled);
   }
 
-  /**
-   * Returns {@code true} if these options can possibly equal
-   * some {@code other} object.
-   */
+  @Override
+  protected JsonParserOptions copy(TermRegistry termRegistry) {
+    return this.copy(termRegistry, this.exprsEnabled);
+  }
+
+  protected JsonParserOptions copy(TermRegistry termRegistry,
+                                   boolean exprsEnabled) {
+    if (termRegistry == this.termRegistry
+        && exprsEnabled == this.exprsEnabled) {
+      return this;
+    }
+    return new JsonParserOptions(termRegistry, exprsEnabled);
+  }
+
+  @Override
   public boolean canEqual(Object other) {
     return other instanceof JsonParserOptions;
   }
@@ -70,9 +89,9 @@ public class JsonParserOptions implements ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof JsonParserOptions) {
-      final JsonParserOptions that = (JsonParserOptions) other;
+    } else if (other instanceof JsonParserOptions that) {
       return that.canEqual(this)
+          && this.termRegistry.equals(that.termRegistry)
           && this.exprsEnabled == that.exprsEnabled;
     }
     return false;
@@ -82,25 +101,27 @@ public class JsonParserOptions implements ToSource {
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(HASH_SEED, Murmur3.hash(this.exprsEnabled)));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
+        this.termRegistry.hashCode()), Murmur3.hash(this.exprsEnabled)));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    if (this.exprsEnabled) {
+    if (this.equals(STANDARD)) {
+      notation.beginInvoke("JsonParserOptions", "standard").endInvoke();
+    } else if (this.equals(EXPRESSIONS)) {
       notation.beginInvoke("JsonParserOptions", "expressions").endInvoke();
     } else {
-      notation.beginInvoke("JsonParserOptions", "standard").endInvoke();
+      notation.beginInvokeNew("JsonParserOptions")
+              .appendArgument(this.termRegistry)
+              .appendArgument(this.exprsEnabled)
+              .endInvoke();
     }
   }
 
-  @Override
-  public String toString() {
-    return this.toSource();
-  }
-
-  private static final JsonParserOptions STANDARD = new JsonParserOptions(false);
+  private static final JsonParserOptions STANDARD =
+      new JsonParserOptions(Term.registry(), false);
 
   /**
    * Returns {@code JsonParserOptions} with expressions disabled.
@@ -109,7 +130,8 @@ public class JsonParserOptions implements ToSource {
     return STANDARD;
   }
 
-  private static final JsonParserOptions EXPRESSIONS = new JsonParserOptions(true);
+  private static final JsonParserOptions EXPRESSIONS =
+      new JsonParserOptions(Term.registry(), true);
 
   /**
    * Returns {@code JsonParserOptions} with expressions enabled.

@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 @Since("5.0")
 @Documented
 @Retention(RetentionPolicy.CLASS)
-@Target({ElementType.TYPE_USE})
+@Target(ElementType.TYPE_USE)
 public @interface NonNull {
 
 }

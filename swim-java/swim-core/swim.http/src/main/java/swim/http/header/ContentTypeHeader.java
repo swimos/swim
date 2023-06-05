@@ -79,7 +79,7 @@ public final class ContentTypeHeader extends HttpHeader {
     return ContentTypeHeader.of(NAME, value);
   }
 
-  private static MediaType parseValue(String value) throws HttpException {
+  static MediaType parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     final Parse<MediaType> parseMediaType = MediaType.parse(input);
     if (parseMediaType.isDone()) {

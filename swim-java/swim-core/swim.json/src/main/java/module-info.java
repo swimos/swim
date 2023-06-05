@@ -23,16 +23,18 @@ import swim.annotations.Since;
 module swim.json {
 
   requires transitive swim.annotations;
+  requires transitive swim.decl;
   requires transitive swim.util;
   requires transitive swim.collections;
   requires transitive swim.codec;
-  requires transitive swim.expr;
+  requires transitive swim.term;
   requires transitive swim.repr;
 
   exports swim.json;
+  exports swim.json.decl;
 
   uses swim.json.JsonProvider;
 
-  provides swim.codec.Codec with swim.json.JsonCodec;
+  provides swim.codec.MetaCodec with swim.json.JsonMetaCodec;
 
 }

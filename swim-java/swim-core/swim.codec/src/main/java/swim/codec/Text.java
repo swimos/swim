@@ -22,9 +22,6 @@ import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
 
-/**
- * Text transcoder.
- */
 @Public
 @Since("5.0")
 public final class Text {
@@ -37,48 +34,37 @@ public final class Text {
 
   static final MediaType TEXT_PLAIN_UTF8 = TEXT_PLAIN.withParam("charset", "utf-8");
 
-  static final TextTranscoder TRANSCODER = new TextTranscoder(TEXT_PLAIN_UTF8, UtfErrorMode.fatal());
-
-  public static Translator<String> transcoder() {
-    return TRANSCODER;
+  public static Format<String> stringCodec() {
+    return StringCodec.INSTANCE;
   }
 
-  public static Translator<String> transcoder(MediaType mediaType) {
+  public static Format<String> stringCodec(MediaType mediaType) {
     if (TEXT_PLAIN_UTF8.equals(mediaType)) {
-      return TRANSCODER;
-    } else {
-      return new TextTranscoder(mediaType, UtfErrorMode.fatal());
+      return StringCodec.INSTANCE;
     }
+    return new StringCodec(mediaType, UtfErrorMode.fatal());
   }
 
-  public static Translator<String> transcoder(UtfErrorMode errorMode) {
+  public static Format<String> stringCodec(UtfErrorMode errorMode) {
     if (errorMode == UtfErrorMode.fatal()) {
-      return TRANSCODER;
-    } else {
-      return new TextTranscoder(TEXT_PLAIN_UTF8, errorMode);
+      return StringCodec.INSTANCE;
     }
+    return new StringCodec(TEXT_PLAIN_UTF8, errorMode);
   }
 
-  public static Translator<String> transcoder(MediaType mediaType, UtfErrorMode errorMode) {
+  public static Format<String> stringCodec(MediaType mediaType, UtfErrorMode errorMode) {
     if (TEXT_PLAIN_UTF8.equals(mediaType) && errorMode == UtfErrorMode.fatal()) {
-      return TRANSCODER;
-    } else {
-      return new TextTranscoder(mediaType, errorMode);
+      return StringCodec.INSTANCE;
     }
+    return new StringCodec(mediaType, errorMode);
   }
 
-  static final TextCodec CODEC = new TextCodec(TRANSCODER);
-
-  public static Codec codec() {
-    return CODEC;
+  public static MetaFormat metaCodec() {
+    return TextMetaCodec.INSTANCE;
   }
 
-  public static Codec codec(Transcoder<String> transcoder) {
-    if (TRANSCODER.equals(transcoder)) {
-      return CODEC;
-    } else {
-      return new TextCodec(transcoder);
-    }
+  public static MetaFormat metaCodec(Format<String> stringCodec) {
+    return new TextMetaCodec(stringCodec);
   }
 
   public static Parse<String> parseLine(Input input, @Nullable StringBuilder output) {
@@ -95,6 +81,58 @@ public final class Text {
 
   public static Parse<String> parseLine() {
     return new ParseLine(null);
+  }
+
+  public static Parse<String> parse(Input input, @Nullable StringBuilder output) {
+    return ParseString.parse(input, output);
+  }
+
+  public static Parse<String> parse(Input input) {
+    return ParseString.parse(input, null);
+  }
+
+  public static Parse<String> parse(@Nullable StringBuilder output) {
+    return new ParseString(output);
+  }
+
+  public static Parse<String> parse() {
+    return new ParseString(null);
+  }
+
+  public static Write<?> write(Output<?> output, @Nullable String value) {
+    if (value == null) {
+      return Write.done();
+    }
+    return WriteString.write(output, value, 0);
+  }
+
+  public static Write<?> write(@Nullable String value) {
+    if (value == null) {
+      return Write.done();
+    }
+    return new WriteString(value, 0);
+  }
+
+  public static Decode<String> decode(Input input) {
+    return new Utf8DecodedInput(input, UtfErrorMode.fatal()).parseInto(new ParseString(null));
+  }
+
+  public static Decode<String> decode() {
+    return new Utf8DecodedInput(BinaryInput.empty(), UtfErrorMode.fatal()).parseInto(new ParseString(null));
+  }
+
+  public static Encode<?> encode(Output<?> output, @Nullable String value) {
+    if (value == null) {
+      return Encode.done();
+    }
+    return new Utf8EncodedOutput<>(output, UtfErrorMode.fatal()).writeFrom(new WriteString(value, 0));
+  }
+
+  public static Encode<?> encode(@Nullable String value) {
+    if (value == null) {
+      return Encode.done();
+    }
+    return new Utf8EncodedOutput<>(BinaryOutput.full(), UtfErrorMode.fatal()).writeFrom(new WriteString(value, 0));
   }
 
   /**
@@ -163,13 +201,13 @@ public final class Text {
 
 }
 
-final class TextTranscoder implements Translator<String>, ToSource {
+final class StringCodec implements Format<String>, ToSource {
 
   final MediaType mediaType;
 
   final UtfErrorMode errorMode;
 
-  TextTranscoder(MediaType mediaType, UtfErrorMode errorMode) {
+  StringCodec(MediaType mediaType, UtfErrorMode errorMode) {
     this.mediaType = mediaType;
     this.errorMode = errorMode;
   }
@@ -181,11 +219,10 @@ final class TextTranscoder implements Translator<String>, ToSource {
 
   @Override
   public long sizeOf(@Nullable String value) {
-    if (value != null) {
-      return (long) Text.sizeOf(value, this.errorMode);
-    } else {
+    if (value == null) {
       return 0L;
     }
+    return (long) Text.sizeOf(value, this.errorMode);
   }
 
   @Override
@@ -195,11 +232,10 @@ final class TextTranscoder implements Translator<String>, ToSource {
 
   @Override
   public Encode<?> encode(OutputBuffer<?> output, @Nullable String value) {
-    if (value != null) {
-      return new Utf8EncodedOutput<>(output, this.errorMode).writeFrom(new WriteString<>(value, 0));
-    } else {
+    if (value == null) {
       return Encode.done();
     }
+    return new Utf8EncodedOutput<>(output, this.errorMode).writeFrom(new WriteString(value, 0));
   }
 
   @Override
@@ -214,26 +250,24 @@ final class TextTranscoder implements Translator<String>, ToSource {
 
   @Override
   public Write<?> write(Output<?> output, @Nullable String value) {
-    if (value != null) {
-      return WriteString.write(output, value, 0);
-    } else {
+    if (value == null) {
       return Write.done();
     }
+    return WriteString.write(output, value, 0);
   }
 
   @Override
   public Write<?> write(@Nullable String value) {
-    if (value != null) {
-      return new WriteString<Object>(value, 0);
-    } else {
+    if (value == null) {
       return Write.done();
     }
+    return new WriteString(value, 0);
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Text", "transcoder");
+    notation.beginInvoke("Text", "stringCodec");
     if (!this.mediaType.equals(Text.TEXT_PLAIN_UTF8)) {
       notation.appendArgument(this.mediaType);
     }
@@ -248,44 +282,50 @@ final class TextTranscoder implements Translator<String>, ToSource {
     return this.toSource();
   }
 
+  static final StringCodec INSTANCE = new StringCodec(Text.TEXT_PLAIN_UTF8, UtfErrorMode.fatal());
+
 }
 
-final class TextCodec implements Codec, ToSource {
+final class TextMetaCodec implements MetaFormat, ToSource {
 
-  final Transcoder<String> transcoder;
+  final Format<String> stringCodec;
 
-  TextCodec(Transcoder<String> transcoder) {
-    this.transcoder = transcoder;
+  TextMetaCodec(Format<String> stringCodec) {
+    this.stringCodec = stringCodec;
   }
 
   @Override
   public MediaType mediaType() {
-    return this.transcoder.mediaType();
+    return this.stringCodec.mediaType();
   }
 
   @Override
-  public <T> Transcoder<T> getTranscoder(Type javaType) throws TranscoderException {
-    if (javaType instanceof Class<?>) {
-      final Class<?> javaClass = (Class<?>) javaType;
-      if (javaClass.isAssignableFrom(String.class)) {
-        return Assume.conforms(this.transcoder);
+  public <T> Format<T> getFormat(Type type) throws CodecException {
+    if (type instanceof Class<?>) {
+      final Class<?> classType = (Class<?>) type;
+      if (classType.isAssignableFrom(String.class)) {
+        return Assume.conforms(this.stringCodec);
       }
     }
-    throw new TranscoderException("no text transcoder for type: " + javaType);
+    throw new CodecException("no codec for " + type);
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Text", "codec")
-            .appendArgument(this.transcoder)
-            .endInvoke();
+    notation.beginInvoke("Text", "stringCodec");
+    if (!this.stringCodec.equals(StringCodec.INSTANCE)) {
+      notation.appendArgument(this.stringCodec);
+    }
+    notation.endInvoke();
   }
 
   @Override
   public String toString() {
     return this.toSource();
   }
+
+  static final TextMetaCodec INSTANCE = new TextMetaCodec(StringCodec.INSTANCE);
 
 }
 
@@ -320,7 +360,7 @@ final class ParseString extends Parse<String> {
 
 }
 
-final class WriteString<T> extends Write<T> {
+final class WriteString extends Write<Object> {
 
   final String input;
   final int index;
@@ -331,11 +371,11 @@ final class WriteString<T> extends Write<T> {
   }
 
   @Override
-  public Write<T> produce(Output<?> output) {
+  public Write<Object> produce(Output<?> output) {
     return WriteString.write(output, this.input, this.index);
   }
 
-  static <T> Write<T> write(Output<?> output, String input, int index) {
+  static Write<Object> write(Output<?> output, String input, int index) {
     while (index < input.length() && output.isCont()) {
       output.write(input.codePointAt(index));
       index = input.offsetByCodePoints(index, 1);
@@ -347,7 +387,7 @@ final class WriteString<T> extends Write<T> {
     } else if (output.isError()) {
       return Write.error(output.getError());
     }
-    return new WriteString<T>(input, index);
+    return new WriteString(input, index);
   }
 
 }

@@ -25,6 +25,7 @@ import swim.annotations.Since;
 module swim.uri {
 
   requires transitive swim.annotations;
+  requires transitive swim.decl;
   requires transitive swim.util;
   requires swim.collections;
   requires transitive swim.codec;

@@ -19,6 +19,7 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Base16;
+import swim.codec.Codec;
 import swim.codec.Decode;
 import swim.codec.DecodeException;
 import swim.codec.Diagnostic;
@@ -27,7 +28,6 @@ import swim.codec.EncodeException;
 import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
 import swim.codec.Parse;
-import swim.codec.Transcoder;
 import swim.http.header.ContentTypeHeader;
 import swim.http.header.TransferEncodingHeader;
 import swim.util.Assume;
@@ -40,12 +40,12 @@ import swim.util.ToSource;
 public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
 
   final @Nullable T value;
-  final Transcoder<T> transcoder;
+  final Codec<T> codec;
   final HttpHeaders trailers;
 
-  HttpChunked(@Nullable T value, Transcoder<T> transcoder, HttpHeaders trailers) {
+  HttpChunked(@Nullable T value, Codec<T> codec, HttpHeaders trailers) {
     this.value = value;
-    this.transcoder = transcoder;
+    this.codec = codec;
     this.trailers = trailers;
   }
 
@@ -60,8 +60,8 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
   }
 
   @Override
-  public Transcoder<T> transcoder() {
-    return this.transcoder;
+  public Codec<T> codec() {
+    return this.codec;
   }
 
   @Override
@@ -77,7 +77,7 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
   }
 
   public HttpChunked<T> withTrailers(HttpHeaders trailers) {
-    return HttpChunked.of(this.value, this.transcoder, trailers);
+    return HttpChunked.of(this.value, this.codec, trailers);
   }
 
   @Override
@@ -94,10 +94,9 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpChunked<?>) {
-      final HttpChunked<?> that = (HttpChunked<?>) other;
+    } else if (other instanceof HttpChunked<?> that) {
       return Objects.equals(this.value, that.value)
-          && this.transcoder.equals(that.transcoder)
+          && this.codec.equals(that.codec)
           && this.trailers.equals(that.trailers);
     }
     return false;
@@ -108,8 +107,7 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
   @Override
   public int hashCode() {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HASH_SEED,
-        Objects.hashCode(this.value)), this.transcoder.hashCode()),
-        this.trailers.hashCode()));
+        Objects.hashCode(this.value)), this.codec.hashCode()), this.trailers.hashCode()));
   }
 
   @Override
@@ -117,7 +115,7 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("HttpChunked", "of")
             .appendArgument(this.value)
-            .appendArgument(this.transcoder)
+            .appendArgument(this.codec)
             .endInvoke();
     if (!this.trailers.isEmpty()) {
       notation.beginInvoke("withTrailers")
@@ -131,40 +129,37 @@ public final class HttpChunked<T> extends HttpPayload<T> implements ToSource {
     return this.toSource();
   }
 
-  public static <T> HttpChunked<T> of(@Nullable T value, Transcoder<T> transcoder,
-                                      HttpHeaders trailers) {
-    return new HttpChunked<T>(value, transcoder, trailers);
+  public static <T> HttpChunked<T> of(@Nullable T value, Codec<T> codec, HttpHeaders trailers) {
+    return new HttpChunked<T>(value, codec, trailers);
   }
 
-  public static <T> HttpChunked<T> of(@Nullable T value, Transcoder<T> transcoder) {
-    return new HttpChunked<T>(value, transcoder, HttpHeaders.empty());
+  public static <T> HttpChunked<T> of(@Nullable T value, Codec<T> codec) {
+    return new HttpChunked<T>(value, codec, HttpHeaders.empty());
   }
 
-  public static <T> Decode<HttpChunked<T>> decode(InputBuffer input, Transcoder<T> transcoder) {
-    return DecodeHttpChunked.decode(input, transcoder, null, null, null, 0L, 1);
+  public static <T> Decode<HttpChunked<T>> decode(InputBuffer input, Codec<T> codec) {
+    return DecodeHttpChunked.decode(input, codec, null, null, null, 0L, 1);
   }
 
-  public static <T> Decode<HttpChunked<T>> decode(Transcoder<T> transcoder) {
-    return new DecodeHttpChunked<T>(transcoder, null, null, null, 0L, 1);
+  public static <T> Decode<HttpChunked<T>> decode(Codec<T> codec) {
+    return new DecodeHttpChunked<T>(codec, null, null, null, 0L, 1);
   }
 
 }
 
 final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
 
-  final Transcoder<T> transcoder;
+  final Codec<T> codec;
   final @Nullable Parse<HttpChunkHeader> parseHeader;
   final @Nullable Decode<T> decodePayload;
   final @Nullable Parse<HttpHeaders> parseTrailers;
   final long offset;
   final int step;
 
-  DecodeHttpChunked(Transcoder<T> transcoder,
-                    @Nullable Parse<HttpChunkHeader> parseHeader,
-                    @Nullable Decode<T> decodePayload,
-                    @Nullable Parse<HttpHeaders> parseTrailers,
+  DecodeHttpChunked(Codec<T> codec, @Nullable Parse<HttpChunkHeader> parseHeader,
+                    @Nullable Decode<T> decodePayload, @Nullable Parse<HttpHeaders> parseTrailers,
                     long offset, int step) {
-    this.transcoder = transcoder;
+    this.codec = codec;
     this.parseHeader = parseHeader;
     this.decodePayload = decodePayload;
     this.parseTrailers = parseTrailers;
@@ -174,12 +169,11 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
 
   @Override
   public Decode<HttpChunked<T>> consume(InputBuffer input) {
-    return DecodeHttpChunked.decode(input, this.transcoder, this.parseHeader,
-                                    this.decodePayload, this.parseTrailers,
-                                    this.offset, this.step);
+    return DecodeHttpChunked.decode(input, this.codec, this.parseHeader, this.decodePayload,
+                                    this.parseTrailers, this.offset, this.step);
   }
 
-  static <T> Decode<HttpChunked<T>> decode(InputBuffer input, Transcoder<T> transcoder,
+  static <T> Decode<HttpChunked<T>> decode(InputBuffer input, Codec<T> codec,
                                            @Nullable Parse<HttpChunkHeader> parseHeader,
                                            @Nullable Decode<T> decodePayload,
                                            @Nullable Parse<HttpHeaders> parseTrailers,
@@ -224,7 +218,7 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
 
         input.limit(inputStart + decodeSize).asLast(chunkSize == 0);
         if (decodePayload == null) {
-          decodePayload = transcoder.decode(input);
+          decodePayload = codec.decode(input);
         } else {
           decodePayload = decodePayload.consume(input);
         }
@@ -289,7 +283,7 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
     if (step == 9) {
       if (input.isCont() && input.head() == '\n') {
         input.step();
-        return Decode.done(HttpChunked.of(Assume.nonNull(decodePayload).getUnchecked(), transcoder,
+        return Decode.done(HttpChunked.of(Assume.nonNull(decodePayload).getUnchecked(), codec,
                                           Assume.nonNull(parseTrailers).getNonNullUnchecked()));
       } else if (input.isReady()) {
         return Parse.error(Diagnostic.expected("line feed", input));
@@ -298,7 +292,7 @@ final class DecodeHttpChunked<T> extends Decode<HttpChunked<T>> {
     if (input.isError()) {
       return Decode.error(input.getError());
     }
-    return new DecodeHttpChunked<T>(transcoder, parseHeader, decodePayload,
+    return new DecodeHttpChunked<T>(codec, parseHeader, decodePayload,
                                     parseTrailers, offset, step);
   }
 
@@ -332,7 +326,7 @@ final class EncodeHttpChunked<T> extends Encode<HttpChunked<T>> {
 
       output.asLast(false);
       if (encode == null) {
-        encode = payload.transcoder.encode(output, payload.value);
+        encode = payload.codec.encode(output, payload.value);
       } else {
         encode = encode.produce(output);
       }

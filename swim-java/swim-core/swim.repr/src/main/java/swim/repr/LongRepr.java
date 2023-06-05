@@ -66,9 +66,8 @@ public final class LongRepr implements NumberRepr, ToSource {
       return this;
     } else if (attrs == Attrs.empty()) {
       return LongRepr.of(this.value);
-    } else {
-      return new LongRepr(attrs, this.value);
     }
+    return new LongRepr(attrs, this.value);
   }
 
   @Override
@@ -216,9 +215,8 @@ public final class LongRepr implements NumberRepr, ToSource {
     final long value = -this.value;
     if (value == (long) (int) value) {
       return IntRepr.of((int) value);
-    } else {
-      return LongRepr.of(value);
     }
+    return LongRepr.of(value);
   }
 
   @Override
@@ -293,28 +291,25 @@ public final class LongRepr implements NumberRepr, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof NumberRepr) {
-      final NumberRepr that = (NumberRepr) other;
-      if (this.attrs().equals(that.attrs())) {
-        if (this.isValidByte() && that.isValidByte()) {
-          return this.byteValue() == that.byteValue();
-        } else if (this.isValidShort() && that.isValidShort()) {
-          return this.shortValue() == that.shortValue();
-        } else if (this.isValidInt() && that.isValidInt()) {
-          return this.intValue() == that.intValue();
-        } else if (this.isValidLong() && that.isValidLong()) {
-          return this.longValue() == that.longValue();
-        } else if (this.isValidFloat() && that.isValidFloat()) {
-          final float x = this.floatValue();
-          final float y = that.floatValue();
-          return x == y || (Float.isNaN(x) && Float.isNaN(y));
-        } else if (this.isValidDouble() && that.isValidDouble()) {
-          final double x = this.doubleValue();
-          final double y = that.doubleValue();
-          return x == y || (Double.isNaN(x) && Double.isNaN(y));
-        } else {
-          return this.stringValue().equals(that.stringValue());
-        }
+    } else if (other instanceof NumberRepr that && this.attrs().equals(that.attrs())) {
+      if (this.isValidByte() && that.isValidByte()) {
+        return this.byteValue() == that.byteValue();
+      } else if (this.isValidShort() && that.isValidShort()) {
+        return this.shortValue() == that.shortValue();
+      } else if (this.isValidInt() && that.isValidInt()) {
+        return this.intValue() == that.intValue();
+      } else if (this.isValidLong() && that.isValidLong()) {
+        return this.longValue() == that.longValue();
+      } else if (this.isValidFloat() && that.isValidFloat()) {
+        final float x = this.floatValue();
+        final float y = that.floatValue();
+        return x == y || (Float.isNaN(x) && Float.isNaN(y));
+      } else if (this.isValidDouble() && that.isValidDouble()) {
+        final double x = this.doubleValue();
+        final double y = that.doubleValue();
+        return x == y || (Double.isNaN(x) && Double.isNaN(y));
+      } else {
+        return this.stringValue().equals(that.stringValue());
       }
     }
     return false;
@@ -355,23 +350,11 @@ public final class LongRepr implements NumberRepr, ToSource {
     return this.toSource();
   }
 
-  private static final LongRepr ZERO = new LongRepr(Attrs.empty(), 0L);
+  static final LongRepr ZERO = new LongRepr(Attrs.empty(), 0L);
 
-  static LongRepr zero() {
-    return ZERO;
-  }
+  static final LongRepr POSITIVE_ONE = new LongRepr(Attrs.empty(), 1L);
 
-  private static final LongRepr POSITIVE_ONE = new LongRepr(Attrs.empty(), 1L);
-
-  static LongRepr positiveOne() {
-    return POSITIVE_ONE;
-  }
-
-  private static final LongRepr NEGATIVE_ONE = new LongRepr(Attrs.empty(), -1L);
-
-  static LongRepr negativeOne() {
-    return NEGATIVE_ONE;
-  }
+  static final LongRepr NEGATIVE_ONE = new LongRepr(Attrs.empty(), -1L);
 
   public static LongRepr of(long value) {
     if (value == 0L) {
@@ -380,9 +363,8 @@ public final class LongRepr implements NumberRepr, ToSource {
       return POSITIVE_ONE;
     } else if (value == -1L) {
       return NEGATIVE_ONE;
-    } else {
-      return new LongRepr(Attrs.empty(), value);
     }
+    return new LongRepr(Attrs.empty(), value);
   }
 
 }

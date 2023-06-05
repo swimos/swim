@@ -176,8 +176,7 @@ public class HttpOptions implements ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpOptions) {
-      final HttpOptions that = (HttpOptions) other;
+    } else if (other instanceof HttpOptions that) {
       return that.canEqual(this)
           && this.maxMessageSize == that.maxMessageSize
           && this.clientRequestBufferSize == that.clientRequestBufferSize

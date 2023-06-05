@@ -15,14 +15,14 @@
 package swim.waml;
 
 import org.junit.jupiter.api.Test;
+import swim.expr.ChildExpr;
+import swim.expr.ChildrenExpr;
 import swim.expr.ContextExpr;
+import swim.expr.DescendantsExpr;
 import swim.expr.GlobalExpr;
-import swim.expr.operator.PlusExpr;
-import swim.expr.selector.ChildExpr;
-import swim.expr.selector.ChildrenExpr;
-import swim.expr.selector.DescendantsExpr;
-import swim.expr.selector.InvokeExpr;
-import swim.expr.selector.MemberExpr;
+import swim.expr.InvokeExpr;
+import swim.expr.MemberExpr;
+import swim.expr.PlusExpr;
 import swim.repr.ArrayRepr;
 import swim.repr.ObjectRepr;
 import swim.repr.Repr;
@@ -269,12 +269,12 @@ public class WamlExprWriterTests {
   }
 
   public static void assertWrites(String expected, Repr value, WamlWriterOptions options) {
-    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(options)));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.valueFormat().write(value, options));
   }
 
   public static void assertWrites(String expected, Repr value) {
-    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(WamlWriterOptions.readable())));
-    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(WamlWriterOptions.compact())));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.valueFormat().write(value, WamlWriterOptions.readable()));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.valueFormat().write(value, WamlWriterOptions.compact()));
   }
 
 }

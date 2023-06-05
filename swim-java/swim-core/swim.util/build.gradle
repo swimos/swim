@@ -9,4 +9,5 @@ ext.moduleName = 'swim.util'
 
 dependencies {
   api project(':swim-annotations')
+  api project(':swim-decl')
 }

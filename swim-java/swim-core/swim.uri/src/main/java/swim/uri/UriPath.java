@@ -22,8 +22,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Consumer;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -35,6 +33,8 @@ import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8DecodedOutput;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
 import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
@@ -98,9 +98,8 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
       final UriPath tail = path.tail();
       if (tail.isEmpty()) {
         return path.isRelative() ? path.head() : "";
-      } else {
-        path = tail;
       }
+      path = tail;
     } while (true);
   }
 
@@ -122,9 +121,8 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
       final UriPath tail = path.tail();
       if (tail.isEmpty()) {
         return path;
-      } else {
-        path = tail;
       }
+      path = tail;
     } while (true);
   }
 
@@ -211,9 +209,8 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     Objects.requireNonNull(component);
     if (component.equals("/")) {
       return this.appendedSlash();
-    } else {
-      return this.appendedSegment(component);
     }
+    return this.appendedSegment(component);
   }
 
   public UriPath appended(String... components) {
@@ -254,9 +251,8 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     Objects.requireNonNull(component);
     if (component.equals("/")) {
       return this.prependedSlash();
-    } else {
-      return this.prependedSegment(component);
     }
+    return this.prependedSegment(component);
   }
 
   public UriPath prepended(String... components) {
@@ -286,9 +282,8 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
   public UriPath prependedSegment(String segment) {
     if (this.isEmpty() || this.isAbsolute()) {
       return UriPath.segment(segment, this);
-    } else {
-      return UriPath.segment(segment, UriPath.slash(this));
     }
+    return UriPath.segment(segment, UriPath.slash(this));
   }
 
   public UriPath resolve(UriPath that) {
@@ -296,9 +291,8 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
       return this;
     } else if (that.isAbsolute() || this.isEmpty()) {
       return that.removeDotSegments();
-    } else {
-      return this.merge(that).removeDotSegments();
     }
+    return this.merge(that).removeDotSegments();
   }
 
   public UriPath removeDotSegments() {
@@ -356,19 +350,18 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     final UriPathBuilder builder = new UriPathBuilder();
     do {
       final UriPath next = prev.tail();
-      if (!next.isEmpty()) {
-        if (prev.isSlash()) {
-          builder.addSlash();
-        } else {
-          builder.addSegment(prev.head());
-        }
-        prev = next;
-      } else {
+      if (next.isEmpty()) {
         if (prev.isSlash()) {
           builder.addSlash();
         }
         break;
       }
+      if (prev.isSlash()) {
+        builder.addSlash();
+      } else {
+        builder.addSegment(prev.head());
+      }
+      prev = next;
     } while (true);
     builder.addPath(that);
     return builder.build();
@@ -388,24 +381,21 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
         return relative;
       } else if (relative.isRelative()) {
         return UriPath.slash(relative);
-      } else {
-        UriPath a = base.tail();
-        UriPath b = relative.tail();
-        if (!a.isEmpty() && b.isEmpty()) {
-          return UriPath.slash();
-        } else if (a.isEmpty() || b.isEmpty() || !a.head().equals(b.head())) {
-          return b;
-        } else {
-          a = a.tail();
-          b = b.tail();
-          if (!a.isEmpty() && b.isEmpty()) {
-            return that;
-          } else {
-            base = a;
-            relative = b;
-          }
-        }
       }
+      UriPath a = base.tail();
+      UriPath b = relative.tail();
+      if (!a.isEmpty() && b.isEmpty()) {
+        return UriPath.slash();
+      } else if (a.isEmpty() || b.isEmpty() || !a.head().equals(b.head())) {
+        return b;
+      }
+      a = a.tail();
+      b = b.tail();
+      if (!a.isEmpty() && b.isEmpty()) {
+        return that;
+      }
+      base = a;
+      relative = b;
     } while (true);
   }
 
@@ -514,17 +504,17 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     }
   }
 
-  @IntoForm
+  @Marshal
   @Override
   public abstract String toString();
 
-  private static final UriPath EMPTY = new UriPathEmpty();
+  static final UriPath EMPTY = new UriPathEmpty();
 
   public static UriPath empty() {
     return EMPTY;
   }
 
-  private static final UriPath SLASH = new UriPathSlash(EMPTY);
+  static final UriPath SLASH = new UriPathSlash(EMPTY);
 
   public static UriPath slash() {
     return SLASH;
@@ -534,9 +524,8 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
   static UriPath slash(UriPath tail) {
     if (tail == EMPTY) {
       return UriPath.slash();
-    } else {
-      return new UriPathSlash(tail);
     }
+    return new UriPathSlash(tail);
   }
 
   public static UriPath segment(String segment) {
@@ -556,9 +545,8 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     Objects.requireNonNull(component, "component");
     if (component.equals("/")) {
       return UriPath.slash();
-    } else {
-      return UriPath.segment(component);
     }
+    return UriPath.segment(component);
   }
 
   public static UriPath of(String... components) {
@@ -577,14 +565,13 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     Objects.requireNonNull(components);
     if (components instanceof UriPath) {
       return (UriPath) components;
-    } else {
-      final UriPathBuilder builder = new UriPathBuilder();
-      builder.addAll(components);
-      return builder.build();
     }
+    final UriPathBuilder builder = new UriPathBuilder();
+    builder.addAll(components);
+    return builder.build();
   }
 
-  @FromForm
+  @Unmarshal
   public static @Nullable UriPath from(String value) {
     return UriPath.parse(value).getOr(null);
   }
@@ -611,10 +598,10 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     return parsePath;
   }
 
-  private static final ThreadLocal<CacheMap<String, Parse<UriPath>>> CACHE =
+  static final ThreadLocal<CacheMap<String, Parse<UriPath>>> CACHE =
       new ThreadLocal<CacheMap<String, Parse<UriPath>>>();
 
-  private static CacheMap<String, Parse<UriPath>> cache() {
+  static CacheMap<String, Parse<UriPath>> cache() {
     CacheMap<String, Parse<UriPath>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;
@@ -694,9 +681,8 @@ final class UriPathSegment extends UriPath {
   void setTail(UriPath tail) {
     if (tail instanceof UriPathSegment) {
       throw new UnsupportedOperationException();
-    } else {
-      this.tail = tail;
     }
+    this.tail = tail;
   }
 
   @Override
@@ -707,16 +693,10 @@ final class UriPathSegment extends UriPath {
   @Override
   public UriPath parent() {
     final UriPath tail = this.tail;
-    if (tail.isEmpty()) {
+    if (tail.isEmpty() || tail.tail().isEmpty()) {
       return UriPath.empty();
-    } else {
-      final UriPath next = tail.tail();
-      if (next.isEmpty()) {
-        return UriPath.empty();
-      } else {
-        return new UriPathSegment(this.head, tail.parent());
-      }
     }
+    return new UriPathSegment(this.head, tail.parent());
   }
 
   @Override
@@ -724,9 +704,8 @@ final class UriPathSegment extends UriPath {
     final UriPath tail = this.tail;
     if (tail.isEmpty()) {
       return UriPath.empty();
-    } else {
-      return new UriPathSegment(this.head, tail.base());
     }
+    return new UriPathSegment(this.head, tail.base());
   }
 
   @Override
@@ -734,9 +713,8 @@ final class UriPathSegment extends UriPath {
     final UriPath tail = this.tail;
     if (tail.isEmpty()) {
       return UriPath.empty();
-    } else {
-      return new UriPathSegment(this.head, tail.body());
     }
+    return new UriPathSegment(this.head, tail.body());
   }
 
   @Override
@@ -748,9 +726,9 @@ final class UriPathSegment extends UriPath {
   public void writeString(Appendable output) throws IOException {
     if (this.string != null) {
       output.append(this.string);
-    } else {
-      UriPath.writeString(output, this);
+      return;
     }
+    UriPath.writeString(output, this);
   }
 
   @Override
@@ -833,14 +811,10 @@ final class UriPathSlash extends UriPath {
     final UriPath tail = this.tail;
     if (tail.isEmpty()) {
       return UriPath.empty();
-    } else {
-      final UriPath next = tail.tail();
-      if (next.isEmpty()) {
-        return UriPath.slash();
-      } else {
-        return new UriPathSlash(tail.parent());
-      }
+    } else if (tail.tail().isEmpty()) {
+      return UriPath.slash();
     }
+    return new UriPathSlash(tail.parent());
   }
 
   @Override
@@ -848,9 +822,8 @@ final class UriPathSlash extends UriPath {
     final UriPath tail = this.tail;
     if (tail.isEmpty()) {
       return this;
-    } else {
-      return new UriPathSlash(tail.base());
     }
+    return new UriPathSlash(tail.base());
   }
 
   @Override
@@ -858,14 +831,10 @@ final class UriPathSlash extends UriPath {
     final UriPath tail = this.tail;
     if (tail.isEmpty()) {
       return UriPath.empty();
-    } else {
-      final UriPath next = tail.tail();
-      if (next.isEmpty()) {
-        return UriPath.slash();
-      } else {
-        return new UriPathSlash(tail.body());
-      }
+    } else if (tail.tail().isEmpty()) {
+      return UriPath.slash();
     }
+    return new UriPathSlash(tail.body());
   }
 
   @Override
@@ -877,9 +846,9 @@ final class UriPathSlash extends UriPath {
   public void writeString(Appendable output) throws IOException {
     if (this.string != null) {
       output.append(this.string);
-    } else {
-      UriPath.writeString(output, this);
+      return;
     }
+    UriPath.writeString(output, this);
   }
 
   @Override

@@ -91,7 +91,7 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
     return SecWebSocketVersionHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<Integer> parseValue(String value) throws HttpException {
+  static FingerTrieList<Integer> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     FingerTrieList<Integer> versions = FingerTrieList.empty();
@@ -158,7 +158,7 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
     return versions;
   }
 
-  private static String writeValue(Iterator<Integer> versions) {
+  static String writeValue(Iterator<Integer> versions) {
     final StringOutput output = new StringOutput();
     int version = -1;
     do {

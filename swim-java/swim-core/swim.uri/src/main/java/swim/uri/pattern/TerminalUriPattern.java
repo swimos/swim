@@ -33,11 +33,10 @@ public abstract class TerminalUriPattern extends UriFragmentPattern {
 
   @Override
   boolean matches(UriFragment fragment) {
-    if (!fragment.isDefined()) {
-      return this.matches();
-    } else {
+    if (fragment.isDefined()) {
       return false;
     }
+    return this.matches();
   }
 
   public static TerminalUriPattern compile(Uri pattern) {

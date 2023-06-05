@@ -1339,9 +1339,8 @@ public class Notation implements Appendable {
   public static Notation from(Appendable output) {
     if (output instanceof Notation) {
       return (Notation) output;
-    } else {
-      return new Notation(output);
     }
+    return new Notation(output);
   }
 
 }

@@ -14,37 +14,46 @@
 
 package swim.waml;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaConversionException;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Output;
-import swim.codec.Write;
-import swim.expr.Term;
-import swim.expr.TermException;
+import swim.decl.FilterMode;
 import swim.util.Assume;
 import swim.util.Notation;
+import swim.util.Result;
 import swim.util.ToSource;
 
 @Public
 @Since("5.0")
 public final class WamlCollections implements WamlProvider, ToSource {
 
-  final WamlCodec codec;
+  final WamlMetaCodec metaCodec;
   final int priority;
 
-  private WamlCollections(WamlCodec codec, int priority) {
-    this.codec = codec;
+  private WamlCollections(WamlMetaCodec metaCodec, int priority) {
+    this.metaCodec = metaCodec;
     this.priority = priority;
   }
 
@@ -54,14 +63,14 @@ public final class WamlCollections implements WamlProvider, ToSource {
   }
 
   @Override
-  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
-    final Class<?> javaClass;
-    if (javaType instanceof Class<?>) {
-      javaClass = (Class<?>) javaType;
-    } else if (javaType instanceof ParameterizedType) {
-      final Type rawType = ((ParameterizedType) javaType).getRawType();
+  public @Nullable WamlFormat<?> resolveWamlFormat(Type type) throws WamlProviderException {
+    final Class<?> classType;
+    if (type instanceof Class<?>) {
+      classType = (Class<?>) type;
+    } else if (type instanceof ParameterizedType) {
+      final Type rawType = ((ParameterizedType) type).getRawType();
       if (rawType instanceof Class<?>) {
-        javaClass = (Class<?>) rawType;
+        classType = (Class<?>) rawType;
       } else {
         return null;
       }
@@ -69,10 +78,10 @@ public final class WamlCollections implements WamlProvider, ToSource {
       return null;
     }
 
-    if (List.class.isAssignableFrom(javaClass)) {
-      return WamlCollections.listForm(this.codec, javaClass, javaType);
-    } else if (Map.class.isAssignableFrom(javaClass)) {
-      return WamlCollections.mapForm(this.codec, javaClass, javaType);
+    if (List.class.isAssignableFrom(classType)) {
+      return WamlCollections.listFormat(this.metaCodec, classType, type);
+    } else if (Map.class.isAssignableFrom(classType)) {
+      return WamlCollections.mapFormat(this.metaCodec, classType, type, FilterMode.DEFAULT);
     }
 
     return null;
@@ -81,8 +90,8 @@ public final class WamlCollections implements WamlProvider, ToSource {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("WamlCollections", "provider");
-    notation.appendArgument(this.codec);
+    notation.beginInvoke("WamlCollections", "provider")
+            .appendArgument(this.metaCodec);
     if (this.priority != GENERIC_PRIORITY) {
       notation.appendArgument(this.priority);
     }
@@ -94,36 +103,101 @@ public final class WamlCollections implements WamlProvider, ToSource {
     return this.toSource();
   }
 
-  public static WamlCollections provider(WamlCodec codec, int priority) {
-    return new WamlCollections(codec, priority);
+  public static WamlCollections provider(WamlMetaCodec metaCodec, int priority) {
+    return new WamlCollections(metaCodec, priority);
   }
 
-  public static WamlCollections provider(WamlCodec codec) {
-    return new WamlCollections(codec, GENERIC_PRIORITY);
+  public static WamlCollections provider(WamlMetaCodec metaCodec) {
+    return new WamlCollections(metaCodec, GENERIC_PRIORITY);
   }
 
-  public static <E, T extends List<E>> WamlArrayForm<E, T, T> listForm(Class<?> listClass, WamlForm<E> elementForm) {
-    if (!List.class.isAssignableFrom(listClass)) {
-      throw new IllegalArgumentException(listClass.getName() + " is not a subclass of " + List.class.getName());
+  public static <E, T extends List<E>> WamlFormat<T> listFormat(Supplier<T> creator,
+                                                                WamlFormat<E> elementFormat) {
+    return new ListFormat<E, T>(creator, elementFormat);
+  }
+
+  public static <E, T extends List<E>> WamlFormat<T> listFormat(MethodHandle creatorHandle,
+                                                                WamlFormat<E> elementFormat) throws WamlProviderException {
+    final MethodType methodType = creatorHandle.type();
+    if (methodType.parameterCount() != 0) {
+      throw new WamlProviderException("invalid creator signature " + creatorHandle);
     }
-    Constructor<T> constructor;
+
+    final CallSite callSite;
+    try {
+      callSite = LambdaMetafactory.metafactory(MethodHandles.lookup(), "get",
+                                               MethodType.methodType(Supplier.class),
+                                               MethodType.methodType(Object.class),
+                                               creatorHandle, methodType);
+    } catch (LambdaConversionException cause) {
+      throw new WamlProviderException(cause);
+    }
+
+    final Supplier<T> creator;
+    try {
+      creator = (Supplier<T>) callSite.getTarget().invokeExact();
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      throw new WamlProviderException(cause);
+    }
+
+    return new ListFormat<E, T>(creator, elementFormat);
+  }
+
+  public static <E, T extends List<E>> WamlFormat<T> listFormat(Executable creatorExecutable,
+                                                                WamlFormat<E> elementFormat) throws WamlProviderException {
+    MethodHandles.Lookup lookup = MethodHandles.lookup();
+    try {
+      lookup = MethodHandles.privateLookupIn(creatorExecutable.getDeclaringClass(), lookup);
+    } catch (IllegalAccessException | SecurityException cause) {
+      // Proceed with the original lookup object.
+    }
+
+    final MethodHandle creatorHandle;
+    if (creatorExecutable instanceof Constructor<?>) {
+      try {
+        creatorHandle = lookup.unreflectConstructor((Constructor<?>) creatorExecutable);
+      } catch (IllegalAccessException cause) {
+        throw new WamlProviderException("inaccessible creator " + creatorExecutable, cause);
+      }
+    } else if (creatorExecutable instanceof Method) {
+      try {
+        creatorHandle = lookup.unreflect((Method) creatorExecutable);
+      } catch (IllegalAccessException cause) {
+        throw new WamlProviderException("inaccessible creator " + creatorExecutable, cause);
+      }
+    } else {
+      throw new AssertionError("unreachable");
+    }
+
+    return WamlCollections.listFormat(creatorHandle, elementFormat);
+  }
+
+  public static <E, T extends List<E>> WamlFormat<T> listFormat(Class<?> listClass,
+                                                                WamlFormat<E> elementFormat) throws WamlProviderException {
+    if (!List.class.isAssignableFrom(listClass)) {
+      throw new WamlProviderException(listClass.getName() + " is not a subclass of " + List.class.getName());
+    }
     do {
       if (listClass == List.class) {
         listClass = ArrayList.class;
       }
-      try {
-        constructor = Assume.conforms(listClass.getDeclaredConstructor());
-        break;
-      } catch (NoSuchMethodException cause) {
-        listClass = listClass.getSuperclass();
-        assert listClass != null;
+      if (!listClass.isInterface() && (listClass.getModifiers() & Modifier.ABSTRACT) == 0) {
+        try {
+          final Constructor<?> constructor = listClass.getDeclaredConstructor();
+          return WamlCollections.listFormat(constructor, elementFormat);
+        } catch (NoSuchMethodException cause) {
+          // proceed
+        }
       }
+      listClass = listClass.getSuperclass();
+      assert listClass != null;
     } while (true);
-    constructor.setAccessible(true);
-    return new WamlCollections.ListForm<E, T>(constructor, elementForm);
   }
 
-  public static <E, T extends List<E>> @Nullable WamlArrayForm<E, T, T> listForm(WamlCodec codec, Class<?> listClass, Type listType) throws WamlFormException {
+  public static <E, T extends List<E>> @Nullable WamlFormat<T> listFormat(WamlMetaCodec metaCodec,
+                                                                          Class<?> listClass,
+                                                                          Type listType) throws WamlProviderException {
     do {
       Type[] typeArguments = null;
       if (listType instanceof ParameterizedType) {
@@ -135,54 +209,127 @@ public final class WamlCollections implements WamlProvider, ToSource {
         }
       }
       if (listType == List.class) {
-        final WamlForm<E> elementForm;
+        final WamlFormat<E> elementFormat;
         if (typeArguments != null && typeArguments.length == 1) {
-          elementForm = codec.getWamlForm(typeArguments[0]);
+          elementFormat = metaCodec.getWamlFormat(typeArguments[0]);
         } else {
-          elementForm = Assume.conforms(codec);
+          elementFormat = Assume.conforms(metaCodec);
         }
-        return WamlCollections.listForm(listClass, elementForm);
-      } else if (listType instanceof Class<?>) {
-        final Class<?> baseClass = (Class<?>) listType;
+        return WamlCollections.listFormat(listClass, elementFormat);
+      } else if (listType instanceof Class<?> baseClass) {
         final Type[] interfaceTypes = baseClass.getGenericInterfaces();
         for (int i = 0; i < interfaceTypes.length; i += 1) {
-          final WamlArrayForm<E, T, T> listForm = WamlCollections.listForm(codec, listClass, interfaceTypes[i]);
-          if (listForm != null) {
-            return listForm;
+          final WamlFormat<T> listFormat = WamlCollections.listFormat(metaCodec, listClass, interfaceTypes[i]);
+          if (listFormat != null) {
+            return listFormat;
           }
         }
         listType = baseClass.getSuperclass();
         continue;
-      } else {
-        return null;
       }
+      break;
     } while (true);
+    return null;
   }
 
-  public static <K, V, T extends Map<K, V>> WamlObjectForm<K, V, T, T> mapForm(Class<?> mapClass, WamlForm<K> keyForm, WamlForm<V> valueForm) {
-    if (!Map.class.isAssignableFrom(mapClass)) {
-      throw new IllegalArgumentException(mapClass.getName() + " is not a subclass of " + Map.class.getName());
+  public static <V, T extends Map<String, V>> WamlFormat<T> mapFormat(Supplier<T> creator,
+                                                                      WamlFormat<String> keyFormat,
+                                                                      WamlFormat<V> valueFormat,
+                                                                      FilterMode filterMode) {
+    return new MapFormat<V, T>(creator, keyFormat, valueFormat, filterMode);
+  }
+
+  public static <V, T extends Map<String, V>> WamlFormat<T> mapFormat(MethodHandle creatorHandle,
+                                                                      WamlFormat<String> keyFormat,
+                                                                      WamlFormat<V> valueFormat,
+                                                                      FilterMode filterMode) throws WamlProviderException {
+    final MethodType methodType = creatorHandle.type();
+    if (methodType.parameterCount() != 0) {
+      throw new WamlProviderException("invalid creator signature " + creatorHandle);
     }
-    Constructor<T> constructor;
+
+    final CallSite callSite;
+    try {
+      callSite = LambdaMetafactory.metafactory(MethodHandles.lookup(), "get",
+                                               MethodType.methodType(Supplier.class),
+                                               MethodType.methodType(Object.class),
+                                               creatorHandle, methodType);
+    } catch (LambdaConversionException cause) {
+      throw new WamlProviderException(cause);
+    }
+
+    final Supplier<T> creator;
+    try {
+      creator = (Supplier<T>) callSite.getTarget().invokeExact();
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      throw new WamlProviderException(cause);
+    }
+
+    return new MapFormat<V, T>(creator, keyFormat, valueFormat, filterMode);
+  }
+
+  public static <V, T extends Map<String, V>> WamlFormat<T> mapFormat(Executable creatorExecutable,
+                                                                      WamlFormat<String> keyFormat,
+                                                                      WamlFormat<V> valueFormat,
+                                                                      FilterMode filterMode) throws WamlProviderException {
+    MethodHandles.Lookup lookup = MethodHandles.lookup();
+    try {
+      lookup = MethodHandles.privateLookupIn(creatorExecutable.getDeclaringClass(), lookup);
+    } catch (IllegalAccessException | SecurityException cause) {
+      // Proceed with the original lookup object.
+    }
+
+    final MethodHandle creatorHandle;
+    if (creatorExecutable instanceof Constructor<?>) {
+      try {
+        creatorHandle = lookup.unreflectConstructor((Constructor<?>) creatorExecutable);
+      } catch (IllegalAccessException cause) {
+        throw new WamlProviderException("inaccessible creator " + creatorExecutable, cause);
+      }
+    } else if (creatorExecutable instanceof Method) {
+      try {
+        creatorHandle = lookup.unreflect((Method) creatorExecutable);
+      } catch (IllegalAccessException cause) {
+        throw new WamlProviderException("inaccessible creator " + creatorExecutable, cause);
+      }
+    } else {
+      throw new AssertionError("unreachable");
+    }
+
+    return WamlCollections.mapFormat(creatorHandle, keyFormat, valueFormat, filterMode);
+  }
+
+  public static <V, T extends Map<String, V>> WamlFormat<T> mapFormat(Class<?> mapClass,
+                                                                      WamlFormat<String> keyFormat,
+                                                                      WamlFormat<V> valueFormat,
+                                                                      FilterMode filterMode) throws WamlProviderException {
+    if (!Map.class.isAssignableFrom(mapClass)) {
+      throw new WamlProviderException(mapClass.getName() + " is not a subclass of " + Map.class.getName());
+    }
     do {
       if (mapClass == Map.class) {
         mapClass = HashMap.class;
       } else if (mapClass == SortedMap.class) {
         mapClass = TreeMap.class;
       }
-      try {
-        constructor = Assume.conforms(mapClass.getDeclaredConstructor());
-        break;
-      } catch (NoSuchMethodException cause) {
-        mapClass = mapClass.getSuperclass();
-        assert mapClass != null;
+      if (!mapClass.isInterface() && (mapClass.getModifiers() & Modifier.ABSTRACT) == 0) {
+        try {
+          final Constructor<?> constructor = mapClass.getDeclaredConstructor();
+          return WamlCollections.mapFormat(constructor, keyFormat, valueFormat, filterMode);
+        } catch (NoSuchMethodException cause) {
+          // proceed
+        }
       }
+      mapClass = mapClass.getSuperclass();
+      assert mapClass != null;
     } while (true);
-    constructor.setAccessible(true);
-    return new WamlCollections.MapForm<K, V, T>(constructor, keyForm, valueForm);
   }
 
-  public static <K, V, T extends Map<K, V>> @Nullable WamlObjectForm<K, V, T, T> mapForm(WamlCodec codec, Class<?> mapClass, Type mapType) throws WamlFormException {
+  public static <V, T extends Map<String, V>> @Nullable WamlFormat<T> mapFormat(WamlMetaCodec metaCodec,
+                                                                                Class<?> mapClass,
+                                                                                Type mapType,
+                                                                                FilterMode filterMode) throws WamlProviderException {
     do {
       Type[] typeArguments = null;
       if (mapType instanceof ParameterizedType) {
@@ -194,102 +341,131 @@ public final class WamlCollections implements WamlProvider, ToSource {
         }
       }
       if (mapType == Map.class) {
-        final WamlForm<K> keyForm;
-        final WamlForm<V> valueForm;
+        final WamlFormat<String> keyFormat;
+        final WamlFormat<V> valueFormat;
         if (typeArguments != null && typeArguments.length == 2) {
           if (typeArguments[0] instanceof TypeVariable) {
             final Type[] bounds = ((TypeVariable) typeArguments[0]).getBounds();
             if (bounds.length == 1 && bounds[0] == Object.class) {
-              keyForm = Assume.conforms(WamlJava.keyForm());
+              keyFormat = WamlLang.keyFormat();
             } else {
-              keyForm = codec.getWamlForm(typeArguments[0]);
+              keyFormat = metaCodec.getWamlFormat(typeArguments[0]);
             }
           } else {
-            keyForm = codec.getWamlForm(typeArguments[0]);
+            keyFormat = metaCodec.getWamlFormat(typeArguments[0]);
           }
-          valueForm = codec.getWamlForm(typeArguments[1]);
+          valueFormat = metaCodec.getWamlFormat(typeArguments[1]);
         } else {
-          keyForm = Assume.conforms(WamlJava.keyForm());
-          valueForm = Assume.conforms(codec);
+          keyFormat = WamlLang.keyFormat();
+          valueFormat = Assume.conforms(metaCodec);
         }
-        return WamlCollections.mapForm(mapClass, keyForm, valueForm);
-      } else if (mapType instanceof Class<?>) {
-        final Class<?> baseClass = (Class<?>) mapType;
+        return WamlCollections.mapFormat(mapClass, keyFormat, valueFormat, filterMode);
+      } else if (mapType instanceof Class<?> baseClass) {
         final Type[] interfaceTypes = baseClass.getGenericInterfaces();
         for (int i = 0; i < interfaceTypes.length; i += 1) {
-          final WamlObjectForm<K, V, T, T> mapForm = WamlCollections.mapForm(codec, mapClass, interfaceTypes[i]);
-          if (mapForm != null) {
-            return mapForm;
+          final WamlFormat<T> mapFormat = WamlCollections.mapFormat(metaCodec, mapClass, interfaceTypes[i], filterMode);
+          if (mapFormat != null) {
+            return mapFormat;
           }
         }
         mapType = baseClass.getSuperclass();
         continue;
-      } else {
+      }
+      break;
+    } while (true);
+    return null;
+  }
+
+  static <V, T extends Map<String, V>> Iterator<WamlFieldFormat<? extends V, T>> mapFieldFormatIterator(Iterator<String> keys,
+                                                                                                        WamlFormat<String> keyWriter,
+                                                                                                        WamlFormat<V> valueWriter,
+                                                                                                        FilterMode filterMode) {
+    return new MapFieldFormatIterator<V, T>(keys, keyWriter, valueWriter, filterMode);
+  }
+
+  static final class ListFormat<E, T extends List<E>> implements WamlFormat<T>, WamlArrayParser<E, T, T>, WamlArrayWriter<E, T>, ToSource {
+
+    final Supplier<T> creator;
+    final WamlFormat<E> elementFormat;
+
+    ListFormat(Supplier<T> creator, WamlFormat<E> elementFormat) {
+      this.creator = creator;
+      this.elementFormat = elementFormat;
+    }
+
+    @Override
+    public @Nullable String typeName() {
+      return "array";
+    }
+
+    @Override
+    public WamlParser<E> elementParser() {
+      return this.elementFormat;
+    }
+
+    @Override
+    public T arrayBuilder(@Nullable Object attrs) throws WamlException {
+      try {
+        return this.creator.get();
+      } catch (Throwable cause) {
+        Result.throwFatal(cause);
+        throw new WamlException(cause);
+      }
+    }
+
+    @Override
+    public T appendElement(T object, @Nullable E element) {
+      object.add(element);
+      return object;
+    }
+
+    @Override
+    public T buildArray(@Nullable Object attrs, T object) {
+      return object;
+    }
+
+    @Override
+    public @Nullable Iterator<? extends E> getElements(@Nullable T object) {
+      if (object == null) {
         return null;
       }
-    } while (true);
-  }
-
-  static final class ListForm<E, T extends List<E>> implements WamlArrayForm<E, T, T>, ToSource {
-
-    final Constructor<T> constructor;
-    final WamlForm<E> elementForm;
-
-    ListForm(Constructor<T> constructor, WamlForm<E> elementForm) {
-      this.constructor = constructor;
-      this.elementForm = elementForm;
+      return object.iterator();
     }
 
     @Override
-    public WamlForm<E> elementForm() {
-      return this.elementForm;
+    public WamlWriter<E> elementWriter() {
+      return this.elementFormat;
     }
 
     @Override
-    public T arrayBuilder() throws WamlException {
+    public boolean filter(@Nullable T object, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+        case TRUTHY:
+          return object != null;
+        case DISTINCT:
+          return object != null && !object.isEmpty();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public @Nullable T initializer(@Nullable Object attrs) throws WamlException {
       try {
-        return this.constructor.newInstance();
-      } catch (ReflectiveOperationException cause) {
-        throw new WamlException("unable to construct array builder", cause);
+        return this.creator.get();
+      } catch (Throwable cause) {
+        Result.throwFatal(cause);
+        throw new WamlException(cause);
       }
-    }
-
-    @Override
-    public T appendElement(T builder, @Nullable E element) {
-      builder.add(element);
-      return builder;
-    }
-
-    @Override
-    public T buildArray(T builder) {
-      return builder;
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable T value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeArray(output, this, value.iterator(), Collections.emptyIterator());
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable T value) throws TermException {
-      return Term.from(value);
-    }
-
-    @Override
-    public @Nullable T fromTerm(Term term) {
-      return term.objectValue(this.constructor.getDeclaringClass());
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlCollections", "listForm")
-              .appendArgument(this.constructor.getDeclaringClass())
-              .appendArgument(this.elementForm)
+      notation.beginInvoke("WamlCollections", "listFormat")
+              .appendArgument(this.creator)
+              .appendArgument(this.elementFormat)
               .endInvoke();
     }
 
@@ -300,85 +476,154 @@ public final class WamlCollections implements WamlProvider, ToSource {
 
   }
 
-  static final class MapForm<K, V, T extends Map<K, V>> implements WamlFieldForm<K, V, T>, WamlObjectForm<K, V, T, T>, ToSource {
+  static final class MapFormat<V, T extends Map<String, V>> implements WamlFormat<T>, WamlObjectFormat<V, T, T>, ToSource {
 
-    final Constructor<T> constructor;
-    final WamlForm<K> keyForm;
-    final WamlForm<V> valueForm;
+    final Supplier<T> creator;
+    final WamlFormat<String> keyFormat;
+    final WamlFormat<V> valueFormat;
+    final FilterMode filterMode;
 
-    MapForm(Constructor<T> constructor, WamlForm<K> keyForm, WamlForm<V> valueForm) {
-      this.constructor = constructor;
-      this.keyForm = keyForm;
-      this.valueForm = valueForm;
+    MapFormat(Supplier<T> creator, WamlFormat<String> keyFormat,
+              WamlFormat<V> valueFormat, FilterMode filterMode) {
+      this.creator = creator;
+      this.keyFormat = keyFormat;
+      this.valueFormat = valueFormat;
+      this.filterMode = filterMode;
     }
 
     @Override
-    public WamlForm<K> keyForm() {
-      return this.keyForm;
+    public @Nullable String typeName() {
+      return "object";
     }
 
     @Override
-    public WamlForm<V> valueForm() {
-      return this.valueForm;
+    public WamlFieldFormat<? extends V, T> getFieldFormat(@Nullable T object, String key) {
+      return WamlFieldFormat.forKey(key, this.keyFormat, this.valueFormat, this.filterMode);
     }
 
     @Override
-    public WamlFieldForm<K, V, T> getFieldForm(K key) {
-      return this;
+    public Iterator<WamlFieldFormat<? extends V, T>> getFieldFormats(@Nullable T object) {
+      if (object == null) {
+        return Collections.emptyIterator();
+      }
+      return new MapFieldFormatIterator<V, T>(object.keySet().iterator(), this.keyFormat,
+                                              this.valueFormat, this.filterMode);
     }
 
     @Override
-    public T objectBuilder() throws WamlException {
+    public Iterator<WamlFieldFormat<? extends V, T>> getDeclaredFieldFormats() {
+      return Collections.emptyIterator();
+    }
+
+    @Override
+    public WamlParser<String> keyParser() {
+      return this.keyFormat;
+    }
+
+    @Override
+    public T objectBuilder(@Nullable Object attrs) throws WamlException {
       try {
-        return this.constructor.newInstance();
-      } catch (ReflectiveOperationException cause) {
-        throw new WamlException("unable to construct object builder", cause);
+        return this.creator.get();
+      } catch (Throwable cause) {
+        Result.throwFatal(cause);
+        throw new WamlException(cause);
       }
     }
 
     @Override
-    public T updateField(T builder, K key, @Nullable V value) {
-      builder.put(key, value);
-      return builder;
+    public WamlFieldParser<? extends V, T> getFieldParser(T object, String key) {
+      return WamlFieldParser.forKey(key, this.valueFormat);
     }
 
     @Override
-    public T buildObject(T builder) {
-      return builder;
+    public @Nullable T buildObject(@Nullable Object attrs, T object) {
+      return object;
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable T value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeObject(output, this, value.entrySet().iterator(), Collections.emptyIterator());
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
+    public WamlFieldWriter<? extends V, T> getFieldWriter(T object, String key) {
+      return WamlFieldWriter.forKey(key, this.keyFormat, this.valueFormat, this.filterMode);
+    }
+
+    @Override
+    public Iterator<WamlFieldWriter<? extends V, T>> getFieldWriters(T object) {
+      return Assume.conforms(new MapFieldFormatIterator<V, T>(object.keySet().iterator(), this.keyFormat,
+                                                              this.valueFormat, this.filterMode));
+    }
+
+    @Override
+    public boolean filter(@Nullable T object, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+        case TRUTHY:
+          return object != null;
+        case DISTINCT:
+          return object != null && !object.isEmpty();
+        default:
+          return true;
       }
     }
 
     @Override
-    public Term intoTerm(@Nullable T value) throws TermException {
-      return Term.from(value);
+    public @Nullable T merged(@Nullable T newObject, @Nullable T oldObject) {
+      if (newObject == null || oldObject == null) {
+        return newObject;
+      }
+      newObject.putAll(oldObject);
+      return newObject;
     }
 
     @Override
-    public @Nullable T fromTerm(Term term) {
-      return term.objectValue(this.constructor.getDeclaringClass());
+    public @Nullable T initializer(@Nullable Object attrs) throws WamlException {
+      try {
+        return this.creator.get();
+      } catch (Throwable cause) {
+        Result.throwFatal(cause);
+        throw new WamlException(cause);
+      }
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlCollections", "mapForm")
-              .appendArgument(this.constructor.getDeclaringClass())
-              .appendArgument(this.keyForm)
-              .appendArgument(this.valueForm)
+      notation.beginInvoke("WamlCollections", "mapFormat")
+              .appendArgument(this.creator)
+              .appendArgument(this.keyFormat)
+              .appendArgument(this.valueFormat)
               .endInvoke();
     }
 
     @Override
     public String toString() {
       return this.toSource();
+    }
+
+  }
+
+  static final class MapFieldFormatIterator<V, T extends Map<String, V>> implements Iterator<WamlFieldFormat<? extends V, T>> {
+
+    final Iterator<String> keys;
+    final WamlFormat<String> keyFormat;
+    final WamlFormat<V> valueFormat;
+    final FilterMode filterMode;
+
+    MapFieldFormatIterator(Iterator<String> keys, WamlFormat<String> keyFormat,
+                           WamlFormat<V> valueFormat, FilterMode filterMode) {
+      this.keys = keys;
+      this.keyFormat = keyFormat;
+      this.valueFormat = valueFormat;
+      this.filterMode = filterMode;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return this.keys.hasNext();
+    }
+
+    @Override
+    public WamlFieldFormat<? extends V, T> next() {
+      return WamlFieldFormat.forKey(this.keys.next(), this.keyFormat,
+                                    this.valueFormat, this.filterMode);
     }
 
   }

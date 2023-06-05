@@ -90,8 +90,7 @@ public abstract class UriPattern implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UriPattern) {
-      final UriPattern that = (UriPattern) other;
+    } else if (other instanceof UriPattern that) {
       return this.toUri().equals(that.toUri());
     }
     return false;
@@ -127,7 +126,7 @@ public abstract class UriPattern implements ToSource, ToString {
     return this.toUri().toString();
   }
 
-  private static final UriPattern EMPTY = TerminalUriPattern.compile(Uri.empty());
+  static final UriPattern EMPTY = TerminalUriPattern.compile(Uri.empty());
 
   public static UriPattern empty() {
     return EMPTY;

@@ -9,10 +9,11 @@ ext.moduleName = 'swim.log'
 
 dependencies {
   api project(':swim-annotations')
+  api project(':swim-decl')
   api project(':swim-util')
   api project(':swim-collections')
   api project(':swim-codec')
-  api project(':swim-expr')
+  api project(':swim-term')
   implementation project(':swim-repr')
   implementation project(':swim-json')
   implementation project(':swim-waml')

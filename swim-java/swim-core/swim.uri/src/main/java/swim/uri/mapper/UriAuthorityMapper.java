@@ -47,9 +47,8 @@ public abstract class UriAuthorityMapper<T> extends UriSchemeMapper<T> {
   UriSchemeMapper<T> merged(UriSchemeMapper<T> that) {
     if (that instanceof UriAuthorityMapper<?>) {
       return this.merged((UriAuthorityMapper<T>) that);
-    } else {
-      return that;
     }
+    return that;
   }
 
   abstract UriAuthorityMapper<T> removed(UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment);
@@ -65,9 +64,8 @@ public abstract class UriAuthorityMapper<T> extends UriSchemeMapper<T> {
   UriSchemeMapper<T> unmerged(UriSchemeMapper<T> that) {
     if (that instanceof UriAuthorityMapper<?>) {
       return this.unmerged((UriAuthorityMapper<T>) that);
-    } else {
-      return this;
     }
+    return this;
   }
 
   public static <T> UriAuthorityMapper<T> compile(Uri pattern, UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment, T value) {

@@ -443,8 +443,7 @@ public class HashGenCacheMap<K, V> {
   }
 
   /**
-   * {@code VarHandle} for atomically accessing elements of a
-   * {@link HashGenCacheMapBucket} array.
+   * {@code VarHandle} for atomically accessing elements of a {@link HashGenCacheMapBucket} array.
    */
   static final VarHandle BUCKET;
 

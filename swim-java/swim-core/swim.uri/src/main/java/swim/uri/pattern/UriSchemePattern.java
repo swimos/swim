@@ -46,11 +46,11 @@ public abstract class UriSchemePattern extends UriPattern {
 
   public static UriSchemePattern compile(Uri pattern, UriScheme scheme, UriAuthority authority,
                                          UriPath path, UriQuery query, UriFragment fragment) {
-    if (scheme.isDefined()) {
-      return new UriSchemeLiteral(scheme, UriAuthorityPattern.compile(pattern, authority, path, query, fragment));
-    } else {
-      return UriAuthorityPattern.compile(pattern, authority, path, query, fragment);
+    final UriAuthorityPattern authorityPattern = UriAuthorityPattern.compile(pattern, authority, path, query, fragment);
+    if (!scheme.isDefined()) {
+      return authorityPattern;
     }
+    return new UriSchemeLiteral(scheme, authorityPattern);
   }
 
 }

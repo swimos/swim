@@ -153,9 +153,8 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
     final NetSocketContext context = this.context;
     if (context != null && context.sslSession() != null) {
       return "wss";
-    } else {
-      return "ws";
     }
+    return "ws";
   }
 
   @Override
@@ -244,19 +243,17 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       final int oldStatus = status;
       final int newStatus = status | READ_REQUEST;
       status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        status = newStatus;
-        if ((oldStatus & READ_REQUEST) == 0) {
-          // Trigger a read to begin reading a websocket frame.
-          this.triggerRead();
-          return true;
-        } else {
-          return false;
-        }
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      status = newStatus;
+      if ((oldStatus & READ_REQUEST) != 0) {
+        return false;
+      }
+      // Trigger a read to begin reading a websocket frame.
+      this.triggerRead();
+      return true;
     } while (true);
   }
 
@@ -292,9 +289,8 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
     final int readState = ((int) STATUS.getOpaque(this) & DECODE_MASK) >>> DECODE_SHIFT;
     if (readState == DECODE_FRAME || FRAGMENT.getOpaque(this) != null) {
       return this.requestRead();
-    } else {
-      return false;
     }
+    return false;
   }
 
   @SuppressWarnings("checkstyle:RequireThis") // false positive
@@ -361,17 +357,16 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       final int oldStatus = status;
       final int newStatus = (oldStatus & ~DECODE_MASK) | (DECODE_FRAME << DECODE_SHIFT);
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        status = newStatus;
-        // Initiate a frame read.
-        this.willReadFrame();
-        // Re-check status to pick up any callback changes.
-        status = (int) STATUS.getAcquire(this);
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      status = newStatus;
+      // Initiate a frame read.
+      this.willReadFrame();
+      // Re-check status to pick up any callback changes.
+      status = (int) STATUS.getAcquire(this);
+      break;
     } while (true);
 
     return status;
@@ -389,20 +384,19 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
         }
         final WsFragment<?> fragment = (WsFragment<?>) FRAGMENT.getOpaque(this);
         if (fragment == null) {
-          decode = this.decoder.decodeMessage(this.readBuffer, this.webSocket);
+          decode = this.decoder.decodeMessage(this.readBuffer, this.webSocket.subprotocol());
         } else {
-          decode = this.decoder.decodeContinuation(this.readBuffer, this.webSocket,
+          decode = this.decoder.decodeContinuation(this.readBuffer, this.webSocket.subprotocol(),
                                                    Assume.conforms(fragment));
         }
       } else {
         decode = decode.consume(this.readBuffer);
       }
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        decode = Decode.error(cause);
-      } else {
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      decode = Decode.error(cause);
     }
     // Store the frame decode continuation.
     DECODE.setOpaque(this, decode);
@@ -428,30 +422,29 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
           newStatus = (oldStatus & ~DECODE_MASK) | (DECODE_CLOSE << DECODE_SHIFT);
         }
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Reset the frame decode state.
-          DECODE.setOpaque(this, null);
-          // Check if a fragment was decoded.
-          if (frame instanceof WsFragment<?>) {
-            // Store the fragment so that message decoding can be resumed.
-            FRAGMENT.setOpaque(this, frame);
-          } else if (frame instanceof WsDataFrame<?>) {
-            // Finished reading a message; reset fragment state.
-            FRAGMENT.setOpaque(this, null);
-          } else if (frame instanceof WsCloseFrame<?>) {
-            // A close frame was decoded; don't decode any more frames.
-            this.doneReading();
-          }
-          // Complete the frame read.
-          this.didReadFrame(Result.ok(frame));
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Reset the frame decode state.
+        DECODE.setOpaque(this, null);
+        // Check if a fragment was decoded.
+        if (frame instanceof WsFragment<?>) {
+          // Store the fragment so that message decoding can be resumed.
+          FRAGMENT.setOpaque(this, frame);
+        } else if (frame instanceof WsDataFrame<?>) {
+          // Finished reading a message; reset fragment state.
+          FRAGMENT.setOpaque(this, null);
+        } else if (frame instanceof WsCloseFrame<?>) {
+          // A close frame was decoded; don't decode any more frames.
+          this.doneReading();
+        }
+        // Complete the frame read.
+        this.didReadFrame(Result.ok(frame));
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else if (decode.isError()) {
       // Failed to decode the frame;
@@ -460,20 +453,19 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~DECODE_MASK) | (DECODE_ERROR << DECODE_SHIFT);
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Close the socket for reading.
-          this.doneReading();
-          // Complete the frame read with the decode error;
-          // the websocket can write a close frame or close the socket.
-          this.didReadFrame(Result.error(decode.getError()));
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Close the socket for reading.
+        this.doneReading();
+        // Complete the frame read with the decode error;
+        // the websocket can write a close frame or close the socket.
+        this.didReadFrame(Result.error(decode.getError()));
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else {
       throw new AssertionError("unreachable");
@@ -497,20 +489,16 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       // Invoke willReadFrame websocket callback.
       this.webSocket.willReadFrame();
     } catch (WsException cause) {
-      // Report the exception.
       this.log.warningStatus("willReadFrame callback failed", this.webSocket, cause);
       // Fail the websocket with an error.
       this.writeClose(WsCloseFrame.error(cause));
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willReadFrame callback failed", this.webSocket, cause);
-        // Fail the websocket with an error.
-        this.writeClose(WsCloseFrame.error(cause));
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willReadFrame callback failed", this.webSocket, cause);
+      // Fail the websocket with an error.
+      this.writeClose(WsCloseFrame.error(cause));
     }
   }
 
@@ -525,20 +513,16 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       // Invoke didReadFrame websocket callback.
       this.webSocket.didReadFrame(frame);
     } catch (WsException cause) {
-      // Report the exception.
       this.log.warningStatus("didReadFrame callback failed", this.webSocket, cause);
       // Fail the websocket with an error.
       this.writeClose(WsCloseFrame.error(cause));
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("didReadFrame callback failed", this.webSocket, cause);
-        // Fail the websocket with an error.
-        this.writeClose(WsCloseFrame.error(cause));
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didReadFrame callback failed", this.webSocket, cause);
+      // Fail the websocket with an error.
+      this.writeClose(WsCloseFrame.error(cause));
     }
   }
 
@@ -602,9 +586,8 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
     final int writeState = ((int) STATUS.getOpaque(this) & ENCODE_MASK) >>> ENCODE_SHIFT;
     if (writeState == ENCODE_FRAME || CONTINUATION.getOpaque(this) != null) {
       return this.requestWrite();
-    } else {
-      return false;
     }
+    return false;
   }
 
   @SuppressWarnings("checkstyle:RequireThis") // false positive
@@ -658,17 +641,16 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       final int oldStatus = status;
       final int newStatus = (oldStatus & ~ENCODE_MASK) | (ENCODE_FRAME << ENCODE_SHIFT);
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        status = newStatus;
-        // Initiate the frame write.
-        this.willWriteFrame();
-        // Re-check status to pick up any callback changes.
-        status = (int) STATUS.getAcquire(this);
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      status = newStatus;
+      // Initiate the frame write.
+      this.willWriteFrame();
+      // Re-check status to pick up any callback changes.
+      status = (int) STATUS.getAcquire(this);
+      break;
     } while (true);
 
     return status;
@@ -699,11 +681,10 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
         encode = encode.produce(this.writeBuffer);
       }
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        encode = Encode.error(cause);
-      } else {
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      encode = Encode.error(cause);
     }
     // Store the frame encode continuation.
     ENCODE.setOpaque(this, encode);
@@ -729,30 +710,29 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
           newStatus = (oldStatus & ~ENCODE_MASK) | (ENCODE_CLOSE << ENCODE_SHIFT);
         }
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Reset the frame encode state.
-          ENCODE.setOpaque(this, null);
-          // Check if a fragment was encoded.
-          if (frame instanceof WsFragment<?>) {
-            // Store the continuation so that message encoding can be resumed.
-            CONTINUATION.setOpaque(this, frame);
-          } else if (frame instanceof WsDataFrame<?>) {
-            // Finished writing a message; reset continuation state.
-            CONTINUATION.setOpaque(this, null);
-          } else if (frame instanceof WsCloseFrame<?>) {
-            // A close frame was encoded; don't encode any more frames.
-            this.doneWriting();
-          }
-          // Complete the frame write.
-          this.didWriteFrame(Result.ok(frame));
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Reset the frame encode state.
+        ENCODE.setOpaque(this, null);
+        // Check if a fragment was encoded.
+        if (frame instanceof WsFragment<?>) {
+          // Store the continuation so that message encoding can be resumed.
+          CONTINUATION.setOpaque(this, frame);
+        } else if (frame instanceof WsDataFrame<?>) {
+          // Finished writing a message; reset continuation state.
+          CONTINUATION.setOpaque(this, null);
+        } else if (frame instanceof WsCloseFrame<?>) {
+          // A close frame was encoded; don't encode any more frames.
+          this.doneWriting();
+        }
+        // Complete the frame write.
+        this.didWriteFrame(Result.ok(frame));
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else if (encode.isError()) {
       // Failed to encode the frame;
@@ -761,20 +741,19 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~ENCODE_MASK) | (ENCODE_ERROR << ENCODE_SHIFT);
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Close the socket for writing.
-          this.doneWriting();
-          // Complete the frame write with the encode error;
-          // the websocket should close the socket.
-          this.didWriteFrame(Result.error(encode.getError()));
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Close the socket for writing.
+        this.doneWriting();
+        // Complete the frame write with the encode error;
+        // the websocket should close the socket.
+        this.didWriteFrame(Result.error(encode.getError()));
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else {
       throw new AssertionError("unreachable");
@@ -798,20 +777,16 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       // Invoke willWriteFrame websocket callback.
       this.webSocket.willWriteFrame();
     } catch (WsException cause) {
-      // Report the exception.
       this.log.warningStatus("willWriteFrame callback failed", this.webSocket, cause);
       // Fail the websocket with an error.
       this.writeClose(WsCloseFrame.error(cause));
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willWriteFrame callback failed", this.webSocket, cause);
-        // Fail the websocket with an error.
-        this.writeClose(WsCloseFrame.error(cause));
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willWriteFrame callback failed", this.webSocket, cause);
+      // Fail the websocket with an error.
+      this.writeClose(WsCloseFrame.error(cause));
     }
   }
 
@@ -826,20 +801,16 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       // Invoke didWriteFrame websocket callback.
       this.webSocket.didWriteFrame(frame);
     } catch (WsException cause) {
-      // Report the exception.
       this.log.warningStatus("didWriteFrame callback failed", this.webSocket, cause);
       // Fail the websocket with an error.
       this.writeClose(WsCloseFrame.error(cause));
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("didWriteFrame callback failed", this.webSocket, cause);
-        // Fail the websocket with an error.
-        this.writeClose(WsCloseFrame.error(cause));
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didWriteFrame callback failed", this.webSocket, cause);
+      // Fail the websocket with an error.
+      this.writeClose(WsCloseFrame.error(cause));
     }
   }
 
@@ -866,19 +837,17 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       final int oldStatus = status;
       final int newStatus = status | READ_DONE;
       status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        status = newStatus;
-        if ((oldStatus & READ_DONE) == 0) {
-          // Trigger a read to close the socket for reading.
-          this.triggerRead();
-          return true;
-        } else {
-          return false;
-        }
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      status = newStatus;
+      if ((oldStatus & READ_DONE) != 0) {
+        return false;
+      }
+      // Trigger a read to close the socket for reading.
+      this.triggerRead();
+      return true;
     } while (true);
   }
 
@@ -894,19 +863,17 @@ public class WebSocketStream implements NetSocket, FlowContext, WebSocketContext
       final int oldStatus = status;
       final int newStatus = status | WRITE_DONE;
       status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        status = newStatus;
-        if ((oldStatus & WRITE_DONE) == 0) {
-          // Trigger a write to close the socket for writing.
-          this.triggerWrite();
-          return true;
-        } else {
-          return false;
-        }
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      status = newStatus;
+      if ((oldStatus & WRITE_DONE) != 0) {
+        return false;
+      }
+      // Trigger a write to close the socket for writing.
+      this.triggerWrite();
+      return true;
     } while (true);
   }
 

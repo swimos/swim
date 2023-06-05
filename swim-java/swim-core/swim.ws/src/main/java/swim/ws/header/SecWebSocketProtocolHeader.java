@@ -82,7 +82,7 @@ public final class SecWebSocketProtocolHeader extends HttpHeader {
     return SecWebSocketProtocolHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<String> parseValue(String value) throws HttpException {
+  static FingerTrieList<String> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     FingerTrieList<String> subprotocols = FingerTrieList.empty();
@@ -139,7 +139,7 @@ public final class SecWebSocketProtocolHeader extends HttpHeader {
     return subprotocols;
   }
 
-  private static String writeValue(Iterator<String> subprotocols) {
+  static String writeValue(Iterator<String> subprotocols) {
     final StringOutput output = new StringOutput();
     String subprotocol = null;
     do {

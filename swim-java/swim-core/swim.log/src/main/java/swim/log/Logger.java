@@ -177,12 +177,15 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
         newFlags = oldFlags & ~BUBBLES_FLAG;
       }
       flags = (int) FLAGS.compareAndExchangeRelease(this, oldFlags, newFlags);
-      if (flags == oldFlags) {
-        if (oldFlags != newFlags) {
-          this.updateSeverity();
-        }
-        break;
+      if (flags != oldFlags) {
+        // CAS failed; try again.
+        continue;
       }
+      flags = newFlags;
+      if (oldFlags != newFlags) {
+        this.updateSeverity();
+      }
+      break;
     } while (true);
     return this;
   }
@@ -202,12 +205,15 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
         newFlags = oldFlags & ~INHERITS_FLAG;
       }
       flags = (int) FLAGS.compareAndExchangeRelease(this, oldFlags, newFlags);
-      if (flags == oldFlags) {
-        if (oldFlags != newFlags) {
-          this.updateSeverity();
-        }
-        break;
+      if (flags != oldFlags) {
+        // CAS failed; try again.
+        continue;
       }
+      flags = newFlags;
+      if (oldFlags != newFlags) {
+        this.updateSeverity();
+      }
+      break;
     } while (true);
     return this;
   }
@@ -317,30 +323,29 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
         // Child logger already exists.
         child = oldChild;
         break;
-      } else {
-        if (child == null) {
-          // Create the new child logger.
-          final String childTopic;
-          if (this.topic.length() != 0) {
-            childTopic = this.topic + '.' + segment;
-          } else {
-            childTopic = segment;
-          }
-          child = this.createChild(childTopic);
-          child.parent = this;
-          child.configure();
-          childRef = new SoftReference<Logger>(child);
+      } else if (child == null) {
+        // Create the new child logger.
+        final String childTopic;
+        if (this.topic.length() != 0) {
+          childTopic = this.topic + '.' + segment;
+        } else {
+          childTopic = segment;
         }
-        // Try to add the new child logger to the children map.
-        final HashTrieMap<String, SoftReference<Logger>> oldChildren = children;
-        final HashTrieMap<String, SoftReference<Logger>> newChildren = oldChildren.updated(segment, childRef);
-        children = (HashTrieMap<String, SoftReference<Logger>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
-        if (children == oldChildren) {
-          // Successfully inserted the new child logger.
-          children = newChildren;
-          break;
-        }
+        child = this.createChild(childTopic);
+        child.parent = this;
+        child.configure();
+        childRef = new SoftReference<Logger>(child);
       }
+      // Try to add the new child logger to the children map.
+      final HashTrieMap<String, SoftReference<Logger>> oldChildren = children;
+      final HashTrieMap<String, SoftReference<Logger>> newChildren = oldChildren.updated(segment, childRef);
+      children = (HashTrieMap<String, SoftReference<Logger>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
+      if (children != oldChildren) {
+        // CAS failed; try again.
+        continue;
+      }
+      children = newChildren;
+      break;
     } while (true);
 
     // Periodically help purge child logger references cleared by the GC.
@@ -372,15 +377,16 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
       final SoftReference<Logger> childRef = children.get(segment);
       if (childRef == null || childRef.get() != null) {
         break;
-      } else {
-        final HashTrieMap<String, SoftReference<Logger>> oldChildren = children;
-        final HashTrieMap<String, SoftReference<Logger>> newChildren = oldChildren.removed(segment);
-        children = (HashTrieMap<String, SoftReference<Logger>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
-        if (children == oldChildren) {
-          children = newChildren;
-          break;
-        }
       }
+      final HashTrieMap<String, SoftReference<Logger>> oldChildren = children;
+      final HashTrieMap<String, SoftReference<Logger>> newChildren = oldChildren.removed(segment);
+      children = (HashTrieMap<String, SoftReference<Logger>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
+      if (children != oldChildren) {
+        // CAS failed; try again.
+        continue;
+      }
+      children = newChildren;
+      break;
     } while (true);
   }
 
@@ -418,12 +424,15 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
         throw new AssertionError("unreachable");
       }
       subscribersRef = SUBSCRIBERS.compareAndExchangeRelease(this, oldSubscribersRef, newSubscribersRef);
-      if (subscribersRef == oldSubscribersRef) {
-        if (oldSubscribersRef != newSubscribersRef) {
-          this.updateSeverity();
-        }
-        break;
+      if (subscribersRef != oldSubscribersRef) {
+        // CAS failed; try again.
+        continue;
       }
+      subscribersRef = newSubscribersRef;
+      if (oldSubscribersRef != newSubscribersRef) {
+        this.updateSeverity();
+      }
+      break;
     } while (true);
   }
 
@@ -470,12 +479,15 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
         throw new AssertionError("unreachable");
       }
       subscribersRef = SUBSCRIBERS.compareAndExchangeRelease(this, oldSubscribersRef, newSubscribersRef);
-      if (subscribersRef == oldSubscribersRef) {
-        if (oldSubscribersRef != newSubscribersRef) {
-          this.updateSeverity();
-        }
-        break;
+      if (subscribersRef != oldSubscribersRef) {
+        // CAS failed; try again.
+        continue;
       }
+      subscribersRef = newSubscribersRef;
+      if (oldSubscribersRef != newSubscribersRef) {
+        this.updateSeverity();
+      }
+      break;
     } while (true);
   }
 

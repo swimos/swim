@@ -34,19 +34,18 @@ public abstract class UriFragmentPattern extends UriQueryPattern {
 
   @Override
   boolean matches(UriQuery query, UriFragment fragment) {
-    if (!query.isDefined()) {
-      return this.matches(fragment);
-    } else {
+    if (query.isDefined()) {
       return false;
     }
+    return this.matches(fragment);
   }
 
   public static UriFragmentPattern compile(Uri pattern, UriFragment fragment) {
-    if (fragment.isDefined()) {
-      return new UriFragmentLiteral(fragment, TerminalUriPattern.compile(pattern));
-    } else {
-      return TerminalUriPattern.compile(pattern);
+    final TerminalUriPattern terminalPattern = TerminalUriPattern.compile(pattern);
+    if (!fragment.isDefined()) {
+      return terminalPattern;
     }
+    return new UriFragmentLiteral(fragment, terminalPattern);
   }
 
 }

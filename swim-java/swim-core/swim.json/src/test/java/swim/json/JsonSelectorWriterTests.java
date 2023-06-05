@@ -17,7 +17,7 @@ package swim.json;
 import org.junit.jupiter.api.Test;
 import swim.expr.ContextExpr;
 import swim.expr.GlobalExpr;
-import swim.expr.selector.InvokeExpr;
+import swim.expr.InvokeExpr;
 import swim.repr.Repr;
 import swim.repr.TermRepr;
 
@@ -34,7 +34,7 @@ public class JsonSelectorWriterTests {
                  JsonWriterOptions.readable());
     assertWrites("baz(x,y)",
                  TermRepr.of(InvokeExpr.of(ContextExpr.child(Repr.of("baz")), ContextExpr.child(Repr.of("x")), ContextExpr.child(Repr.of("y")))),
-                 JsonWriterOptions.compact());
+                 JsonWriterOptions.standard());
   }
 
   @Test
@@ -149,12 +149,12 @@ public class JsonSelectorWriterTests {
   }
 
   public static void assertWrites(String expected, Repr value, JsonWriterOptions options) {
-    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(options)));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.valueFormat().write(value, options));
   }
 
   public static void assertWrites(String expected, Repr value) {
-    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(JsonWriterOptions.readable())));
-    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(JsonWriterOptions.compact())));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.valueFormat().write(value, JsonWriterOptions.readable()));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.valueFormat().write(value, JsonWriterOptions.standard()));
   }
 
 }

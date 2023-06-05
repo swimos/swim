@@ -19,6 +19,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Binary;
 import swim.codec.BinaryInputBuffer;
+import swim.codec.Codec;
 import swim.codec.CodecException;
 import swim.codec.Decode;
 import swim.codec.Diagnostic;
@@ -29,7 +30,6 @@ import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Text;
-import swim.codec.Transcoder;
 import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.collections.FingerTrieList;
@@ -99,7 +99,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
     return HttpResponse.of(this.version, this.status, this.headers, payload);
   }
 
-  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(InputBuffer input, HttpRequest<?> request, Transcoder<T2> transcoder) throws HttpException {
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(InputBuffer input, HttpRequest<?> request, Codec<T2> codec) throws HttpException {
     // RFC 7230 § 3.3.3 Item 1
     if (request.method().equals(HttpMethod.HEAD)
         || this.status().isInformational()
@@ -136,16 +136,16 @@ public final class HttpResponse<T> extends HttpMessage<T> {
       if (transferCodings.size() != 1 || !Assume.nonNull(transferCodings.head()).isChunked()) {
         throw new HttpException(HttpStatus.BAD_GATEWAY, "unsupported Transfer-Encoding: " + transferEncoding.value());
       }
-      return HttpChunked.decode(input, transcoder);
+      return HttpChunked.decode(input, codec);
     }
 
     if (contentLength != null) {
       // RFC 7230 § 3.3.3 Item 5
-      return HttpBody.decode(input, transcoder, contentLength.length());
+      return HttpBody.decode(input, codec, contentLength.length());
     }
 
     // RFC 7230 § 3.3.3 Item 7
-    return HttpUnsized.decode(input, transcoder);
+    return HttpUnsized.decode(input, codec);
   }
 
   public <T2> Decode<? extends HttpPayload<T2>> decodePayload(InputBuffer input, HttpRequest<?> request) throws HttpException {
@@ -182,15 +182,15 @@ public final class HttpResponse<T> extends HttpMessage<T> {
       }
     }
 
-    Transcoder<T2> transcoder;
+    Codec<T2> codec;
     if (contentType != null) {
       try {
-        transcoder = Transcoder.get(contentType.mediaType(), Object.class);
+        codec = Codec.get(contentType.mediaType(), Object.class);
       } catch (CodecException cause) {
-        transcoder = Assume.conforms(Binary.byteBufferTranscoder());
+        codec = Assume.conforms(Binary.byteBufferCodec());
       }
     } else {
-      transcoder = Assume.conforms(Binary.byteBufferTranscoder());
+      codec = Assume.conforms(Binary.byteBufferCodec());
     }
 
     if (transferEncoding != null) {
@@ -199,20 +199,20 @@ public final class HttpResponse<T> extends HttpMessage<T> {
       if (transferCodings.size() != 1 || !Assume.nonNull(transferCodings.head()).isChunked()) {
         throw new HttpException(HttpStatus.BAD_GATEWAY, "unsupported Transfer-Encoding: " + transferEncoding.value());
       }
-      return HttpChunked.decode(input, transcoder);
+      return HttpChunked.decode(input, codec);
     }
 
     if (contentLength != null) {
       // RFC 7230 § 3.3.3 Item 5
-      return HttpBody.decode(input, transcoder, contentLength.length());
+      return HttpBody.decode(input, codec, contentLength.length());
     }
 
     // RFC 7230 § 3.3.3 Item 7
-    return HttpUnsized.decode(input, transcoder);
+    return HttpUnsized.decode(input, codec);
   }
 
-  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(HttpRequest<?> request, Transcoder<T2> transcoder) throws HttpException {
-    return this.decodePayload(BinaryInputBuffer.empty(), request, transcoder);
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(HttpRequest<?> request, Codec<T2> codec) throws HttpException {
+    return this.decodePayload(BinaryInputBuffer.empty(), request, codec);
   }
 
   public <T2> Decode<? extends HttpPayload<T2>> decodePayload(HttpRequest<?> request) throws HttpException {
@@ -233,8 +233,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpResponse<?>) {
-      final HttpResponse<?> that = (HttpResponse<?>) other;
+    } else if (other instanceof HttpResponse<?> that) {
       return this.version.equals(that.version)
           && this.status.equals(that.status)
           && this.headers.equals(that.headers)
@@ -331,7 +330,7 @@ public final class HttpResponse<T> extends HttpMessage<T> {
     final HttpPayload<?> payload;
     final String message = error.getMessage();
     if (message != null) {
-      payload = HttpBody.of(message, Text.transcoder());
+      payload = HttpBody.of(message, Text.stringCodec());
     } else {
       payload = HttpEmpty.payload();
     }

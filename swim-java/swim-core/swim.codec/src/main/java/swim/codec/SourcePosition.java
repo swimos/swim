@@ -183,8 +183,7 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof SourcePosition) {
-      final SourcePosition that = (SourcePosition) other;
+    } else if (other instanceof SourcePosition that) {
       return Objects.equals(this.name, that.name)
           && this.offset == that.offset
           && this.line == that.line
@@ -210,9 +209,9 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
     if (this.name != null) {
       notation.appendArgument(this.name);
     }
-    notation.appendArgument(this.offset);
-    notation.appendArgument(this.line);
-    notation.appendArgument(this.column);
+    notation.appendArgument(this.offset)
+            .appendArgument(this.line)
+            .appendArgument(this.column);
     if (this.note != null) {
       notation.appendArgument(this.note);
     }
@@ -226,9 +225,9 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
     if (this.name != null) {
       notation.appendField("name", this.name);
     }
-    notation.appendField("offset", this.offset);
-    notation.appendField("line", this.line);
-    notation.appendField("column", this.column);
+    notation.appendField("offset", this.offset)
+            .appendField("line", this.line)
+            .appendField("column", this.column);
     if (this.note != null) {
       notation.appendField("note", this.note);
     }

@@ -44,17 +44,17 @@ public interface ReprProvider {
 
   /**
    * Returns a {@code ReprForm} that converts between instances of
-   * the given {@code javaType} and {@code Repr} instances.
+   * the given {@code type} and {@code Repr} instances.
    *
-   * @param javaType the type of {@code ReprForm} to resolve
+   * @param type the type of {@code ReprForm} to resolve
    * @return a {@code ReprForm<T>} whose type parameter {@code T} conforms
-   *         to the given {@code javaType}, or {@code null} if this provider
-   *         can't resolve the given {@code javaType}
-   * @throws ReprFormException if this provider could have resolved the given
-   *         {@code javaType}, but was unable to do so because of a potentially
-   *         inadvertent error
+   *         to the given {@code type}, or {@code null} if this provider
+   *         can't resolve the given {@code type}
+   * @throws ReprProviderException if this provider could have resolved
+   *         the given {@code type}, but was unable to do so because
+   *         of a potentially inadvertent error
    */
-  @Nullable ReprForm<?> resolveReprForm(Type javaType) throws ReprFormException;
+  @Nullable ReprForm<?> resolveReprForm(Type type) throws ReprProviderException;
 
   static final int BUILTIN_PRIORITY = 100;
 

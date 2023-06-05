@@ -137,13 +137,11 @@ final class EncodeWsDeflateFrame<T> extends Encode<WsFrame<T>> {
 
   @Override
   public Encode<WsFrame<T>> produce(OutputBuffer<?> output) {
-    return EncodeWsDeflateFrame.encode(output, this.encoder, this.frame,
-                                       this.encode, this.offset);
+    return EncodeWsDeflateFrame.encode(output, this.encoder, this.frame, this.encode, this.offset);
   }
 
   static <T> Encode<WsFrame<T>> encode(OutputBuffer<?> output, WsDeflateEncoder encoder,
-                                       WsFrame<T> frame, @Nullable Encode<?> encode,
-                                       long offset) {
+                                       WsFrame<T> frame, @Nullable Encode<?> encode, long offset) {
     // Only compress data frames.
     final WsOpcode frameType = frame.frameType();
     if (frameType.isControl()) {
@@ -176,7 +174,7 @@ final class EncodeWsDeflateFrame<T> extends Encode<WsFrame<T>> {
       // Encode a payload fragment into the deflate buffer.
       final BinaryOutputBuffer deflateBuffer = encoder.deflateBuffer;
       if (encode == null) {
-        encode = frame.transcoder().encode(deflateBuffer, Assume.conformsNullable(frame.get()));
+        encode = frame.codec().encode(deflateBuffer, Assume.conformsNullable(frame.get()));
       } else {
         encode = encode.produce(deflateBuffer);
       }

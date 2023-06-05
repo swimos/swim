@@ -17,8 +17,8 @@ package swim.ws;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Codec;
 import swim.codec.Encode;
-import swim.codec.Transcoder;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -58,8 +58,8 @@ public final class WsContinuation<T> extends WsFrame<T> implements ToSource {
   }
 
   @Override
-  public Transcoder<T> transcoder() {
-    return this.frame.transcoder();
+  public Codec<T> codec() {
+    return this.frame.codec();
   }
 
   public WsDataFrame<T> frame() {
@@ -78,8 +78,7 @@ public final class WsContinuation<T> extends WsFrame<T> implements ToSource {
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WsContinuation<?>) {
-      final WsContinuation<?> that = (WsContinuation<?>) other;
+    } else if (other instanceof WsContinuation<?> that) {
       return this.frame.equals(that.frame)
           && this.encodePayload.equals(that.encodePayload)
           && this.offset == that.offset;

@@ -16,8 +16,10 @@ package swim.codec;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.Covariant;
 import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -96,9 +98,9 @@ import swim.util.ToSource;
  * <li>{@link #getNonNullUnchecked()}: returns the written value, if available
  *     and not {@code null}; otherwise throws an unchecked exception
  * <li>{@link #getOr(Object) getOr(T)}: returns the written value, if available;
- *     otherwise returns a default value
+ *     otherwise returns some other value
  * <li>{@link #getNonNullOr(Object) getNonNullOr(T)}: returns the written value,
- *     if available and not {@code null}; otherwise returns a default value
+ *     if available and not {@code null}; otherwise returns some other value
  * <li>{@link #getOrElse(Supplier)}: returns the written value, if available;
  *     otherwise returns a value supplied by a function
  * <li>{@link #getNonNullOrElse(Supplier)}: returns the written value,
@@ -132,12 +134,14 @@ import swim.util.ToSource;
  * from {@code backoff} indicates that the {@code Write} instance is currently
  * ready to produce more output.
  *
+ * @param <T> the type of written value
+ *
  * @see Output
  * @see Writer
  */
 @Public
 @Since("5.0")
-public abstract class Write<T> extends Encode<T> {
+public abstract class Write<@Covariant T> extends Encode<T> {
 
   /**
    * Constructs a {@code Write} instance in the {@code write-cont} state.
@@ -220,10 +224,10 @@ public abstract class Write<T> extends Encode<T> {
    * {@code write-backoff} state and invoke {@code produce} with a
    * terminated output in order to terminate a write operation.
    * <p>
-   * Consider the example of a proxy translator that parses one input,
+   * Consider the example of a proxy stream that parses one input,
    * and writes another output. There's no point invoking {@code produce}
-   * on the write end of the translator if the parse end's input is empty.
-   * Such a translator can wait for input to become available before calling
+   * on the write end of the stream if the parse end's input is empty.
+   * Such a stream can wait for input to become available before calling
    * {@code future.requestOutput()}.
    *
    * @param future an output future that will trigger an invocation of
@@ -267,11 +271,10 @@ public abstract class Write<T> extends Encode<T> {
   @Override
   public @NonNull T getNonNull() throws WriteException {
     final T value = this.get();
-    if (value != null) {
-      return value;
-    } else {
+    if (value == null) {
       throw new NullPointerException("written value is null");
     }
+    return value;
   }
 
   /**
@@ -320,50 +323,48 @@ public abstract class Write<T> extends Encode<T> {
 
   /**
    * Returns the written value, if in the {@code write-done} state;
-   * otherwise returns the given {@code defaultValue}. The default
-   * implementation delegates to {@link #get()}, catching any
-   * {@code WriteException} or {@code IllegalStateException}
-   * to instead return {@code defaultValue}.
+   * otherwise returns some {@code other} value. The default implementation
+   * delegates to {@link #get()}, catching any {@code WriteException}
+   * or {@code IllegalStateException} to instead return {@code other}.
    *
-   * @param defaultValue returned when a written value is not available
-   * @return either the written value, or the {@code defaultValue}
+   * @param other returned when a written value is not available
+   * @return either the written value, or the {@code other} value
    */
   @CheckReturnValue
   @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
+  public @Nullable T getOr(@Nullable T other) {
     try {
       return this.get();
     } catch (WriteException | IllegalStateException cause) {
-      return defaultValue;
+      return other;
     }
   }
 
   /**
-   * Returns the written value, if in the {@code write-done} state and
-   * the written value is not {@code null}; otherwise returns the given
-   * non-{@code null} {@code defaultValue}. The default implementation
-   * delegates to {@link #getNonNull()}, catching any {@code WriteException},
+   * Returns the written value, if in the {@code write-done} state
+   * and the written value is not {@code null}; otherwise returns some
+   * non-{@code null} {@code other}. The default implementation delegates
+   * to {@link #getNonNull()}, catching any {@code WriteException},
    * {@code IllegalStateException}, or {@code NullPointerException}
-   * to instead {@code null}-check and return the {@code defaultValue}.
+   * to instead {@code null}-check and return the {@code other} value.
    *
-   * @param defaultValue non-{@code null} value returned when
+   * @param other non-{@code null} value returned when
    *        the written value is {@code null} or not available
    * @return either the non-{@code null} written value,
-   *         or the non-{@code null} {@code defaultValue}
+   *         or the non-{@code null} {@code other} value
    * @throws NullPointerException if the written value and
-   *         the {@code defaultValue} are both {@code null}
+   *         the {@code other} value are both {@code null}
    */
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+  public @NonNull T getNonNullOr(@NonNull T other) {
     try {
       return this.getNonNull();
     } catch (WriteException | IllegalStateException | NullPointerException cause) {
-      if (defaultValue != null) {
-        return defaultValue;
-      } else {
-        throw new NullPointerException("default value is null");
+      if (other == null) {
+        throw new NullPointerException("other value is null");
       }
+      return other;
     }
   }
 
@@ -412,11 +413,10 @@ public abstract class Write<T> extends Encode<T> {
       return this.getNonNull();
     } catch (WriteException | IllegalStateException | NullPointerException cause) {
       final T value = supplier.get();
-      if (value != null) {
-        return value;
-      } else {
+      if (value == null) {
         throw new NullPointerException("supplied value is null");
       }
+      return value;
     }
   }
 
@@ -497,6 +497,25 @@ public abstract class Write<T> extends Encode<T> {
   }
 
   /**
+   * Returns a {@code Write} instance that continues writing {@code that}
+   * after it finishes writing {@code this}.
+   *
+   * @param that the {@code Write} instance to write after {@code this}
+   * @return a {@code Write} instance that writes {@code this},
+   *         followed by {@code that}
+   */
+  public <T2> Write<T2> andThen(Write<T2> that) {
+    Objects.requireNonNull(that);
+    return new WriteAndThen<T2>(this, that);
+  }
+
+  @CheckReturnValue
+  @Override
+  public <U> Write<U> map(Function<? super T, ? extends U> mapper) {
+    return new WriteMapper<T, U>(this, mapper);
+  }
+
+  /**
    * Converts this {@code Write} instance to a {@link Result}. {@code Write}
    * states map to {@code Result} states according to the following rules:
    * <ul>
@@ -518,19 +537,6 @@ public abstract class Write<T> extends Encode<T> {
     } catch (WriteException | IllegalStateException cause) {
       return Result.error(cause);
     }
-  }
-
-  /**
-   * Returns a {@code Write} instance that continues writing {@code that}
-   * after it finishes writing {@code this}.
-   *
-   * @param that the {@code Write} instance to write after {@code this}
-   * @return a {@code Write} instance that writes {@code this},
-   *         followed by {@code that}
-   */
-  public <T2> Write<T2> andThen(Write<T2> that) {
-    Objects.requireNonNull(that);
-    return new WriteAndThen<T2>(this, that);
   }
 
   /**
@@ -588,7 +594,7 @@ public abstract class Write<T> extends Encode<T> {
 
 }
 
-final class WriteDone<T> extends Write<T> implements ToSource {
+final class WriteDone<@Covariant T> extends Write<T> implements ToSource {
 
   private final @Nullable T value;
 
@@ -620,11 +626,10 @@ final class WriteDone<T> extends Write<T> implements ToSource {
   @CheckReturnValue
   @Override
   public @NonNull T getNonNull() {
-    if (this.value != null) {
-      return this.value;
-    } else {
+    if (this.value == null) {
       throw new NullPointerException("written value is null");
     }
+    return this.value;
   }
 
   @CheckReturnValue
@@ -636,28 +641,27 @@ final class WriteDone<T> extends Write<T> implements ToSource {
   @CheckReturnValue
   @Override
   public @NonNull T getNonNullUnchecked() {
-    if (this.value != null) {
-      return this.value;
-    } else {
+    if (this.value == null) {
       throw new NullPointerException("written value is null");
     }
-  }
-
-  @CheckReturnValue
-  @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
     return this.value;
   }
 
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+  public @Nullable T getOr(@Nullable T other) {
+    return this.value;
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOr(@NonNull T other) {
     if (this.value != null) {
       return this.value;
-    } else if (defaultValue != null) {
-      return defaultValue;
+    } else if (other != null) {
+      return other;
     } else {
-      throw new NullPointerException("default value is null");
+      throw new NullPointerException("other value is null");
     }
   }
 
@@ -674,11 +678,10 @@ final class WriteDone<T> extends Write<T> implements ToSource {
       return this.value;
     } else {
       final T value = supplier.get();
-      if (value != null) {
-        return value;
-      } else {
+      if (value == null) {
         throw new NullPointerException("supplied value is null");
       }
+      return value;
     }
   }
 
@@ -692,6 +695,25 @@ final class WriteDone<T> extends Write<T> implements ToSource {
     return this;
   }
 
+  @Override
+  public <T2> Write<T2> andThen(Write<T2> that) {
+    Objects.requireNonNull(that);
+    return that;
+  }
+
+  @CheckReturnValue
+  @Override
+  public <U> Write<U> map(Function<? super T, ? extends U> mapper) {
+    try {
+      return Write.done(mapper.apply(this.value));
+    } catch (Throwable cause) {
+      if (Result.isFatal(cause)) {
+        throw cause;
+      }
+      return Write.error(cause);
+    }
+  }
+
   @CheckReturnValue
   @Override
   public Result<T> toResult() {
@@ -699,14 +721,10 @@ final class WriteDone<T> extends Write<T> implements ToSource {
   }
 
   @Override
-  public <T2> Write<T2> andThen(Write<T2> that) {
-    Objects.requireNonNull(that);
-    return that;
-  }
-
-  @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof WriteDone<?> that) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof WriteDone<?> that) {
       return Objects.equals(this.value, that.value);
     }
     return false;
@@ -736,7 +754,7 @@ final class WriteDone<T> extends Write<T> implements ToSource {
 
 }
 
-final class WriteError<T> extends Write<T> implements ToSource {
+final class WriteError<@Covariant T> extends Write<T> implements ToSource {
 
   private final Throwable error;
 
@@ -793,18 +811,17 @@ final class WriteError<T> extends Write<T> implements ToSource {
 
   @CheckReturnValue
   @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
-    return defaultValue;
+  public @Nullable T getOr(@Nullable T other) {
+    return other;
   }
 
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
-    if (defaultValue != null) {
-      return defaultValue;
-    } else {
-      throw new NullPointerException("default value is null");
+  public @NonNull T getNonNullOr(@NonNull T other) {
+    if (other == null) {
+      throw new NullPointerException("other value is null");
     }
+    return other;
   }
 
   @CheckReturnValue
@@ -817,11 +834,10 @@ final class WriteError<T> extends Write<T> implements ToSource {
   @Override
   public @NonNull T getNonNullOrElse(Supplier<? extends T> supplier) {
     final T value = supplier.get();
-    if (value != null) {
-      return value;
-    } else {
+    if (value == null) {
       throw new NullPointerException("supplied value is null");
     }
+    return value;
   }
 
   @Override
@@ -857,6 +873,18 @@ final class WriteError<T> extends Write<T> implements ToSource {
     throw new AssertionError("write failed", this.error);
   }
 
+  @Override
+  public <T2> Write<T2> andThen(Write<T2> that) {
+    Objects.requireNonNull(that);
+    return Assume.conforms(this);
+  }
+
+  @CheckReturnValue
+  @Override
+  public <U> Write<U> map(Function<? super T, ? extends U> mapper) {
+    return Assume.conforms(this);
+  }
+
   @CheckReturnValue
   @Override
   public Result<T> toResult() {
@@ -864,14 +892,10 @@ final class WriteError<T> extends Write<T> implements ToSource {
   }
 
   @Override
-  public <T2> Write<T2> andThen(Write<T2> that) {
-    Objects.requireNonNull(that);
-    return Assume.conforms(this);
-  }
-
-  @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof WriteError<?> that) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof WriteError<?> that) {
       return this.error.equals(that.error);
     }
     return false;
@@ -899,7 +923,7 @@ final class WriteError<T> extends Write<T> implements ToSource {
 
 }
 
-final class WriteAndThen<T> extends Write<T> implements ToSource {
+final class WriteAndThen<@Covariant T> extends Write<T> implements ToSource {
 
   private final Write<?> head;
   private final Write<T> tail;
@@ -922,7 +946,9 @@ final class WriteAndThen<T> extends Write<T> implements ToSource {
 
   @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof WriteAndThen<?> that) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof WriteAndThen<?> that) {
       return this.head.equals(that.head)
           && this.tail.equals(that.tail);
     }
@@ -943,6 +969,42 @@ final class WriteAndThen<T> extends Write<T> implements ToSource {
     notation.appendSource(this.head)
             .beginInvoke("andThen")
             .appendArgument(this.tail)
+            .endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+}
+
+final class WriteMapper<S, T> extends Write<T> implements ToSource {
+
+  final Write<S> write;
+  final Function<? super S, ? extends T> mapper;
+
+  WriteMapper(Write<S> write, Function<? super S, ? extends T> mapper) {
+    this.write = write;
+    this.mapper = mapper;
+  }
+
+  @Override
+  public Write<T> produce(Output<?> output) {
+    return this.write.produce(output).map(this.mapper);
+  }
+
+  @Override
+  public <U> Write<U> map(Function<? super T, ? extends U> mapper) {
+    return new WriteMapper<S, U>(this.write, this.mapper.andThen(mapper));
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.appendSource(this.write)
+            .beginInvoke("map")
+            .appendArgument(this.mapper)
             .endInvoke();
   }
 

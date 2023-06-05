@@ -16,13 +16,13 @@ package swim.http;
 
 import org.junit.jupiter.api.Test;
 import swim.annotations.Nullable;
+import swim.codec.Codec;
 import swim.codec.Decode;
 import swim.codec.Encode;
 import swim.codec.InputBuffer;
 import swim.codec.MediaType;
 import swim.codec.OutputBuffer;
 import swim.codec.Text;
-import swim.codec.Transcoder;
 import swim.codec.Utf8EncodedOutput;
 import swim.codec.Write;
 
@@ -30,49 +30,49 @@ public class HttpChunkedTests {
 
   @Test
   public void decodeEmptyChunk() {
-    assertDecodes(HttpChunked.of("", Text.transcoder()), "0\r\n\r\n");
+    assertDecodes(HttpChunked.of("", Text.stringCodec()), "0\r\n\r\n");
   }
 
   @Test
   public void decodeSingleChunk() {
-    assertDecodes(HttpChunked.of("test", Text.transcoder()), "4\r\ntest\r\n0\r\n\r\n");
+    assertDecodes(HttpChunked.of("test", Text.stringCodec()), "4\r\ntest\r\n0\r\n\r\n");
   }
 
   @Test
   public void decodeMultipleChunks() {
-    assertDecodes(HttpChunked.of("Hello, world!", Text.transcoder()), "7\r\nHello, \r\n6\r\nworld!\r\n0\r\n\r\n");
+    assertDecodes(HttpChunked.of("Hello, world!", Text.stringCodec()), "7\r\nHello, \r\n6\r\nworld!\r\n0\r\n\r\n");
   }
 
   @Test
   public void encodeEmptyChunk() {
-    assertEncodes("0\r\n\r\n", HttpChunked.of("", Text.transcoder()));
+    assertEncodes("0\r\n\r\n", HttpChunked.of("", Text.stringCodec()));
   }
 
   @Test
   public void encodeSingleChunk() {
-    assertEncodes("4\r\ntest\r\n0\r\n\r\n", HttpChunked.of("test", Text.transcoder()));
+    assertEncodes("4\r\ntest\r\n0\r\n\r\n", HttpChunked.of("test", Text.stringCodec()));
   }
 
   @Test
   public void encodeMultipleChunks() {
-    final Transcoder<String> transcoder = new SplitTranscoder(7);
+    final Codec<String> codec = new SplitCodec(7);
     assertEncodes("7\r\nHello, \r\n6\r\nworld!\r\n0\r\n\r\n",
-                  HttpChunked.of("Hello, world!", transcoder));
+                  HttpChunked.of("Hello, world!", codec));
   }
 
   public static <T> void assertDecodes(HttpChunked<T> expected, String string) {
-    HttpAssertions.assertDecodes(HttpChunked.decode(expected.transcoder()), expected, string);
+    HttpAssertions.assertDecodes(HttpChunked.decode(expected.codec()), expected, string);
   }
 
   public static void assertEncodes(String expected, HttpChunked<?> payload) {
     HttpAssertions.assertEncodes(expected, payload.encode());
   }
 
-  static final class SplitTranscoder implements Transcoder<String> {
+  static final class SplitCodec implements Codec<String> {
 
     final int index;
 
-    SplitTranscoder(int index) {
+    SplitCodec(int index) {
       this.index = index;
     }
 
@@ -83,7 +83,7 @@ public class HttpChunkedTests {
 
     @Override
     public Decode<String> decode(InputBuffer input) {
-      return Text.transcoder().decode(input);
+      return Text.decode(input);
     }
 
     @Override
@@ -91,8 +91,8 @@ public class HttpChunkedTests {
       if (value != null) {
         final String a = value.substring(0, this.index);
         final String b = value.substring(this.index);
-        final Write<?> aWriter = Utf8EncodedOutput.full().writeFrom(Text.transcoder().write(a));
-        final Write<?> bWriter = Utf8EncodedOutput.full().writeFrom(Text.transcoder().write(b));
+        final Write<?> aWriter = Utf8EncodedOutput.full().writeFrom(Text.write(a));
+        final Write<?> bWriter = Utf8EncodedOutput.full().writeFrom(Text.write(b));
         return aWriter.andThen(bWriter).produce(output);
       } else {
         return Encode.done();

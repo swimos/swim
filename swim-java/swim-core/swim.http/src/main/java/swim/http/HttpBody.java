@@ -18,13 +18,13 @@ import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Codec;
 import swim.codec.Decode;
 import swim.codec.DecodeException;
 import swim.codec.Encode;
 import swim.codec.EncodeException;
 import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
-import swim.codec.Transcoder;
 import swim.http.header.ContentLengthHeader;
 import swim.http.header.ContentTypeHeader;
 import swim.util.Murmur3;
@@ -36,17 +36,17 @@ import swim.util.ToSource;
 public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
 
   final @Nullable T value;
-  final Transcoder<T> transcoder;
+  final Codec<T> codec;
   long contentLength;
 
-  HttpBody(@Nullable T value, Transcoder<T> transcoder, long contentLength) {
+  HttpBody(@Nullable T value, Codec<T> codec, long contentLength) {
     this.value = value;
-    this.transcoder = transcoder;
+    this.codec = codec;
     this.contentLength = contentLength;
   }
 
-  HttpBody(@Nullable T value, Transcoder<T> transcoder) {
-    this(value, transcoder, -1L);
+  HttpBody(@Nullable T value, Codec<T> codec) {
+    this(value, codec, -1L);
   }
 
   @Override
@@ -60,14 +60,14 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
   }
 
   @Override
-  public Transcoder<T> transcoder() {
-    return this.transcoder;
+  public Codec<T> codec() {
+    return this.codec;
   }
 
   public long contentLength() {
     if (this.contentLength < 0) {
       try {
-        this.contentLength = this.transcoder.sizeOf(this.value);
+        this.contentLength = this.codec.sizeOf(this.value);
       } catch (EncodeException cause) {
         throw new AssertionError("indeterminate Content-Length", cause);
       }
@@ -101,10 +101,9 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpBody<?>) {
-      final HttpBody<?> that = (HttpBody<?>) other;
+    } else if (other instanceof HttpBody<?> that) {
       return Objects.equals(this.value, that.value)
-          && this.transcoder.equals(that.transcoder);
+          && this.codec.equals(that.codec);
     }
     return false;
   }
@@ -114,7 +113,7 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
   @Override
   public int hashCode() {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(HASH_SEED,
-        Objects.hashCode(this.value)), this.transcoder.hashCode()));
+        Objects.hashCode(this.value)), this.codec.hashCode()));
   }
 
   @Override
@@ -122,7 +121,7 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
     final Notation notation = Notation.from(output);
     notation.beginInvoke("HttpBody", "of")
             .appendArgument(this.value)
-            .appendArgument(this.transcoder)
+            .appendArgument(this.codec)
             .endInvoke();
   }
 
@@ -131,38 +130,34 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
     return this.toSource();
   }
 
-  public static <T> HttpBody<T> of(@Nullable T value, Transcoder<T> transcoder,
-                                   long contentLength) {
-    return new HttpBody<T>(value, transcoder, contentLength);
+  public static <T> HttpBody<T> of(@Nullable T value, Codec<T> codec, long contentLength) {
+    return new HttpBody<T>(value, codec, contentLength);
   }
 
-  public static <T> HttpBody<T> of(@Nullable T value, Transcoder<T> transcoder) {
-    return new HttpBody<T>(value, transcoder);
+  public static <T> HttpBody<T> of(@Nullable T value, Codec<T> codec) {
+    return new HttpBody<T>(value, codec);
   }
 
-  public static <T> Decode<HttpBody<T>> decode(InputBuffer input,
-                                               Transcoder<T> transcoder,
-                                               long contentLength) {
-    return DecodeHttpBody.decode(input, transcoder, null, contentLength, 0L);
+  public static <T> Decode<HttpBody<T>> decode(InputBuffer input, Codec<T> codec, long contentLength) {
+    return DecodeHttpBody.decode(input, codec, null, contentLength, 0L);
   }
 
-  public static <T> Decode<HttpBody<T>> decode(Transcoder<T> transcoder,
-                                               long contentLength) {
-    return new DecodeHttpBody<T>(transcoder, null, contentLength, 0L);
+  public static <T> Decode<HttpBody<T>> decode(Codec<T> codec, long contentLength) {
+    return new DecodeHttpBody<T>(codec, null, contentLength, 0L);
   }
 
 }
 
 final class DecodeHttpBody<T> extends Decode<HttpBody<T>> {
 
-  final Transcoder<T> transcoder;
+  final Codec<T> codec;
   final @Nullable Decode<T> decodePayload;
   final long contentLength;
   final long offset;
 
-  DecodeHttpBody(Transcoder<T> transcoder, @Nullable Decode<T> decodePayload,
+  DecodeHttpBody(Codec<T> codec, @Nullable Decode<T> decodePayload,
                  long contentLength, long offset) {
-    this.transcoder = transcoder;
+    this.codec = codec;
     this.decodePayload = decodePayload;
     this.contentLength = contentLength;
     this.offset = offset;
@@ -170,11 +165,11 @@ final class DecodeHttpBody<T> extends Decode<HttpBody<T>> {
 
   @Override
   public Decode<HttpBody<T>> consume(InputBuffer input) {
-    return DecodeHttpBody.decode(input, this.transcoder, this.decodePayload,
+    return DecodeHttpBody.decode(input, this.codec, this.decodePayload,
                                  this.contentLength, this.offset);
   }
 
-  static <T> Decode<HttpBody<T>> decode(InputBuffer input, Transcoder<T> transcoder,
+  static <T> Decode<HttpBody<T>> decode(InputBuffer input, Codec<T> codec,
                                         @Nullable Decode<T> decodePayload,
                                         long contentLength, long offset) {
     final int inputStart = input.position();
@@ -186,7 +181,7 @@ final class DecodeHttpBody<T> extends Decode<HttpBody<T>> {
 
     input.limit(inputStart + decodeSize).asLast(bodyRemaining <= (long) inputRemaining);
     if (decodePayload == null) {
-      decodePayload = transcoder.decode(input);
+      decodePayload = codec.decode(input);
     } else {
       decodePayload = decodePayload.consume(input);
     }
@@ -198,7 +193,7 @@ final class DecodeHttpBody<T> extends Decode<HttpBody<T>> {
     offset += (long) (input.position() - inputStart);
     if (offset == contentLength) {
       if (decodePayload.isDone()) {
-        return Decode.done(HttpBody.of(decodePayload.getUnchecked(), transcoder, contentLength));
+        return Decode.done(HttpBody.of(decodePayload.getUnchecked(), codec, contentLength));
       } else {
         return Decode.error(new DecodeException("truncated payload"));
       }
@@ -208,7 +203,7 @@ final class DecodeHttpBody<T> extends Decode<HttpBody<T>> {
     if (input.isError()) {
       return Decode.error(input.getError());
     }
-    return new DecodeHttpBody<T>(transcoder, decodePayload, contentLength, offset);
+    return new DecodeHttpBody<T>(codec, decodePayload, contentLength, offset);
   }
 
 }
@@ -242,7 +237,7 @@ final class EncodeHttpBody<T> extends Encode<HttpBody<T>> {
     if (inputRemaining <= (long) outputRemaining) {
       output.limit(outputStart + (int) inputRemaining).asLast(true);
       if (encode == null) {
-        encode = payload.transcoder.encode(output, payload.value);
+        encode = payload.codec.encode(output, payload.value);
       } else {
         encode = encode.produce(output);
       }
@@ -250,7 +245,7 @@ final class EncodeHttpBody<T> extends Encode<HttpBody<T>> {
     } else {
       output.asLast(false);
       if (encode == null) {
-        encode = payload.transcoder.encode(output, payload.value);
+        encode = payload.codec.encode(output, payload.value);
       } else {
         encode = encode.produce(output);
       }

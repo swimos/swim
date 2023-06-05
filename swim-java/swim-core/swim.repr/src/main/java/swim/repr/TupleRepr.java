@@ -67,10 +67,9 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   public TupleRepr letAttrs(Attrs attrs) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
       return this.withAttrs(attrs);
-    } else {
-      this.attrs = attrs;
-      return this;
     }
+    this.attrs = attrs;
+    return this;
   }
 
   @Override
@@ -88,13 +87,10 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   public TupleRepr withAttrs(Attrs attrs) {
     if (attrs == this.attrs) {
       return this;
-    } else {
-      if (this.shape.size < 0 || this.shape.size >= 4) {
-        this.flags |= ALIASED_FLAG;
-      }
-      return new TupleRepr(this.flags & ~IMMUTABLE_FLAG, attrs,
-                           this.shape, this.slots);
+    } else if (this.shape.size < 0 || this.shape.size >= 4) {
+      this.flags |= ALIASED_FLAG;
     }
+    return new TupleRepr(this.flags & ~IMMUTABLE_FLAG, attrs, this.shape, this.slots);
   }
 
   @Override
@@ -116,7 +112,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   }
 
   @Override
-  public boolean isDefinite() {
+  public boolean isDistinct() {
     return this.shape.size != 0;
   }
 
@@ -156,10 +152,10 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
       return null;
     }
     final int index = this.shape.lookup((String) key);
-    if (index >= 0) {
-      return this.slots[index];
+    if (index < 0) {
+      return null;
     }
-    return null;
+    return this.slots[index];
   }
 
   public Repr get(String key) {
@@ -303,18 +299,24 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   public TupleRepr let(String key, Repr value) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
       return this.updated(key, value);
-    } else {
-      this.put(key, value);
-      return this;
     }
+    this.put(key, value);
+    return this;
+  }
+
+  public TupleRepr letAll(Map<? extends String, ? extends Repr> map) {
+    TupleRepr tuple = this;
+    for (Map.Entry<? extends String, ? extends Repr> entry : map.entrySet()) {
+      tuple = tuple.let(entry.getKey(), entry.getValue());
+    }
+    return tuple;
   }
 
   public Repr set(int index, Repr value) {
     Objects.requireNonNull(value);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
       throw new UnsupportedOperationException("immutable");
-    }
-    if (index < 0 || index >= this.shape.size) {
+    } else if (index < 0 || index >= this.shape.size) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
     final Repr oldValue = this.slots[index];
@@ -550,6 +552,13 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
     this.flags |= ALIASED_FLAG;
   }
 
+  public int indexOf(@Nullable String key) {
+    if (key == null) {
+      return -1;
+    }
+    return this.shape.lookup(key);
+  }
+
   @Override
   public boolean isMutable() {
     return (this.flags & IMMUTABLE_FLAG) == 0;
@@ -562,8 +571,7 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   @Override
   public TupleRepr clone() {
     this.flags |= ALIASED_FLAG;
-    return new TupleRepr(this.flags & ~IMMUTABLE_FLAG, this.attrs,
-                         this.shape, this.slots);
+    return new TupleRepr(this.flags & ~IMMUTABLE_FLAG, this.attrs, this.shape, this.slots);
   }
 
   @Override
@@ -635,8 +643,8 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Map<?, ?>) {
-      return this.entrySet().equals(((Map<?, ?>) other).entrySet());
+    } else if (other instanceof Map<?, ?> that) {
+      return this.entrySet().equals(that.entrySet());
     }
     return false;
   }
@@ -679,10 +687,8 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
 
   static final Repr[] EMPTY_SLOTS = new Repr[0];
 
-  private static final TupleRepr EMPTY = new TupleRepr(IMMUTABLE_FLAG,
-                                                       Attrs.empty(),
-                                                       TupleShape.empty(),
-                                                       EMPTY_SLOTS);
+  static final TupleRepr EMPTY = new TupleRepr(IMMUTABLE_FLAG, Attrs.empty(),
+                                               TupleShape.empty(), EMPTY_SLOTS);
 
   public static TupleRepr empty() {
     return EMPTY;
@@ -725,16 +731,20 @@ public final class TupleRepr implements Repr, UpdatableMap<String, Repr>, Iterab
   }
 
   public static TupleRepr of(@Nullable Object... keyValuePairs) {
-    Objects.requireNonNull(keyValuePairs);
-    final int n = keyValuePairs.length;
-    if (n % 2 != 0) {
+    keyValuePairs = Assume.nonNull(keyValuePairs);
+    if (keyValuePairs.length % 2 != 0) {
       throw new IllegalArgumentException("odd number of key-value pairs");
     }
-    final Repr[] slots = new Repr[n >>> 1];
+    final Repr[] slots = new Repr[keyValuePairs.length >>> 1];
     TupleShape shape = TupleShape.empty();
-    for (int i = 0; i < n; i += 2) {
-      shape = shape.getChild((String) keyValuePairs[i]);
-      slots[shape.size - 1] = (Repr) keyValuePairs[i + 1];
+    for (int i = 0; i < keyValuePairs.length; i += 2) {
+      final String key = (String) keyValuePairs[i];
+      final Repr value = (Repr) keyValuePairs[i + 1];
+      if (value == null) {
+        throw new NullPointerException("value " + (i >>> 1));
+      }
+      shape = shape.getChild(key);
+      slots[shape.size - 1] = value;
     }
     return new TupleRepr(0, Attrs.empty(), shape, slots);
   }
@@ -776,8 +786,7 @@ final class TupleEntry implements Map.Entry<String, Repr> {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Map.Entry<?, ?>) {
-      final Map.Entry<?, ?> that = (Map.Entry<?, ?>) other;
+    } else if (other instanceof Map.Entry<?, ?> that) {
       return this.key.equals(that.getKey()) && this.value.equals(that.getValue());
     }
     return false;
@@ -814,8 +823,7 @@ final class TupleReprEntryIterator implements Iterator<Map.Entry<String, Repr>> 
     final int index = this.index;
     if (index >= this.fields.length) {
       throw new NoSuchElementException();
-    }
-    if (this.repr.shape != this.shape) {
+    } else if (this.repr.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -870,8 +878,7 @@ final class TupleReprKeyIterator implements Iterator<String> {
     final int index = this.index;
     if (index >= this.fields.length) {
       throw new NoSuchElementException();
-    }
-    if (this.repr.shape != this.shape) {
+    } else if (this.repr.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -922,8 +929,7 @@ final class TupleReprValueIterator implements Iterator<Repr> {
     final int index = this.index;
     if (index >= this.shape.size) {
       throw new NoSuchElementException();
-    }
-    if (this.repr.shape != this.shape) {
+    } else if (this.repr.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;

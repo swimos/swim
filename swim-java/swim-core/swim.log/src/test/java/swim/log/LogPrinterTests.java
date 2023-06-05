@@ -15,15 +15,15 @@
 package swim.log;
 
 import org.junit.jupiter.api.Test;
-import swim.json.Json;
-import swim.json.JsonFormException;
+import swim.json.JsonFormat;
+import swim.json.JsonProviderException;
 import swim.util.Severity;
 
 public class LogPrinterTests {
 
   @Test
-  public void testLogPrinter() throws JsonFormException {
-    final LogPrinter log = new LogPrinter(Json.form(LogEvent.class));
+  public void testLogPrinter() throws JsonProviderException {
+    final LogPrinter log = new LogPrinter(JsonFormat.get(LogEvent.class));
     log.publish(LogEvent.of("test", "", LogScope.root(), Severity.INFO, "Hello, world!", null, null));
   }
 

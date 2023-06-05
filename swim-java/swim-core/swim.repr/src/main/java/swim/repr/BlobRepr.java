@@ -69,10 +69,9 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
   public BlobRepr letAttrs(Attrs attrs) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
       return this.withAttrs(attrs);
-    } else {
-      this.attrs = attrs;
-      return this;
     }
+    this.attrs = attrs;
+    return this;
   }
 
   @Override
@@ -90,10 +89,9 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
   public BlobRepr withAttrs(Attrs attrs) {
     if (attrs == this.attrs) {
       return this;
-    } else {
-      this.flags |= ALIASED_FLAG;
-      return new BlobRepr(this.flags, attrs, this.array, this.offset, this.size);
     }
+    this.flags |= ALIASED_FLAG;
+    return new BlobRepr(this.flags, attrs, this.array, this.offset, this.size);
   }
 
   @Override
@@ -221,14 +219,14 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
       final byte[] newArray = new byte[n];
       System.arraycopy(array, this.offset, newArray, 0, n);
       return ByteBuffer.wrap(newArray);
-    } else {
-      ByteBuffer buffer = ByteBuffer.wrap(this.array, this.offset, this.size);
-      if ((this.flags & IMMUTABLE_FLAG) != 0) {
-        buffer = buffer.asReadOnlyBuffer();
-      }
-      this.flags |= ALIASED_FLAG;
-      return buffer;
     }
+
+    ByteBuffer buffer = ByteBuffer.wrap(this.array, this.offset, this.size);
+    if ((this.flags & IMMUTABLE_FLAG) != 0) {
+      buffer = buffer.asReadOnlyBuffer();
+    }
+    this.flags |= ALIASED_FLAG;
+    return buffer;
   }
 
   public ByteBuffer asByteBuffer() {
@@ -260,31 +258,28 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
   }
 
   public Write<?> write(Output<?> output) {
-    if (this.size > 0) {
-      this.flags |= ALIASED_FLAG;
-      final ByteBuffer buffer = ByteBuffer.wrap(this.array, 0, this.size);
-      return Binary.encode(output, new BinaryInputBuffer(buffer));
-    } else {
+    if (this.size == 0) {
       return Write.done();
     }
+    this.flags |= ALIASED_FLAG;
+    final ByteBuffer buffer = ByteBuffer.wrap(this.array, 0, this.size);
+    return Binary.encode(output, new BinaryInputBuffer(buffer));
   }
 
   public Write<?> write() {
-    if (this.size > 0) {
-      this.flags |= ALIASED_FLAG;
-      final ByteBuffer buffer = ByteBuffer.wrap(this.array, 0, this.size);
-      return Binary.encode(new BinaryInputBuffer(buffer));
-    } else {
+    if (this.size == 0) {
       return Write.done();
     }
+    this.flags |= ALIASED_FLAG;
+    final ByteBuffer buffer = ByteBuffer.wrap(this.array, 0, this.size);
+    return Binary.encode(new BinaryInputBuffer(buffer));
   }
 
   public Write<?> writeBase16(Output<?> output, Base16 base16) {
-    if (this.size != 0) {
-      return base16.writeByteBuffer(output, ByteBuffer.wrap(this.array, this.offset, this.size));
-    } else {
+    if (this.size == 0) {
       return Write.done();
     }
+    return base16.writeByteBuffer(output, ByteBuffer.wrap(this.array, this.offset, this.size));
   }
 
   public Write<?> writeBase16(Output<?> output) {
@@ -302,11 +297,10 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
   }
 
   public Write<?> writeBase64(Output<?> output, Base64 base64) {
-    if (this.size != 0) {
-      return base64.writeByteBuffer(output, ByteBuffer.wrap(this.array, this.offset, this.size));
-    } else {
+    if (this.size == 0) {
       return Write.done();
     }
+    return base64.writeByteBuffer(output, ByteBuffer.wrap(this.array, this.offset, this.size));
   }
 
   public Write<?> writeBase64(Output<?> output) {
@@ -360,27 +354,24 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof BlobRepr) {
-      final BlobRepr that = (BlobRepr) other;
-      if (this.attrs.equals(that.attrs)) {
-        final byte[] xs = this.array;
-        final byte[] ys = that.array;
-        int xi = this.offset;
-        int yi = that.offset;
-        final int xn = this.size;
-        if (xn != that.size) {
+    } else if (other instanceof BlobRepr that && this.attrs.equals(that.attrs)) {
+      final byte[] xs = this.array;
+      final byte[] ys = that.array;
+      int xi = this.offset;
+      int yi = that.offset;
+      final int xn = this.size;
+      if (xn != that.size) {
+        return false;
+      }
+      final int xu = xi + xn;
+      while (xi < xu) {
+        if (xs[xi] != ys[yi]) {
           return false;
         }
-        final int xu = xi + xn;
-        while (xi < xu) {
-          if (xs[xi] != ys[yi]) {
-            return false;
-          }
-          xi += 1;
-          yi += 1;
-        }
-        return true;
+        xi += 1;
+        yi += 1;
       }
+      return true;
     }
     return false;
   }
@@ -422,9 +413,9 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
 
   static final int ALIASED_FLAG = 1 << 1;
 
-  private static final byte[] EMPTY_ARRAY = new byte[0];
+  static final byte[] EMPTY_ARRAY = new byte[0];
 
-  private static final BlobRepr EMPTY = new BlobRepr(IMMUTABLE_FLAG | ALIASED_FLAG, Attrs.empty(), EMPTY_ARRAY, 0, 0);
+  static final BlobRepr EMPTY = new BlobRepr(IMMUTABLE_FLAG | ALIASED_FLAG, Attrs.empty(), EMPTY_ARRAY, 0, 0);
 
   public static BlobRepr empty() {
     return EMPTY;
@@ -455,12 +446,11 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
     if (buffer.hasArray()) {
       return new BlobRepr(ALIASED_FLAG, Attrs.empty(), buffer.array(),
                           buffer.arrayOffset(), buffer.remaining());
-    } else {
-      final int size = buffer.remaining();
-      final byte[] array = new byte[size];
-      buffer.get(0, array, 0, size);
-      return new BlobRepr(0, Attrs.empty(), array, 0, size);
     }
+    final int size = buffer.remaining();
+    final byte[] array = new byte[size];
+    buffer.get(0, array, 0, size);
+    return new BlobRepr(0, Attrs.empty(), array, 0, size);
   }
 
   public static BlobRepr fromUtf8(String string) {

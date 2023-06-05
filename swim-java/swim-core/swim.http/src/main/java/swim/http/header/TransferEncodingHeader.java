@@ -90,7 +90,7 @@ public final class TransferEncodingHeader extends HttpHeader {
     return TransferEncodingHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<HttpTransferCoding> parseValue(String value) throws HttpException {
+  static FingerTrieList<HttpTransferCoding> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     FingerTrieList<HttpTransferCoding> codings = FingerTrieList.empty();
@@ -138,7 +138,7 @@ public final class TransferEncodingHeader extends HttpHeader {
     return codings;
   }
 
-  private static String writeValue(Iterator<HttpTransferCoding> codings) {
+  static String writeValue(Iterator<HttpTransferCoding> codings) {
     final StringOutput output = new StringOutput();
     HttpTransferCoding coding = null;
     do {

@@ -79,7 +79,7 @@ public final class SetCookieHeader extends HttpHeader {
     return SetCookieHeader.of(NAME, value);
   }
 
-  private static HttpCookieState parseValue(String value) throws HttpException {
+  static HttpCookieState parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     final Parse<HttpCookieState> parseCookieState = HttpCookieState.parse(input);
     if (parseCookieState.isDone()) {

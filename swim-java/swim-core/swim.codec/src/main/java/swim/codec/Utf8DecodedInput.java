@@ -532,7 +532,7 @@ public final class Utf8DecodedInput extends DecodedInput {
                                 this.have, this.state, this.error);
   }
 
-  private static final Utf8DecodedInput EMPTY = new Utf8DecodedInput(BinaryInput.empty(), UtfErrorMode.fatal());
+  static final Utf8DecodedInput EMPTY = new Utf8DecodedInput(BinaryInput.empty(), UtfErrorMode.fatal());
 
   public static Utf8DecodedInput empty() {
     return EMPTY;
@@ -546,19 +546,19 @@ public final class Utf8DecodedInput extends DecodedInput {
     }
   }
 
-  private static final int DECODE_STATE = -1;
-  private static final int EMPTY_STATE = -2;
-  private static final int DONE_STATE = -3;
-  private static final int ERROR_STATE = -4;
+  static final int DECODE_STATE = -1;
+  static final int EMPTY_STATE = -2;
+  static final int DONE_STATE = -3;
+  static final int ERROR_STATE = -4;
 
-  private static String invalid(int c1) {
+  static String invalid(int c1) {
     final StringOutput output = new StringOutput();
     output.append("invalid UTF-8 code unit: ");
     Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
     return output.get();
   }
 
-  private static String invalid(int c1, int c2) {
+  static String invalid(int c1, int c2) {
     final StringOutput output = new StringOutput();
     output.append("invalid UTF-8 code unit sequence: ");
     Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
@@ -567,7 +567,7 @@ public final class Utf8DecodedInput extends DecodedInput {
     return output.get();
   }
 
-  private static String invalid(int c1, int c2, int c3) {
+  static String invalid(int c1, int c2, int c3) {
     final StringOutput output = new StringOutput();
     output.append("invalid UTF-8 code unit sequence: ");
     Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
@@ -578,7 +578,7 @@ public final class Utf8DecodedInput extends DecodedInput {
     return output.get();
   }
 
-  private static String invalid(int c1, int c2, int c3, int c4) {
+  static String invalid(int c1, int c2, int c3, int c4) {
     final StringOutput output = new StringOutput();
     output.append("invalid UTF-8 code unit sequence: ");
     Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();

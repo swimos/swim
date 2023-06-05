@@ -9,17 +9,20 @@ ext.includeSwimCore = { frameworkDir ->
   include 'swim-annotations'
   project(':swim-annotations').projectDir = file("${frameworkDir}/swim.annotations")
 
-  include 'swim-collections'
-  project(':swim-collections').projectDir = file("${frameworkDir}/swim.collections")
+  include 'swim-decl'
+  project(':swim-decl').projectDir = file("${frameworkDir}/swim.decl")
 
   include 'swim-util'
   project(':swim-util').projectDir = file("${frameworkDir}/swim.util")
 
+  include 'swim-collections'
+  project(':swim-collections').projectDir = file("${frameworkDir}/swim.collections")
+
   include 'swim-codec'
   project(':swim-codec').projectDir = file("${frameworkDir}/swim.codec")
 
-  include 'swim-expr'
-  project(':swim-expr').projectDir = file("${frameworkDir}/swim.expr")
+  include 'swim-term'
+  project(':swim-term').projectDir = file("${frameworkDir}/swim.term")
 
   include 'swim-repr'
   project(':swim-repr').projectDir = file("${frameworkDir}/swim.repr")

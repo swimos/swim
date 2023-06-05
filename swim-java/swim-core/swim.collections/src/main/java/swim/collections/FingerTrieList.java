@@ -354,9 +354,8 @@ public final class FingerTrieList<T> implements UpdatableList<T>, ToMarkup, ToSo
     final int index = this.indexOf(elem);
     if (index >= 0) {
       return this.removed(index);
-    } else {
-      return this;
     }
+    return this;
   }
 
   public FingerTrieList<T> drop(int lower) {
@@ -435,9 +434,8 @@ public final class FingerTrieList<T> implements UpdatableList<T>, ToMarkup, ToSo
   public FingerTrieList<T> slice(int lower, int upper) {
     if (lower >= upper) {
       return FingerTrieList.empty();
-    } else {
-      return this.drop(lower).take(upper - Math.max(0, lower));
     }
+    return this.drop(lower).take(upper - Math.max(0, lower));
   }
 
   @Override
@@ -548,9 +546,9 @@ public final class FingerTrieList<T> implements UpdatableList<T>, ToMarkup, ToSo
   public void writeMarkup(Appendable output) {
     final Notation notation = Notation.from(output);
     if (notation.options().verbose()) {
-      notation.beginObject("FingerTrieList");
-      notation.appendField("size", this.size);
-      notation.appendField("prefix", this.prefix);
+      notation.beginObject("FingerTrieList")
+              .appendField("size", this.size)
+              .appendField("prefix", this.prefix);
       if (this.branch.size != 0) {
         notation.appendField("branch", this.branch);
       } else {
@@ -559,8 +557,8 @@ public final class FingerTrieList<T> implements UpdatableList<T>, ToMarkup, ToSo
                 .append("<empty>")
                 .endValue();
       }
-      notation.appendField("suffix", this.suffix);
-      notation.endObject();
+      notation.appendField("suffix", this.suffix)
+              .endObject();
     } else {
       notation.beginArray("FingerTrieList");
       this.writeElements(notation);

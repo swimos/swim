@@ -85,10 +85,12 @@ public final class HttpUpgrade implements ToSource, ToString {
         final StringTrieMap<HttpUpgrade> oldProtocols = protocols;
         final StringTrieMap<HttpUpgrade> newProtocols = oldProtocols.updated(this.protocol, this);
         protocols = (StringTrieMap<HttpUpgrade>) PROTOCOLS.compareAndExchangeRelease(oldProtocols, newProtocols);
-        if (protocols == oldProtocols) {
-          protocols = newProtocols;
-          break;
+        if (protocols != oldProtocols) {
+          // CAS failed; try again.
+          continue;
         }
+        protocols = newProtocols;
+        break;
       } while (true);
     }
     return this;
@@ -98,8 +100,7 @@ public final class HttpUpgrade implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpUpgrade) {
-      final HttpUpgrade that = (HttpUpgrade) other;
+    } else if (other instanceof HttpUpgrade that) {
       return this.protocol.equals(that.protocol)
           && Objects.equals(this.version, that.version);
     }

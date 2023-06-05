@@ -26,8 +26,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -39,6 +37,8 @@ import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8DecodedOutput;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
 import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
@@ -372,11 +372,11 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
     }
   }
 
-  @IntoForm
+  @Marshal
   @Override
   public abstract String toString();
 
-  private static final UriQuery UNDEFINED = new UriQueryUndefined();
+  static final UriQuery UNDEFINED = new UriQueryUndefined();
 
   public static UriQuery undefined() {
     return UNDEFINED;
@@ -402,12 +402,11 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
 
   public static UriQuery of(@Nullable String... keyValuePairs) {
     Objects.requireNonNull(keyValuePairs);
-    final int n = keyValuePairs.length;
-    if (n % 2 != 0) {
+    if (keyValuePairs.length % 2 != 0) {
       throw new IllegalArgumentException("odd number of key-value pairs");
     }
     final UriQueryBuilder builder = new UriQueryBuilder();
-    for (int i = 0; i < n; i += 2) {
+    for (int i = 0; i < keyValuePairs.length; i += 2) {
       builder.addParam(keyValuePairs[i], keyValuePairs[i + 1]);
     }
     return builder.build();
@@ -417,14 +416,13 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
     Objects.requireNonNull(params);
     if (params instanceof UriQuery) {
       return (UriQuery) params;
-    } else {
-      final UriQueryBuilder builder = new UriQueryBuilder();
-      builder.addAll(params);
-      return builder.build();
     }
+    final UriQueryBuilder builder = new UriQueryBuilder();
+    builder.addAll(params);
+    return builder.build();
   }
 
-  @FromForm
+  @Unmarshal
   public static @Nullable UriQuery from(String value) {
     return UriQuery.parse(value).getOr(null);
   }
@@ -451,10 +449,10 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
     return parseQuery;
   }
 
-  private static final ThreadLocal<CacheMap<String, Parse<UriQuery>>> CACHE =
+  static final ThreadLocal<CacheMap<String, Parse<UriQuery>>> CACHE =
       new ThreadLocal<CacheMap<String, Parse<UriQuery>>>();
 
-  private static CacheMap<String, Parse<UriQuery>> cache() {
+  static CacheMap<String, Parse<UriQuery>> cache() {
     CacheMap<String, Parse<UriQuery>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;
@@ -531,9 +529,9 @@ final class UriQueryParam extends UriQuery {
   public void writeString(Appendable output) throws IOException {
     if (this.string != null) {
       output.append(this.string);
-    } else {
-      UriQuery.writeString(output, this);
+      return;
     }
+    UriQuery.writeString(output, this);
   }
 
   @Override

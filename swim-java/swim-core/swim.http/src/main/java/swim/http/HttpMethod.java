@@ -64,10 +64,12 @@ public final class HttpMethod implements ToSource, ToString {
       final StringTrieMap<HttpMethod> oldNames = names;
       final StringTrieMap<HttpMethod> newNames = oldNames.updated(this.name, this);
       names = (StringTrieMap<HttpMethod>) NAMES.compareAndExchangeRelease(oldNames, newNames);
-      if (names == oldNames) {
-        names = newNames;
-        break;
+      if (names != oldNames) {
+        // CAS failed; try again.
+        continue;
       }
+      names = newNames;
+      break;
     } while (true);
     return this;
   }
@@ -76,8 +78,7 @@ public final class HttpMethod implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpMethod) {
-      final HttpMethod that = (HttpMethod) other;
+    } else if (other instanceof HttpMethod that) {
       return this.name.equals(that.name);
     }
     return false;

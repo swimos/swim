@@ -51,21 +51,19 @@ final class UriSchemeLiteral extends UriSchemePattern {
   Map<String, String> unapply(UriScheme scheme, UriAuthority authority,
                               UriPath path, UriQuery query, UriFragment fragment,
                               Map<String, String> args) {
-    if (this.scheme.equals(scheme)) {
-      return this.rest.unapply(authority, path, query, fragment, args);
-    } else {
+    if (!this.scheme.equals(scheme)) {
       return args;
     }
+    return this.rest.unapply(authority, path, query, fragment, args);
   }
 
   @Override
   boolean matches(UriScheme scheme, UriAuthority authority, UriPath path,
                   UriQuery query, UriFragment fragment) {
-    if (this.scheme.equals(scheme)) {
-      return this.rest.matches(authority, path, query, fragment);
-    } else {
+    if (!this.scheme.equals(scheme)) {
       return false;
     }
+    return this.rest.matches(authority, path, query, fragment);
   }
 
 }

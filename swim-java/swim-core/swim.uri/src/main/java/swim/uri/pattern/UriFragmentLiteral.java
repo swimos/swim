@@ -54,11 +54,10 @@ final class UriFragmentLiteral extends UriFragmentPattern {
 
   @Override
   boolean matches(UriFragment fragment) {
-    if (this.fragment.equals(fragment)) {
-      return this.rest.matches();
-    } else {
+    if (!this.fragment.equals(fragment)) {
       return false;
     }
+    return this.rest.matches();
   }
 
 }

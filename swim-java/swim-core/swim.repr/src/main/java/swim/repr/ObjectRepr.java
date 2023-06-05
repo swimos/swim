@@ -46,9 +46,8 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   @Nullable Object head; // ObjectEntry | Repr | null
   @Nullable Object foot; // ObjectEntry | Repr | null
 
-  ObjectRepr(int flags, int size, Attrs attrs, ObjectShape shape,
-             @Nullable Object slots, @Nullable Object head,
-             @Nullable Object foot) {
+  ObjectRepr(int flags, int size, Attrs attrs, ObjectShape shape, @Nullable Object slots,
+             @Nullable Object head, @Nullable Object foot) {
     this.flags = flags;
     this.size = size;
     this.attrs = attrs;
@@ -75,10 +74,9 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   public ObjectRepr letAttrs(Attrs attrs) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
       return this.withAttrs(attrs);
-    } else {
-      this.attrs = attrs;
-      return this;
     }
+    this.attrs = attrs;
+    return this;
   }
 
   @Override
@@ -96,13 +94,11 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   public ObjectRepr withAttrs(Attrs attrs) {
     if (attrs == this.attrs) {
       return this;
-    } else {
-      if (this.shape.size < 0 || this.shape.size > MAX_INLINE_SIZE) {
-        this.flags |= ALIASED_FLAG;
-      }
-      return new ObjectRepr(this.flags & ~IMMUTABLE_FLAG, this.size, attrs,
-                            this.shape, this.slots, this.head, this.foot);
+    } else if (this.shape.size < 0 || this.shape.size > MAX_INLINE_SIZE) {
+      this.flags |= ALIASED_FLAG;
     }
+    return new ObjectRepr(this.flags & ~IMMUTABLE_FLAG, this.size, attrs,
+                          this.shape, this.slots, this.head, this.foot);
   }
 
   @Override
@@ -120,7 +116,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   }
 
   @Override
-  public boolean isDefinite() {
+  public boolean isDistinct() {
     return this.size != 0;
   }
 
@@ -144,7 +140,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     if (this.shape.size == 0 || !(value instanceof Repr)) {
       return false;
     } else if (this.shape.size < 0) {
-      return this.containsValueHashed((Repr) value);
+      return this.containsValueLinked((Repr) value);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.containsValuePacked((Repr) value);
     } else {
@@ -168,7 +164,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     return false;
   }
 
-  private boolean containsValueHashed(Repr value) {
+  private boolean containsValueLinked(Repr value) {
     ObjectEntry entry = (ObjectEntry) this.head;
     while (entry != null) {
       if (value.equals(entry.value)) {
@@ -184,7 +180,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     if (this.shape.size == 0 || !(key instanceof String)) {
       return null;
     } else if (this.shape.size < 0) {
-      return this.getHashed((String) key);
+      return this.getLinked((String) key);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.getPacked((String) key);
     } else {
@@ -196,17 +192,18 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     final ObjectShape[] fields = this.shape.fields();
     for (int i = 0; i < fields.length; i += 1) {
       final ObjectShape field = fields[i];
-      if (key.equals(field.key)) {
-        switch (field.size - 1) {
-          case 0:
-            return (Repr) this.slots;
-          case 1:
-            return (Repr) this.head;
-          case 2:
-            return (Repr) this.foot;
-          default:
-            throw new AssertionError(Integer.toString(field.size - 1));
-        }
+      if (!key.equals(field.key)) {
+        continue;
+      }
+      switch (field.size - 1) {
+        case 0:
+          return (Repr) this.slots;
+        case 1:
+          return (Repr) this.head;
+        case 2:
+          return (Repr) this.foot;
+        default:
+          throw new AssertionError(Integer.toString(field.size - 1));
       }
     }
     return null;
@@ -214,18 +211,18 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
 
   private @Nullable Repr getPacked(String key) {
     final int index = this.shape.lookup(key);
-    if (index >= 0) {
-      return ((Repr[]) Assume.nonNull(this.slots))[index];
+    if (index < 0) {
+      return null;
     }
-    return null;
+    return ((Repr[]) Assume.nonNull(this.slots))[index];
   }
 
-  private @Nullable Repr getHashed(String key) {
+  private @Nullable Repr getLinked(String key) {
     final ObjectEntry entry = this.getEntry(key.hashCode(), key);
-    if (entry != null) {
-      return entry.value;
+    if (entry == null) {
+      return null;
     }
-    return null;
+    return entry.value;
   }
 
   public Repr get(String key) {
@@ -253,7 +250,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
       throw new UnsupportedOperationException("immutable");
     }
     if (this.shape.size < 0) {
-      return this.putHashed(key, value, false);
+      return this.putLinked(key, value, false);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.putPacked(key, value, false);
     } else {
@@ -269,7 +266,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
       throw new UnsupportedOperationException("immutable");
     }
     if (this.shape.size < 0) {
-      return this.putHashed(key, value, true);
+      return this.putLinked(key, value, true);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.putPacked(key, value, true);
     } else {
@@ -281,32 +278,33 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     final ObjectShape[] fields = this.shape.fields();
     for (int i = 0; i < fields.length; i += 1) {
       final ObjectShape field = fields[i];
-      if (key.equals(field.key)) {
-        final Repr oldValue;
-        switch (field.size - 1) {
-          case 0:
-            oldValue = (Repr) this.slots;
-            if (!ifAbsent) {
-              this.slots = value;
-            }
-            break;
-          case 1:
-            oldValue = (Repr) this.head;
-            if (!ifAbsent) {
-              this.head = value;
-            }
-            break;
-          case 2:
-            oldValue = (Repr) this.foot;
-            if (!ifAbsent) {
-              this.foot = value;
-            }
-            break;
-          default:
-            throw new AssertionError(Integer.toString(field.size - 1));
-        }
-        return oldValue;
+      if (!key.equals(field.key)) {
+        continue;
       }
+      final Repr oldValue;
+      switch (field.size - 1) {
+        case 0:
+          oldValue = (Repr) this.slots;
+          if (!ifAbsent) {
+            this.slots = value;
+          }
+          break;
+        case 1:
+          oldValue = (Repr) this.head;
+          if (!ifAbsent) {
+            this.head = value;
+          }
+          break;
+        case 2:
+          oldValue = (Repr) this.foot;
+          if (!ifAbsent) {
+            this.foot = value;
+          }
+          break;
+        default:
+          throw new AssertionError(Integer.toString(field.size - 1));
+      }
+      return oldValue;
     }
 
     final ObjectShape newShape = this.shape.getChild(key);
@@ -369,28 +367,29 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
       }
       this.shape = newShape;
       this.size = newShape.size;
-    } else {
-      this.slots = new ObjectEntry[ObjectShape.expand((shape.size + 1) * 10 / 7)];
-      this.head = null;
-      this.foot = null;
-      this.buildHashTable(shape.fields(), slots, -1);
-      final ObjectEntry entry = new ObjectEntry(key, value);
-      this.putEntry(key.hashCode(), entry);
-      this.appendEntry(entry);
-      this.shape = ObjectShape.dictionary();
-      this.size = shape.size + 1;
+      return null;
     }
+
+    this.slots = new ObjectEntry[ObjectShape.expand((shape.size + 1) * 10 / 7)];
+    this.head = null;
+    this.foot = null;
+    this.buildHashtable(shape.fields(), slots, -1);
+    final ObjectEntry entry = new ObjectEntry(key, value);
+    this.putEntry(key.hashCode(), entry);
+    this.appendEntry(entry);
+    this.shape = ObjectShape.dictionary();
+    this.size = shape.size + 1;
     return null;
   }
 
-  private @Nullable Repr putHashed(String key, Repr value, boolean ifAbsent) {
+  private @Nullable Repr putLinked(String key, Repr value, boolean ifAbsent) {
     final int hash = key.hashCode();
     ObjectEntry entry = this.getEntry(hash, key);
     if (entry != null) {
       final Repr oldValue = entry.value;
       if (!ifAbsent && value != oldValue) {
         if ((this.flags & ALIASED_FLAG) != 0) {
-          this.dealiasHashTable(this.size, null);
+          this.dealiasHashtable(this.size, null);
           entry = Assume.nonNull(this.getEntry(hash, key));
         }
         entry.value = value;
@@ -399,9 +398,9 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     }
 
     if ((this.flags & ALIASED_FLAG) != 0) {
-      this.dealiasHashTable(this.size + 1, null);
+      this.dealiasHashtable(this.size + 1, null);
     } else {
-      this.resizeHashTable(this.size + 1);
+      this.resizeHashtable(this.size + 1);
     }
     entry = new ObjectEntry(key, value);
     this.putEntry(hash, entry);
@@ -422,7 +421,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     Objects.requireNonNull(key, "key");
     Objects.requireNonNull(value, "value");
     if (this.shape.size < 0) {
-      return this.updatedHashed(key, value);
+      return this.updatedLinked(key, value);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.updatedPacked(key, value);
     } else {
@@ -434,17 +433,18 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     final ObjectShape[] fields = this.shape.fields();
     for (int i = 0; i < fields.length; i += 1) {
       final ObjectShape field = fields[i];
-      if (key.equals(field.key)) {
-        switch (field.size - 1) {
-          case 0:
-            return new ObjectRepr(0, this.size, this.attrs, this.shape, value, this.head, this.foot);
-          case 1:
-            return new ObjectRepr(0, this.size, this.attrs, this.shape, this.slots, value, this.foot);
-          case 2:
-            return new ObjectRepr(0, this.size, this.attrs, this.shape, this.slots, this.head, value);
-          default:
-            throw new AssertionError(Integer.toString(field.size - 1));
-        }
+      if (!key.equals(field.key)) {
+        continue;
+      }
+      switch (field.size - 1) {
+        case 0:
+          return new ObjectRepr(0, this.size, this.attrs, this.shape, value, this.head, this.foot);
+        case 1:
+          return new ObjectRepr(0, this.size, this.attrs, this.shape, this.slots, value, this.foot);
+        case 2:
+          return new ObjectRepr(0, this.size, this.attrs, this.shape, this.slots, this.head, value);
+        default:
+          throw new AssertionError(Integer.toString(field.size - 1));
       }
     }
 
@@ -475,12 +475,11 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     if (index >= 0) {
       if (value == slots[index]) {
         return this;
-      } else {
-        final Repr[] newSlots = new Repr[ObjectShape.expand(shape.size)];
-        System.arraycopy(slots, 0, newSlots, 0, shape.size);
-        slots[index] = value;
-        return new ObjectRepr(0, this.size, this.attrs, shape, newSlots, null, null);
       }
+      final Repr[] newSlots = new Repr[ObjectShape.expand(shape.size)];
+      System.arraycopy(slots, 0, newSlots, 0, shape.size);
+      slots[index] = value;
+      return new ObjectRepr(0, this.size, this.attrs, shape, newSlots, null, null);
     }
 
     if (shape.size < MAX_PACKED_SIZE) {
@@ -489,39 +488,36 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
       System.arraycopy(slots, 0, newSlots, 0, shape.size);
       newSlots[newShape.size - 1] = value;
       return new ObjectRepr(0, newShape.size, this.attrs, newShape, newSlots, null, null);
-    } else {
-      final ObjectRepr newObject = new ObjectRepr(0, shape.size + 1, this.attrs, ObjectShape.dictionary(),
-                                                  new ObjectEntry[ObjectShape.expand((shape.size + 1) * 10 / 7)],
-                                                  null, null);
-      newObject.buildHashTable(shape.fields(), slots, -1);
-      final ObjectEntry entry = new ObjectEntry(key, value);
-      newObject.putEntry(key.hashCode(), entry);
-      newObject.appendEntry(entry);
-      return newObject;
     }
+
+    final ObjectRepr newObject = new ObjectRepr(0, shape.size + 1, this.attrs, ObjectShape.dictionary(),
+                                                new ObjectEntry[ObjectShape.expand((shape.size + 1) * 10 / 7)],
+                                                null, null);
+    newObject.buildHashtable(shape.fields(), slots, -1);
+    final ObjectEntry entry = new ObjectEntry(key, value);
+    newObject.putEntry(key.hashCode(), entry);
+    newObject.appendEntry(entry);
+    return newObject;
   }
 
-  private ObjectRepr updatedHashed(String key, Repr value) {
+  private ObjectRepr updatedLinked(String key, Repr value) {
     final int hash = key.hashCode();
     ObjectEntry entry = this.getEntry(hash, key);
     if (entry != null) {
       if (value == entry.value) {
         return this;
-      } else {
-        final ObjectRepr newObject = new ObjectRepr(0, this.size, this.attrs,
-                                                    this.shape, this.slots,
-                                                    this.head, this.foot);
-        newObject.dealiasHashTable(newObject.size, null);
-        entry = Assume.nonNull(newObject.getEntry(hash, key));
-        entry.value = value;
-        return newObject;
       }
+      final ObjectRepr newObject = new ObjectRepr(0, this.size, this.attrs, this.shape,
+                                                  this.slots, this.head, this.foot);
+      newObject.dealiasHashtable(newObject.size, null);
+      entry = Assume.nonNull(newObject.getEntry(hash, key));
+      entry.value = value;
+      return newObject;
     }
 
-    final ObjectRepr newObject = new ObjectRepr(0, this.size, this.attrs,
-                                                this.shape, this.slots,
-                                                this.head, this.foot);
-    newObject.dealiasHashTable(newObject.size + 1, null);
+    final ObjectRepr newObject = new ObjectRepr(0, this.size, this.attrs, this.shape,
+                                                this.slots, this.head, this.foot);
+    newObject.dealiasHashtable(newObject.size + 1, null);
     entry = new ObjectEntry(key, value);
     newObject.putEntry(hash, entry);
     newObject.appendEntry(entry);
@@ -531,10 +527,17 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   public ObjectRepr let(String key, Repr value) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
       return this.updated(key, value);
-    } else {
-      this.put(key, value);
-      return this;
     }
+    this.put(key, value);
+    return this;
+  }
+
+  public ObjectRepr letAll(Map<? extends String, ? extends Repr> map) {
+    ObjectRepr object = this;
+    for (Map.Entry<? extends String, ? extends Repr> entry : map.entrySet()) {
+      object = object.let(entry.getKey(), entry.getValue());
+    }
+    return object;
   }
 
   @Override
@@ -545,7 +548,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     if (this.shape.size == 0 || !(key instanceof String)) {
       return null;
     } else if (this.shape.size < 0) {
-      return this.removeHashed((String) key);
+      return this.removeLinked((String) key);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.removePacked((String) key);
     } else {
@@ -554,43 +557,41 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   }
 
   private @Nullable Repr removeInline(String key) {
-    Repr oldValue = null;
-    final ObjectShape shape = this.shape;
-
     // Capture current inline value slots.
+    final ObjectShape shape = this.shape;
     final Repr slot0 = shape.size > 0 ? (Repr) this.slots : null;
     final Repr slot1 = shape.size > 1 ? (Repr) this.head : null;
     final Repr slot2 = shape.size > 2 ? (Repr) this.foot : null;
 
-    final ObjectShape[] fields = shape.fields();
-    final int fieldCount = fields.length;
-
     // Search fields for matching key.
+    final ObjectShape[] fields = shape.fields();
     int index = -1;
-    for (int i = 0; i < fieldCount; i += 1) {
+    Repr oldValue = null;
+    for (int i = 0; i < fields.length; i += 1) {
       final ObjectShape field = fields[i];
-      if (key.equals(field.key)) {
-        // Capture the previous value associated with the matched key
-        // and clear the inline value slot.
-        index = field.size - 1;
-        switch (index) {
-          case 0:
-            oldValue = (Repr) this.slots;
-            this.slots = null;
-            break;
-          case 1:
-            oldValue = (Repr) this.head;
-            this.head = null;
-            break;
-          case 2:
-            oldValue = (Repr) this.foot;
-            this.foot = null;
-            break;
-          default:
-            throw new AssertionError(Integer.toString(index));
-        }
-        break;
+      if (!key.equals(field.key)) {
+        continue;
       }
+      // Capture the previous value associated with the matched key
+      // and clear the inline value slot.
+      index = field.size - 1;
+      switch (index) {
+        case 0:
+          oldValue = (Repr) this.slots;
+          this.slots = null;
+          break;
+        case 1:
+          oldValue = (Repr) this.head;
+          this.head = null;
+          break;
+        case 2:
+          oldValue = (Repr) this.foot;
+          this.foot = null;
+          break;
+        default:
+          throw new AssertionError(Integer.toString(index));
+      }
+      break;
     }
     if (index < 0) {
       // No matching key was found.
@@ -603,41 +604,42 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
       // The inline value slot for the removed key has already been nulled out.
       this.shape = Assume.nonNull(shape.parent);
       this.size = shape.size - 1;
-    } else {
-      // Build a hash table with the remaining fields.
-      this.slots = new ObjectEntry[ObjectShape.expand((shape.size - 1) * 10 / 7)];
-      this.head = null;
-      this.foot = null;
-      // Loop over all previous fields.
-      for (int i = 0; i < fieldCount; i += 1) {
-        // Skip the removed field.
-        if (i != index) {
-          final ObjectShape field = fields[i];
-          // Lookup the value of the remaining field.
-          final Repr value;
-          switch (field.size - 1) {
-            case 0:
-              value = Assume.nonNull(slot0);
-              break;
-            case 1:
-              value = Assume.nonNull(slot1);
-              break;
-            case 2:
-              value = Assume.nonNull(slot2);
-              break;
-            default:
-              throw new AssertionError(Integer.toString(field.size - 1));
-          }
-          // Insert the remaining field into the hash table.
-          final ObjectEntry entry = new ObjectEntry(Assume.nonNull(field.key), value);
-          this.putEntry(Assume.nonNull(field.key).hashCode(), entry);
-          this.appendEntry(entry);
-        }
-      }
-      this.shape = ObjectShape.dictionary();
-      this.size = shape.size - 1;
+      return oldValue;
     }
 
+    // Build a hashtable with the remaining fields.
+    this.slots = new ObjectEntry[ObjectShape.expand((shape.size - 1) * 10 / 7)];
+    this.head = null;
+    this.foot = null;
+    // Loop over all previous fields.
+    for (int i = 0; i < fields.length; i += 1) {
+      if (i == index) {
+        // Skip the removed field.
+        continue;
+      }
+      final ObjectShape field = fields[i];
+      // Lookup the value of the remaining field.
+      final Repr value;
+      switch (field.size - 1) {
+        case 0:
+          value = Assume.nonNull(slot0);
+          break;
+        case 1:
+          value = Assume.nonNull(slot1);
+          break;
+        case 2:
+          value = Assume.nonNull(slot2);
+          break;
+        default:
+          throw new AssertionError(Integer.toString(field.size - 1));
+      }
+      // Insert the remaining field into the hashtable.
+      final ObjectEntry entry = new ObjectEntry(Assume.nonNull(field.key), value);
+      this.putEntry(Assume.nonNull(field.key).hashCode(), entry);
+      this.appendEntry(entry);
+    }
+    this.shape = ObjectShape.dictionary();
+    this.size = shape.size - 1;
     return oldValue;
   }
 
@@ -649,9 +651,9 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
       return null;
     }
 
+    // Update the object shape to reflect the removed field.
     final Repr[] slots = (Repr[]) Assume.nonNull(this.slots);
     final Repr oldValue = slots[index];
-    // Update the object shape to reflect the removed field.
     if (index == shape.size - 1) {
       // The leaf field of the shape was removed; revert to the parent shape.
       if (Assume.nonNull(shape.parent).size == MAX_INLINE_SIZE) {
@@ -672,38 +674,37 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
       }
       this.shape = Assume.nonNull(shape.parent);
       this.size = shape.size - 1;
-    } else {
-      // Build a hash table with the remaining fields.
-      this.slots = new ObjectEntry[ObjectShape.expand((shape.size - 1) * 10 / 7)];
-      this.head = null;
-      this.foot = null;
-      this.buildHashTable(shape.fields(), slots, index);
-      this.shape = ObjectShape.dictionary();
-      this.size = shape.size - 1;
+      return oldValue;
     }
+
+    // Build a hashtable with the remaining fields.
+    this.slots = new ObjectEntry[ObjectShape.expand((shape.size - 1) * 10 / 7)];
+    this.head = null;
+    this.foot = null;
+    this.buildHashtable(shape.fields(), slots, index);
+    this.shape = ObjectShape.dictionary();
+    this.size = shape.size - 1;
     return oldValue;
   }
 
-  private @Nullable Repr removeHashed(String key) {
+  private @Nullable Repr removeLinked(String key) {
     if ((this.flags & ALIASED_FLAG) != 0) {
       final ObjectEntry entry = this.getEntry(key.hashCode(), key);
-      if (entry != null) {
-        this.dealiasHashTable(this.size - 1, key);
-        this.size -= 1;
-        return entry.value;
-      } else {
+      if (entry == null) {
         return null;
       }
-    } else {
-      final ObjectEntry entry = this.removeEntry(key.hashCode(), key);
-      if (entry != null) {
-        this.detachEntry(entry);
-        this.size -= 1;
-        return entry.value;
-      } else {
-        return null;
-      }
+      this.dealiasHashtable(this.size - 1, key);
+      this.size -= 1;
+      return entry.value;
     }
+
+    final ObjectEntry entry = this.removeEntry(key.hashCode(), key);
+    if (entry == null) {
+      return null;
+    }
+    this.detachEntry(entry);
+    this.size -= 1;
+    return entry.value;
   }
 
   @Override
@@ -711,7 +712,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     if (this.shape.size == 0 || !(key instanceof String)) {
       return this;
     } else if (this.shape.size < 0) {
-      return this.removedHashed((String) key);
+      return this.removedLinked((String) key);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.removedPacked((String) key);
     } else {
@@ -720,38 +721,36 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   }
 
   private ObjectRepr removedInline(String key) {
-    final ObjectShape shape = this.shape;
-
     // Capture current inline value slots.
+    final ObjectShape shape = this.shape;
     Repr slot0 = shape.size > 0 ? (Repr) this.slots : null;
     Repr slot1 = shape.size > 1 ? (Repr) this.head : null;
     Repr slot2 = shape.size > 2 ? (Repr) this.foot : null;
 
-    final ObjectShape[] fields = shape.fields();
-    final int fieldCount = fields.length;
-
     // Search fields for matching key.
+    final ObjectShape[] fields = shape.fields();
     int index = -1;
-    for (int i = 0; i < fieldCount; i += 1) {
+    for (int i = 0; i < fields.length; i += 1) {
       final ObjectShape field = fields[i];
-      if (key.equals(field.key)) {
-        // Clear the captured inline value slot.
-        index = field.size - 1;
-        switch (index) {
-          case 0:
-            slot0 = null;
-            break;
-          case 1:
-            slot1 = null;
-            break;
-          case 2:
-            slot2 = null;
-            break;
-          default:
-            throw new AssertionError(Integer.toString(index));
-        }
-        break;
+      if (!key.equals(field.key)) {
+        continue;
       }
+      // Clear the found inline value slot.
+      index = field.size - 1;
+      switch (index) {
+        case 0:
+          slot0 = null;
+          break;
+        case 1:
+          slot1 = null;
+          break;
+        case 2:
+          slot2 = null;
+          break;
+        default:
+          throw new AssertionError(Integer.toString(index));
+      }
+      break;
     }
     if (index < 0) {
       // No matching key was found.
@@ -761,43 +760,43 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     // Update the object shape to reflect the removed field.
     if (index == shape.size - 1) {
       // The leaf field of the shape was removed; revert to the parent shape.
-      // The captured inline value slot for the removed key has already been nulled out.
+      // The found inline value slot for the removed key has already been nulled out.
       return new ObjectRepr(0, shape.size - 1, this.attrs, Assume.nonNull(shape.parent),
                             slot0, slot1, slot2);
-    } else {
-      // Build a hash table with the remaining fields.
-      final ObjectRepr newObject = new ObjectRepr(0, shape.size - 1, this.attrs,
-                                                  ObjectShape.dictionary(),
-                                                  new ObjectEntry[ObjectShape.expand((shape.size - 1) * 10 / 7)],
-                                                  null, null);
-      // Loop over all previous fields.
-      for (int i = 0; i < fieldCount; i += 1) {
-        // Skip the removed field.
-        if (i != index) {
-          final ObjectShape field = fields[i];
-          // Lookup the value of the remaining field.
-          final Repr value;
-          switch (field.size - 1) {
-            case 0:
-              value = Assume.nonNull(slot0);
-              break;
-            case 1:
-              value = Assume.nonNull(slot1);
-              break;
-            case 2:
-              value = Assume.nonNull(slot2);
-              break;
-            default:
-              throw new AssertionError(Integer.toString(field.size - 1));
-          }
-          // Insert the remaining field into the hash table.
-          final ObjectEntry entry = new ObjectEntry(Assume.nonNull(field.key), value);
-          newObject.putEntry(Assume.nonNull(field.key).hashCode(), entry);
-          newObject.appendEntry(entry);
-        }
-      }
-      return newObject;
     }
+
+    // Build a hashtable with the remaining fields.
+    final ObjectRepr newObject = new ObjectRepr(0, shape.size - 1, this.attrs, ObjectShape.dictionary(),
+                                                new ObjectEntry[ObjectShape.expand((shape.size - 1) * 10 / 7)],
+                                                null, null);
+    // Loop over all previous fields.
+    for (int i = 0; i < fields.length; i += 1) {
+      if (i == index) {
+        // Skip the removed field.
+        continue;
+      }
+      // Lookup the value of the remaining field.
+      final ObjectShape field = fields[i];
+      final Repr value;
+      switch (field.size - 1) {
+        case 0:
+          value = Assume.nonNull(slot0);
+          break;
+        case 1:
+          value = Assume.nonNull(slot1);
+          break;
+        case 2:
+          value = Assume.nonNull(slot2);
+          break;
+        default:
+          throw new AssertionError(Integer.toString(field.size - 1));
+      }
+      // Insert the remaining field into the hashtable.
+      final ObjectEntry entry = new ObjectEntry(Assume.nonNull(field.key), value);
+      newObject.putEntry(Assume.nonNull(field.key).hashCode(), entry);
+      newObject.appendEntry(entry);
+    }
+    return newObject;
   }
 
   private ObjectRepr removedPacked(String key) {
@@ -816,34 +815,31 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
         // Inline the remaining value slots.
         return new ObjectRepr(0, shape.size - 1, this.attrs, Assume.nonNull(shape.parent),
                               slots[0], slots[1], slots[2]);
-      } else {
-        // Clone the remaining value slots, excluding the last (removed) value.
-        final Repr[] newSlots = new Repr[ObjectShape.expand(shape.size - 1)];
-        System.arraycopy(slots, 0, newSlots, 0, shape.size - 1);
-        return new ObjectRepr(0, shape.size - 1, this.attrs, Assume.nonNull(shape.parent),
-                              newSlots, null, null);
       }
-    } else {
-      // Build a hash table with the remaining fields.
-      final ObjectRepr newObject = new ObjectRepr(0, shape.size - 1, this.attrs,
-                                                  ObjectShape.dictionary(),
-                                                  new ObjectEntry[ObjectShape.expand((shape.size - 1) * 10 / 7)],
-                                                  null, null);
-      newObject.buildHashTable(shape.fields(), slots, index);
-      return newObject;
+      // Clone the remaining value slots, excluding the last (removed) value.
+      final Repr[] newSlots = new Repr[ObjectShape.expand(shape.size - 1)];
+      System.arraycopy(slots, 0, newSlots, 0, shape.size - 1);
+      return new ObjectRepr(0, shape.size - 1, this.attrs, Assume.nonNull(shape.parent),
+                            newSlots, null, null);
     }
+
+    // Build a hashtable with the remaining fields.
+    final ObjectRepr newObject = new ObjectRepr(0, shape.size - 1, this.attrs, ObjectShape.dictionary(),
+                                                new ObjectEntry[ObjectShape.expand((shape.size - 1) * 10 / 7)],
+                                                null, null);
+    newObject.buildHashtable(shape.fields(), slots, index);
+    return newObject;
   }
 
-  private ObjectRepr removedHashed(String key) {
+  private ObjectRepr removedLinked(String key) {
     final ObjectEntry entry = this.getEntry(key.hashCode(), key);
-    if (entry != null) {
-      final ObjectRepr newObject = new ObjectRepr(0, this.size - 1, this.attrs, this.shape,
-                                                  this.slots, this.head, this.foot);
-      newObject.dealiasHashTable(this.size - 1, key);
-      return newObject;
-    } else {
+    if (entry == null) {
       return this;
     }
+    final ObjectRepr newObject = new ObjectRepr(0, this.size - 1, this.attrs, this.shape,
+                                                this.slots, this.head, this.foot);
+    newObject.dealiasHashtable(this.size - 1, key);
+    return newObject;
   }
 
   @Override
@@ -857,6 +853,25 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     this.foot = null;
     this.size = 0;
     this.flags |= ALIASED_FLAG;
+  }
+
+  public int indexOf(@Nullable String key) {
+    if (this.shape.size == 0 || key == null) {
+      return -1;
+    } else if (this.shape.size < 0) {
+      ObjectEntry entry = (ObjectEntry) this.head;
+      int index = 0;
+      while (entry != null) {
+        if (key.equals(entry.key)) {
+          return index;
+        }
+        entry = entry.next;
+        index += 1;
+      }
+      return -1;
+    } else {
+      return this.shape.lookup(key);
+    }
   }
 
   private @Nullable ObjectEntry getEntry(int hash, String key) {
@@ -875,77 +890,69 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     final ObjectEntry[] slots = (ObjectEntry[]) Assume.nonNull(this.slots);
     final int index = Math.abs(hash % slots.length);
     ObjectEntry bucket = slots[index];
-    if (bucket != null) {
-      if (entry.key.equals(bucket.key)) {
-        entry.nextCollision = bucket.nextCollision;
-        slots[index] = bucket;
-      } else {
-        ObjectEntry prev = bucket;
-        do {
-          bucket = prev.nextCollision;
-          if (bucket != null) {
-            if (entry.key.equals(bucket.key)) {
-              entry.nextCollision = bucket.nextCollision;
-              prev.nextCollision = entry;
-              break;
-            } else {
-              prev = bucket;
-            }
-          } else {
-            prev.nextCollision = entry;
-            break;
-          }
-        } while (true);
-      }
-    } else {
+    if (bucket == null) {
       slots[index] = entry;
+      return;
+    } else if (entry.key.equals(bucket.key)) {
+      entry.nextCollision = bucket.nextCollision;
+      slots[index] = bucket;
+      return;
     }
+    ObjectEntry prev = bucket;
+    do {
+      bucket = prev.nextCollision;
+      if (bucket == null) {
+        prev.nextCollision = entry;
+        return;
+      } else if (entry.key.equals(bucket.key)) {
+        entry.nextCollision = bucket.nextCollision;
+        prev.nextCollision = entry;
+        return;
+      }
+      prev = bucket;
+    } while (true);
   }
 
   private @Nullable ObjectEntry removeEntry(int hash, String key) {
     final ObjectEntry[] slots = (ObjectEntry[]) Assume.nonNull(this.slots);
     final int index = Math.abs(hash % slots.length);
     ObjectEntry bucket = slots[index];
-    if (bucket != null) {
-      if (key.equals(bucket.key)) {
-        slots[index] = bucket.nextCollision;
+    if (bucket == null) {
+      return null;
+    } else if (key.equals(bucket.key)) {
+      slots[index] = bucket.nextCollision;
+      bucket.nextCollision = null;
+      return bucket;
+    }
+    ObjectEntry prev = bucket;
+    do {
+      bucket = prev.nextCollision;
+      if (bucket == null) {
+        return null;
+      } else if (key.equals(bucket.key)) {
+        prev.nextCollision = bucket.nextCollision;
         bucket.nextCollision = null;
         return bucket;
-      } else {
-        ObjectEntry prev = bucket;
-        do {
-          bucket = prev.nextCollision;
-          if (bucket != null) {
-            if (key.equals(bucket.key)) {
-              prev.nextCollision = bucket.nextCollision;
-              bucket.nextCollision = null;
-              return bucket;
-            } else {
-              prev = bucket;
-            }
-          } else {
-            break;
-          }
-        } while (true);
       }
-    }
-    return null;
+      prev = bucket;
+    } while (true);
   }
 
-  private void buildHashTable(ObjectShape[] fields, Repr[] slots, int excludeIndex) {
+  private void buildHashtable(ObjectShape[] fields, Repr[] slots, int excludeIndex) {
     for (int i = 0; i < fields.length; i += 1) {
-      if (i != excludeIndex) {
-        final ObjectShape field = fields[i];
-        final String key = Assume.nonNull(field.key);
-        final Repr value = slots[field.size - 1];
-        final ObjectEntry entry = new ObjectEntry(key, value);
-        this.putEntry(key.hashCode(), entry);
-        this.appendEntry(entry);
+      if (i == excludeIndex) {
+        continue;
       }
+      final ObjectShape field = fields[i];
+      final String key = Assume.nonNull(field.key);
+      final Repr value = slots[field.size - 1];
+      final ObjectEntry entry = new ObjectEntry(key, value);
+      this.putEntry(key.hashCode(), entry);
+      this.appendEntry(entry);
     }
   }
 
-  private void resizeHashTable(int newSize) {
+  private void resizeHashtable(int newSize) {
     final int newCapacity = ObjectShape.expand(newSize * 10 / 7);
     if (newCapacity <= ((ObjectEntry[]) Assume.nonNull(this.slots)).length) {
       return;
@@ -969,7 +976,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     }
   }
 
-  private void dealiasHashTable(int newSize, @Nullable String excludeKey) {
+  private void dealiasHashtable(int newSize, @Nullable String excludeKey) {
     final int newCapacity = ObjectShape.expand(newSize * 10 / 7);
     ObjectEntry head = (ObjectEntry) this.head;
     this.slots = new ObjectEntry[newCapacity];
@@ -1039,7 +1046,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
       this.flags |= IMMUTABLE_FLAG;
       this.attrs.commit();
       if (this.shape.size < 0) {
-        this.commitHashed();
+        this.commitLinked();
       } else if (this.shape.size > MAX_INLINE_SIZE) {
         this.commitPacked();
       } else if (this.shape.size > 0) {
@@ -1068,7 +1075,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     }
   }
 
-  private void commitHashed() {
+  private void commitLinked() {
     ObjectEntry entry = (ObjectEntry) this.head;
     while (entry != null) {
       entry.value.commit();
@@ -1079,7 +1086,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   @Override
   public void forEach(BiConsumer<? super String, ? super Repr> action) {
     if (this.shape.size < 0) {
-      this.forEachHashed(action);
+      this.forEachLinked(action);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       this.forEachPacked(action);
     } else if (this.shape.size > 0) {
@@ -1121,7 +1128,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     }
   }
 
-  private void forEachHashed(BiConsumer<? super String, ? super Repr> action) {
+  private void forEachLinked(BiConsumer<? super String, ? super Repr> action) {
     ObjectEntry entry = (ObjectEntry) this.head;
     while (entry != null) {
       final ObjectEntry next = entry.next;
@@ -1133,7 +1140,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   @Override
   public void forEach(Consumer<? super Map.Entry<String, Repr>> action) {
     if (this.shape.size < 0) {
-      this.forEachHashed(action);
+      this.forEachLinked(action);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       this.forEachPacked(action);
     } else if (this.shape.size > 0) {
@@ -1175,7 +1182,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
     }
   }
 
-  private void forEachHashed(Consumer<? super Map.Entry<String, Repr>> action) {
+  private void forEachLinked(Consumer<? super Map.Entry<String, Repr>> action) {
     ObjectEntry entry = (ObjectEntry) this.head;
     while (entry != null) {
       final ObjectEntry next = entry.next;
@@ -1187,7 +1194,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   @Override
   public Iterator<Map.Entry<String, Repr>> iterator() {
     if (this.shape.size < 0) {
-      return new ObjectReprHashedEntryIterator((ObjectEntry) this.head);
+      return new ObjectReprLinkedEntryIterator((ObjectEntry) this.head);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return new ObjectReprPackedEntryIterator(this);
     } else if (this.shape.size > 0) {
@@ -1199,7 +1206,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
 
   public Iterator<String> keyIterator() {
     if (this.shape.size < 0) {
-      return new ObjectReprHashedKeyIterator((ObjectEntry) this.head);
+      return new ObjectReprLinkedKeyIterator((ObjectEntry) this.head);
     } else {
       return new ObjectReprPackedKeyIterator(this);
     }
@@ -1207,7 +1214,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
 
   public Iterator<Repr> valueIterator() {
     if (this.shape.size < 0) {
-      return new ObjectReprHashedValueIterator((ObjectEntry) this.head);
+      return new ObjectReprLinkedValueIterator((ObjectEntry) this.head);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return new ObjectReprPackedValueIterator(this);
     } else {
@@ -1234,8 +1241,8 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Map<?, ?>) {
-      return this.entrySet().equals(((Map<?, ?>) other).entrySet());
+    } else if (other instanceof Map<?, ?> that) {
+      return this.entrySet().equals(that.entrySet());
     }
     return false;
   }
@@ -1276,14 +1283,12 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
 
   static final int ALIASED_FLAG = 1 << 1;
 
-  static final int MAX_INLINE_SIZE = 3;
+  public static final int MAX_INLINE_SIZE = 3;
 
-  static final int MAX_PACKED_SIZE = 32;
+  public static final int MAX_PACKED_SIZE = 32;
 
-  private static final ObjectRepr EMPTY = new ObjectRepr(IMMUTABLE_FLAG, 0,
-                                                         Attrs.empty(),
-                                                         ObjectShape.empty(),
-                                                         null, null, null);
+  static final ObjectRepr EMPTY = new ObjectRepr(IMMUTABLE_FLAG, 0, Attrs.empty(),
+                                                 ObjectShape.empty(), null, null, null);
 
   public static ObjectRepr empty() {
     return EMPTY;
@@ -1323,14 +1328,20 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
   }
 
   public static ObjectRepr of(Object... keyValuePairs) {
-    Objects.requireNonNull(keyValuePairs);
-    final int n = keyValuePairs.length;
-    if (n % 2 != 0) {
+    if (keyValuePairs.length % 2 != 0) {
       throw new IllegalArgumentException("odd number of key-value pairs");
     }
     final ObjectRepr object = ObjectRepr.of();
-    for (int i = 0; i < n; i += 2) {
-      object.put((String) keyValuePairs[i], (Repr) keyValuePairs[i + 1]);
+    for (int i = 0; i < keyValuePairs.length; i += 2) {
+      final String key = (String) keyValuePairs[i];
+      if (key == null) {
+        throw new NullPointerException("key " + (i >>> 1));
+      }
+      final Repr value = (Repr) keyValuePairs[i + 1];
+      if (value == null) {
+        throw new NullPointerException("value " + (i >>> 1));
+      }
+      object.put(key, value);
     }
     return object;
   }
@@ -1372,8 +1383,7 @@ final class ObjectEntry implements Map.Entry<String, Repr> {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Map.Entry<?, ?>) {
-      final Map.Entry<?, ?> that = (Map.Entry<?, ?>) other;
+    } else if (other instanceof Map.Entry<?, ?> that) {
       return this.key.equals(that.getKey()) && this.value.equals(that.getValue());
     }
     return false;
@@ -1410,8 +1420,7 @@ final class ObjectReprInlineEntryIterator implements Iterator<Map.Entry<String, 
     final int index = this.index;
     if (index >= this.fields.length) {
       throw new NoSuchElementException();
-    }
-    if (this.repr.shape != this.shape) {
+    } else if (this.repr.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -1461,8 +1470,7 @@ final class ObjectReprPackedEntryIterator implements Iterator<Map.Entry<String, 
     final int index = this.index;
     if (index >= this.fields.length) {
       throw new NoSuchElementException();
-    }
-    if (this.repr.shape != this.shape) {
+    } else if (this.repr.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -1473,11 +1481,11 @@ final class ObjectReprPackedEntryIterator implements Iterator<Map.Entry<String, 
 
 }
 
-final class ObjectReprHashedEntryIterator implements Iterator<Map.Entry<String, Repr>> {
+final class ObjectReprLinkedEntryIterator implements Iterator<Map.Entry<String, Repr>> {
 
   @Nullable ObjectEntry entry;
 
-  ObjectReprHashedEntryIterator(@Nullable ObjectEntry entry) {
+  ObjectReprLinkedEntryIterator(@Nullable ObjectEntry entry) {
     this.entry = entry;
   }
 
@@ -1489,12 +1497,11 @@ final class ObjectReprHashedEntryIterator implements Iterator<Map.Entry<String, 
   @Override
   public Map.Entry<String, Repr> next() {
     final ObjectEntry entry = this.entry;
-    if (entry != null) {
-      this.entry = entry.next;
-      return entry;
-    } else {
+    if (entry == null) {
       throw new NoSuchElementException();
     }
+    this.entry = entry.next;
+    return entry;
   }
 
 }
@@ -1543,8 +1550,7 @@ final class ObjectReprPackedKeyIterator implements Iterator<String> {
     final int index = this.index;
     if (index >= this.fields.length) {
       throw new NoSuchElementException();
-    }
-    if (this.repr.shape != this.shape) {
+    } else if (this.repr.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -1553,11 +1559,11 @@ final class ObjectReprPackedKeyIterator implements Iterator<String> {
 
 }
 
-final class ObjectReprHashedKeyIterator implements Iterator<String> {
+final class ObjectReprLinkedKeyIterator implements Iterator<String> {
 
   @Nullable ObjectEntry entry;
 
-  ObjectReprHashedKeyIterator(@Nullable ObjectEntry entry) {
+  ObjectReprLinkedKeyIterator(@Nullable ObjectEntry entry) {
     this.entry = entry;
   }
 
@@ -1569,12 +1575,11 @@ final class ObjectReprHashedKeyIterator implements Iterator<String> {
   @Override
   public String next() {
     final ObjectEntry entry = this.entry;
-    if (entry != null) {
-      this.entry = entry.next;
-      return entry.key;
-    } else {
+    if (entry == null) {
       throw new NoSuchElementException();
     }
+    this.entry = entry.next;
+    return entry.key;
   }
 
 }
@@ -1621,8 +1626,7 @@ final class ObjectReprInlineValueIterator implements Iterator<Repr> {
     final int index = this.index;
     if (index >= this.shape.size) {
       throw new NoSuchElementException();
-    }
-    if (this.repr.shape != this.shape) {
+    } else if (this.repr.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -1662,8 +1666,7 @@ final class ObjectReprPackedValueIterator implements Iterator<Repr> {
     final int index = this.index;
     if (index >= this.shape.size) {
       throw new NoSuchElementException();
-    }
-    if (this.repr.shape != this.shape) {
+    } else if (this.repr.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -1672,11 +1675,11 @@ final class ObjectReprPackedValueIterator implements Iterator<Repr> {
 
 }
 
-final class ObjectReprHashedValueIterator implements Iterator<Repr> {
+final class ObjectReprLinkedValueIterator implements Iterator<Repr> {
 
   @Nullable ObjectEntry entry;
 
-  ObjectReprHashedValueIterator(@Nullable ObjectEntry entry) {
+  ObjectReprLinkedValueIterator(@Nullable ObjectEntry entry) {
     this.entry = entry;
   }
 
@@ -1688,12 +1691,11 @@ final class ObjectReprHashedValueIterator implements Iterator<Repr> {
   @Override
   public Repr next() {
     final ObjectEntry entry = this.entry;
-    if (entry != null) {
-      this.entry = entry.next;
-      return entry.value;
-    } else {
+    if (entry == null) {
       throw new NoSuchElementException();
     }
+    this.entry = entry.next;
+    return entry.value;
   }
 
 }

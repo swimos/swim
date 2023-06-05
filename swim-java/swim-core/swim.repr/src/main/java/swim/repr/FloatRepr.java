@@ -67,9 +67,8 @@ public final class FloatRepr implements NumberRepr, ToSource {
       return this;
     } else if (attrs == Attrs.empty()) {
       return FloatRepr.of(this.value);
-    } else {
-      return new FloatRepr(attrs, this.value);
     }
+    return new FloatRepr(attrs, this.value);
   }
 
   @Override
@@ -289,28 +288,25 @@ public final class FloatRepr implements NumberRepr, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof NumberRepr) {
-      final NumberRepr that = (NumberRepr) other;
-      if (this.attrs().equals(that.attrs())) {
-        if (this.isValidByte() && that.isValidByte()) {
-          return this.byteValue() == that.byteValue();
-        } else if (this.isValidShort() && that.isValidShort()) {
-          return this.shortValue() == that.shortValue();
-        } else if (this.isValidInt() && that.isValidInt()) {
-          return this.intValue() == that.intValue();
-        } else if (this.isValidLong() && that.isValidLong()) {
-          return this.longValue() == that.longValue();
-        } else if (this.isValidFloat() && that.isValidFloat()) {
-          final float x = this.floatValue();
-          final float y = that.floatValue();
-          return x == y || (Float.isNaN(x) && Float.isNaN(y));
-        } else if (this.isValidDouble() && that.isValidDouble()) {
-          final double x = this.doubleValue();
-          final double y = that.doubleValue();
-          return x == y || (Double.isNaN(x) && Double.isNaN(y));
-        } else {
-          return this.stringValue().equals(that.stringValue());
-        }
+    } else if (other instanceof NumberRepr that && this.attrs().equals(that.attrs())) {
+      if (this.isValidByte() && that.isValidByte()) {
+        return this.byteValue() == that.byteValue();
+      } else if (this.isValidShort() && that.isValidShort()) {
+        return this.shortValue() == that.shortValue();
+      } else if (this.isValidInt() && that.isValidInt()) {
+        return this.intValue() == that.intValue();
+      } else if (this.isValidLong() && that.isValidLong()) {
+        return this.longValue() == that.longValue();
+      } else if (this.isValidFloat() && that.isValidFloat()) {
+        final float x = this.floatValue();
+        final float y = that.floatValue();
+        return x == y || (Float.isNaN(x) && Float.isNaN(y));
+      } else if (this.isValidDouble() && that.isValidDouble()) {
+        final double x = this.doubleValue();
+        final double y = that.doubleValue();
+        return x == y || (Double.isNaN(x) && Double.isNaN(y));
+      } else {
+        return this.stringValue().equals(that.stringValue());
       }
     }
     return false;
@@ -351,35 +347,16 @@ public final class FloatRepr implements NumberRepr, ToSource {
     return this.toSource();
   }
 
-  private static final FloatRepr POSITIVE_ZERO = new FloatRepr(Attrs.empty(), 0.0f);
+  static final FloatRepr POSITIVE_ZERO = new FloatRepr(Attrs.empty(), 0.0f);
 
-  static FloatRepr positiveZero() {
-    return POSITIVE_ZERO;
-  }
+  static final FloatRepr NEGATIVE_ZERO = new FloatRepr(Attrs.empty(), -0.0f);
 
-  private static final FloatRepr NEGATIVE_ZERO = new FloatRepr(Attrs.empty(), -0.0f);
+  static final FloatRepr POSITIVE_ONE = new FloatRepr(Attrs.empty(), 1.0f);
 
-  static FloatRepr negativeZero() {
-    return NEGATIVE_ZERO;
-  }
+  static final FloatRepr NEGATIVE_ONE = new FloatRepr(Attrs.empty(), -1.0f);
 
-  private static final FloatRepr POSITIVE_ONE = new FloatRepr(Attrs.empty(), 1.0f);
-
-  static FloatRepr positiveOne() {
-    return POSITIVE_ONE;
-  }
-
-  private static final FloatRepr NEGATIVE_ONE = new FloatRepr(Attrs.empty(), -1.0f);
-
-  static FloatRepr negativeOne() {
-    return NEGATIVE_ONE;
-  }
-
-  private static final FloatRepr NAN = new FloatRepr(Attrs.empty(), Float.NaN);
-
-  static FloatRepr nan() {
-    return NAN;
-  }
+  @SuppressWarnings("checkstyle:ConstantName")
+  static final FloatRepr NaN = new FloatRepr(Attrs.empty(), Float.NaN);
 
   public static FloatRepr of(float value) {
     if (value == 0.0f) {
@@ -393,10 +370,9 @@ public final class FloatRepr implements NumberRepr, ToSource {
     } else if (value == -1.0f) {
       return NEGATIVE_ONE;
     } else if (Float.isNaN(value)) {
-      return NAN;
-    } else {
-      return new FloatRepr(Attrs.empty(), value);
+      return NaN;
     }
+    return new FloatRepr(Attrs.empty(), value);
   }
 
 }

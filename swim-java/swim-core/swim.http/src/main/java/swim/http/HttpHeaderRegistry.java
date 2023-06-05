@@ -70,9 +70,12 @@ public class HttpHeaderRegistry implements ToSource {
       newProviders[index] = provider;
       System.arraycopy(oldProviders, index, newProviders, index + 1, oldProviders.length - index);
       providers = (HttpHeaderProvider[]) PROVIDERS.compareAndExchangeRelease(this, oldProviders, newProviders);
-      if (providers == oldProviders) {
-        break;
+      if (providers != oldProviders) {
+        // CAS failed; try again.
+        continue;
       }
+      providers = newProviders;
+      break;
     } while (true);
   }
 
@@ -125,13 +128,18 @@ public class HttpHeaderRegistry implements ToSource {
     StringTrieMap<HttpHeaderType<?, ?>> headerTypes = (StringTrieMap<HttpHeaderType<?, ?>>) HEADER_TYPES.getOpaque(this);
     do {
       final StringTrieMap<HttpHeaderType<?, ?>> oldHeaderTypes = headerTypes;
-      if (!oldHeaderTypes.containsKey(headerType.name())) {
-        final StringTrieMap<HttpHeaderType<?, ?>> newHeaderTypes = oldHeaderTypes.updated(headerType.name(), headerType);
-        headerTypes = (StringTrieMap<HttpHeaderType<?, ?>>) HEADER_TYPES.compareAndExchangeRelease(this, oldHeaderTypes, newHeaderTypes);
-        if (headerTypes == oldHeaderTypes) {
-          break;
-        }
+      if (oldHeaderTypes.containsKey(headerType.name())) {
+        // Header name already registered.
+        break;
       }
+      final StringTrieMap<HttpHeaderType<?, ?>> newHeaderTypes = oldHeaderTypes.updated(headerType.name(), headerType);
+      headerTypes = (StringTrieMap<HttpHeaderType<?, ?>>) HEADER_TYPES.compareAndExchangeRelease(this, oldHeaderTypes, newHeaderTypes);
+      if (headerTypes != oldHeaderTypes) {
+        // CAS failed; try again.
+        continue;
+      }
+      headerTypes = newHeaderTypes;
+      break;
     } while (true);
   }
 

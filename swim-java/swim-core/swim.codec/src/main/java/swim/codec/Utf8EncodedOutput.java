@@ -271,7 +271,7 @@ public final class Utf8EncodedOutput<T> extends EncodedOutput<T> {
                                     this.index, this.error);
   }
 
-  private static final Utf8EncodedOutput<ByteBuffer> FULL = new Utf8EncodedOutput<ByteBuffer>(BinaryOutput.full(), UtfErrorMode.fatal());
+  static final Utf8EncodedOutput<ByteBuffer> FULL = new Utf8EncodedOutput<ByteBuffer>(BinaryOutput.full(), UtfErrorMode.fatal());
 
   public static Utf8EncodedOutput<ByteBuffer> full() {
     return FULL;

@@ -87,7 +87,7 @@ public final class ArrayBuilder<T, A> {
     return array;
   }
 
-  private static int expand(int n) {
+  static int expand(int n) {
     n = Math.max(8, n) - 1;
     n |= n >> 1;
     n |= n >> 2;

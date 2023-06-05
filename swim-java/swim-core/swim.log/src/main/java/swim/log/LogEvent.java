@@ -22,12 +22,17 @@ import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.expr.Evaluator;
-import swim.expr.JavaTerms;
-import swim.expr.SwimTerms;
-import swim.expr.Term;
-import swim.expr.TermException;
-import swim.expr.TermForm;
+import swim.decl.AutoDetect;
+import swim.decl.Creator;
+import swim.decl.FilterMode;
+import swim.decl.Include;
+import swim.decl.Property;
+import swim.decl.Visibility;
+import swim.term.Evaluator;
+import swim.term.LangTerms;
+import swim.term.Term;
+import swim.term.TermException;
+import swim.term.TermForm;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.Severity;
@@ -35,6 +40,8 @@ import swim.util.ToSource;
 
 @Public
 @Since("5.0")
+@Include(FilterMode.DISTINCT)
+@AutoDetect(Visibility.NONE)
 public class LogEvent implements Term, ToSource {
 
   protected final long seq;
@@ -55,9 +62,16 @@ public class LogEvent implements Term, ToSource {
 
   protected final @Nullable Throwable cause;
 
-  public LogEvent(long seq, Instant time, String topic, String focus,
-                  LogScope scope, Severity level, String message,
-                  @Nullable Object detail, @Nullable Throwable cause) {
+  @Creator
+  public LogEvent(@Property("seq") long seq,
+                  @Property("time") Instant time,
+                  @Property("topic") String topic,
+                  @Property("focus") String focus,
+                  @Property("scope") LogScope scope,
+                  @Property("level") Severity level,
+                  @Property("message") String message,
+                  @Property("detail") @Nullable Object detail,
+                  @Property("cause") @Nullable Throwable cause) {
     this.seq = seq;
     this.time = time;
     this.topic = topic;
@@ -73,38 +87,47 @@ public class LogEvent implements Term, ToSource {
     this(0L, Instant.EPOCH, "", "", LogScope.root(), Severity.OFF, "", null, null);
   }
 
+  @Property
   public final long seq() {
     return this.seq;
   }
 
+  @Property
   public final Instant time() {
     return this.time;
   }
 
+  @Property
   public final String topic() {
     return this.topic;
   }
 
+  @Property
   public final String focus() {
     return this.focus;
   }
 
+  @Property
   public final LogScope scope() {
     return this.scope;
   }
 
+  @Property
   public final Severity level() {
     return this.level;
   }
 
+  @Property
   public final String message() {
     return this.message;
   }
 
+  @Property
   public final @Nullable Object detail() {
     return this.detail;
   }
 
+  @Property
   public final @Nullable Throwable cause() {
     return this.cause;
   }
@@ -173,8 +196,7 @@ public class LogEvent implements Term, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof LogEvent) {
-      final LogEvent that = (LogEvent) other;
+    } else if (other instanceof LogEvent that) {
       return that.canEqual(this)
           && this.seq == that.seq
           && this.time.equals(that.time)
@@ -265,10 +287,10 @@ public class LogEvent implements Term, ToSource {
     }
   }
 
-  static final TermForm<Instant> INSTANT_FORM = JavaTerms.instantForm();
+  static final TermForm<Instant> INSTANT_FORM = LangTerms.instantForm();
 
-  static final TermForm<Severity> SEVERITY_FORM = SwimTerms.severityForm();
+  static final TermForm<Severity> SEVERITY_FORM = LangTerms.severityForm();
 
-  static final TermForm<Throwable> THROWABLE_FORM = JavaTerms.throwableForm();
+  static final TermForm<Throwable> THROWABLE_FORM = LangTerms.throwableForm();
 
 }

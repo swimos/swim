@@ -118,7 +118,7 @@ public final class ByteBufferOutput extends Output<ByteBuffer> {
     return new ByteBufferOutput(newArray, n, this.last);
   }
 
-  private static final byte[] EMPTY_ARRAY = new byte[0];
+  static final byte[] EMPTY_ARRAY = new byte[0];
 
   public static ByteBufferOutput ofCapacity(int capacity) {
     return new ByteBufferOutput(new byte[capacity], capacity, true);

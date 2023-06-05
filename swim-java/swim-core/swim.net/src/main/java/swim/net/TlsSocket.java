@@ -188,7 +188,6 @@ public class TlsSocket extends TcpSocket {
                 this.requestOpeningRead();
                 break;
               case BUFFER_OVERFLOW:
-                // Report the failure.
                 this.log.warningStatus("recv buffer overflow", this);
                 // Initiate socket close.
                 this.close();
@@ -203,7 +202,6 @@ public class TlsSocket extends TcpSocket {
             // Initiate socket close.
             this.close();
           } catch (IOException cause) {
-            // Report the exception.
             this.log.warningStatus("opening read failed", this, cause);
             // Initiate socket close.
             this.close();
@@ -262,7 +260,6 @@ public class TlsSocket extends TcpSocket {
                 }
                 break;
               case BUFFER_UNDERFLOW:
-                // Report the failure.
                 this.log.warningStatus("send buffer underflow", this);
                 // Initiate socket close.
                 this.close();
@@ -277,7 +274,6 @@ public class TlsSocket extends TcpSocket {
             // Initiate socket close.
             this.close();
           } catch (IOException cause) {
-            // Report the exception.
             this.log.warningStatus("opening write failed", this, cause);
             // Initiate socket close.
             this.close();
@@ -335,7 +331,6 @@ public class TlsSocket extends TcpSocket {
                 this.requestOpeningRead();
                 break;
               case BUFFER_OVERFLOW:
-                // Report the failure.
                 this.log.warningStatus("recv buffer overflow", this);
                 // Initiate socket close.
                 this.close();
@@ -350,7 +345,6 @@ public class TlsSocket extends TcpSocket {
             // Initiate socket close.
             this.close();
           } catch (IOException cause) {
-            // Report the exception.
             this.log.warningStatus("read failed", this, cause);
             // Initiate socket close.
             this.close();
@@ -429,7 +423,6 @@ public class TlsSocket extends TcpSocket {
                 }
                 break;
               case BUFFER_UNDERFLOW: // unreachable
-                // Report the failure.
                 this.log.warningStatus("send buffer overflow", this);
                 // Initiate socket close.
                 this.close();
@@ -444,7 +437,6 @@ public class TlsSocket extends TcpSocket {
             // Initiate socket close.
             this.close();
           } catch (IOException cause) {
-            // Report the exception.
             this.log.warningStatus("write failed", this, cause);
             // Initiate socket close.
             this.close();
@@ -481,13 +473,11 @@ public class TlsSocket extends TcpSocket {
         }
         break;
       case BUFFER_UNDERFLOW: // unreachable
-        // Report the failure.
         this.log.warningStatus("send buffer underflow", this);
         // Initiate socket close.
         this.close();
         break;
       case BUFFER_OVERFLOW: // unreachable
-        // Report the failure.
         this.log.warningStatus("send buffer overflow", this);
         // Initiate socket close.
         this.close();
@@ -570,7 +560,6 @@ public class TlsSocket extends TcpSocket {
                 this.requestClosingRead();
                 break;
               case BUFFER_OVERFLOW:
-                // Report the failure.
                 this.log.warningStatus("recv buffer overflow", this);
                 // Initiate socket close.
                 this.close();
@@ -585,7 +574,6 @@ public class TlsSocket extends TcpSocket {
             // Initiate socket close.
             this.close();
           } catch (IOException cause) {
-            // Report the exception.
             this.log.warningStatus("closing read failed", this, cause);
             // Initiate socket close.
             this.close();
@@ -656,7 +644,6 @@ public class TlsSocket extends TcpSocket {
                 handshakeStatus = result.getHandshakeStatus();
                 continue write;
               case BUFFER_UNDERFLOW: // unreachable
-                // Report the failure.
                 this.log.warningStatus("send buffer underflow", this);
                 // Initiate socket close.
                 this.close();
@@ -671,7 +658,6 @@ public class TlsSocket extends TcpSocket {
             // Initiate socket close.
             this.close();
           } catch (IOException cause) {
-            // Report the exception.
             this.log.warningStatus("closing write failed", this, cause);
             // Initiate socket close.
             this.close();
@@ -848,7 +834,7 @@ public class TlsSocket extends TcpSocket {
     return context;
   }
 
-  private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocateDirect(0);
+  static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocateDirect(0);
 
   static final boolean LOG_CERTIFICATES;
 

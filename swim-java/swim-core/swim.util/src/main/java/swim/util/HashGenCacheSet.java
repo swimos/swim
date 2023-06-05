@@ -308,8 +308,7 @@ public class HashGenCacheSet<T> {
   }
 
   /**
-   * {@code VarHandle} for atomically accessing elements of a
-   * {@link HashGenCacheSetBucket} array.
+   * {@code VarHandle} for atomically accessing elements of a {@link HashGenCacheSetBucket} array.
    */
   static final VarHandle BUCKET;
 

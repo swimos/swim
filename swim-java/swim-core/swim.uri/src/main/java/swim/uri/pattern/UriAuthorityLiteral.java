@@ -50,20 +50,18 @@ final class UriAuthorityLiteral extends UriAuthorityPattern {
   @Override
   Map<String, String> unapply(UriAuthority authority, UriPath path, UriQuery query,
                               UriFragment fragment, Map<String, String> args) {
-    if (this.authority.equals(authority)) {
-      return this.rest.unapply(path, query, fragment, args);
-    } else {
+    if (!this.authority.equals(authority)) {
       return args;
     }
+    return this.rest.unapply(path, query, fragment, args);
   }
 
   @Override
   boolean matches(UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
-    if (this.authority.equals(authority)) {
-      return this.rest.matches(path, query, fragment);
-    } else {
+    if (!this.authority.equals(authority)) {
       return false;
     }
+    return this.rest.matches(path, query, fragment);
   }
 
 }

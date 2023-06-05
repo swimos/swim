@@ -14,159 +14,555 @@
 
 package swim.waml;
 
-import java.math.BigInteger;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.function.Function;
+import swim.annotations.Contravariant;
+import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.BinaryOutput;
 import swim.codec.Output;
+import swim.codec.StringOutput;
+import swim.codec.Text;
 import swim.codec.Write;
 import swim.codec.WriteException;
+import swim.decl.FilterMode;
 import swim.expr.Expr;
-import swim.expr.ExprWriter;
-import swim.expr.Term;
-import swim.expr.TermForm;
+import swim.term.Term;
+import swim.term.TermException;
+import swim.term.TermWriter;
+import swim.term.TermWriterOptions;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.waml.writer.WriteWamlArray;
-import swim.waml.writer.WriteWamlAttr;
-import swim.waml.writer.WriteWamlBlock;
-import swim.waml.writer.WriteWamlIdentifier;
-import swim.waml.writer.WriteWamlInteger;
-import swim.waml.writer.WriteWamlMarkup;
-import swim.waml.writer.WriteWamlNumber;
-import swim.waml.writer.WriteWamlObject;
-import swim.waml.writer.WriteWamlString;
-import swim.waml.writer.WriteWamlTerm;
-import swim.waml.writer.WriteWamlTuple;
-import swim.waml.writer.WriteWamlUnit;
+import swim.util.Result;
+import swim.util.ToSource;
 
 /**
- * Factory for constructing WAML writers.
+ * A writer of values to WAML.
+ *
+ * @param <T> the type of values to write to WAML
  */
 @Public
 @Since("5.0")
-public class WamlWriter extends ExprWriter {
+public interface WamlWriter<@Contravariant T> extends TermWriter<T> {
 
-  protected WamlWriter(WamlWriterOptions options) {
-    super(options);
+  @Nullable String typeName();
+
+  default WamlAttrsWriter<?, Object> attrsWriter() {
+    return WamlReprs.attrsWriter();
   }
 
-  @Override
-  public WamlWriterOptions options() {
-    return (WamlWriterOptions) this.options;
+  default @Nullable Object getAttrs(@Nullable T value) throws WamlException {
+    return null;
   }
 
-  @Override
-  public Write<?> writeTerm(Output<?> output, TermForm<?> form, Term term) {
-    if (term instanceof Expr) {
-      return this.writeExpr(output, form, (Expr) term);
-    } else if (form instanceof WamlForm<?>) {
-      return Assume.<WamlForm<Object>>conforms(form).write(output, term, this);
-    } else {
-      return Write.error(new WriteException("unsupported term: " + term));
+  default boolean filter(@Nullable T value, FilterMode filterMode) throws WamlException {
+    switch (filterMode) {
+      case DEFINED:
+      case TRUTHY:
+      case DISTINCT:
+        return value != null;
+      default:
+        return true;
     }
   }
 
-  public Write<?> writeUnit(Output<?> output, WamlForm<?> form,
-                            Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlUnit.write(output, this, form, attrs, null, 1);
+  @Override
+  default Write<?> write(Output<?> output, @Nullable T value, TermWriterOptions options) {
+    return this.write(output, value, WamlWriterOptions.readable().withOptions(options));
   }
 
-  public Write<?> writeBoolean(Output<?> output, WamlForm<?> form, boolean value,
-                               Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlIdentifier.write(output, this, form, value ? "true" : "false", attrs, null, 0, 1);
+  Write<?> write(Output<?> output, @Nullable Object attrs, @Nullable T value, WamlWriterOptions options);
+
+  default Write<?> write(Output<?> output, @Nullable T value, WamlWriterOptions options) {
+    final Object attrs;
+    try {
+      attrs = this.getAttrs(value);
+    } catch (WamlException cause) {
+      return Write.error(cause);
+    }
+    return this.write(output, attrs, value, options);
   }
 
-  public Write<?> writeNumber(Output<?> output, WamlForm<?> form, int value,
-                              Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlInteger.write(output, this, form, (long) value, attrs, null, 0, 1);
+  @Override
+  default Write<?> write(Output<?> output, @Nullable T value) {
+    return this.write(output, value, WamlWriterOptions.readable());
   }
 
-  public Write<?> writeNumber(Output<?> output, WamlForm<?> form, long value,
-                              Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlInteger.write(output, this, form, value, attrs, null, 0, 1);
+  default Write<?> write(@Nullable T value, WamlWriterOptions options) {
+    return this.write(BinaryOutput.full(), value, options);
   }
 
-  public Write<?> writeNumber(Output<?> output, WamlForm<?> form, float value,
-                              Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlNumber.write(output, this, form, Float.toString(value), attrs, null, 0, 1);
+  @Override
+  default Write<?> write(@Nullable T value) {
+    return this.write(value, WamlWriterOptions.readable());
   }
 
-  public Write<?> writeNumber(Output<?> output, WamlForm<?> form, double value,
-                              Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlNumber.write(output, this, form, Double.toString(value), attrs, null, 0, 1);
+  default String toString(@Nullable T value, WamlWriterOptions options) {
+    final StringOutput output = new StringOutput();
+    this.write(output, value, options).assertDone();
+    return output.get();
   }
 
-  public Write<?> writeNumber(Output<?> output, WamlForm<?> form, BigInteger value,
-                              Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlNumber.write(output, this, form, value.toString(), attrs, null, 0, 1);
+  @Override
+  default String toString(@Nullable T value) {
+    return this.toString(value, WamlWriterOptions.readable());
   }
 
-  public Write<?> writeIdentifier(Output<?> output, WamlForm<?> form, String value,
-                                  Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlIdentifier.write(output, this, form, value, attrs, null, 0, 1);
+  default Write<?> writeBlock(Output<?> output, @Nullable T value, WamlWriterOptions options) {
+    return this.write(output, value, options);
   }
 
-  public Write<?> writeString(Output<?> output, WamlForm<?> form, String value,
-                              Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlString.write(output, this, form, value, attrs, null, 0, 0, 1);
+  default Write<?> writeBlock(Output<?> output, @Nullable T value) {
+    return this.writeBlock(output, value, WamlWriterOptions.readable());
   }
 
-  public Write<?> writeTerm(Output<?> output, WamlForm<?> form, Term term,
-                            Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlTerm.write(output, this, form, term, attrs, null, 1);
+  default Write<?> writeBlock(@Nullable T value, WamlWriterOptions options) {
+    return this.writeBlock(BinaryOutput.full(), value, options);
   }
 
-  public <E> Write<?> writeArray(Output<?> output, WamlArrayForm<E, ?, ?> form,
-                                 Iterator<? extends E> elements,
-                                 Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlArray.write(output, this, form, elements, attrs, null, 1);
+  default Write<?> writeBlock(@Nullable T value) {
+    return this.writeBlock(value, WamlWriterOptions.readable());
   }
 
-  public <N> Write<?> writeMarkup(Output<?> output, WamlMarkupForm<N, ?, ?> form,
-                                  Iterator<? extends N> nodes,
-                                  Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlMarkup.write(output, this, form, nodes, attrs, null, null, null, false, 0, 0, 1);
+  default String toBlockString(@Nullable T value, WamlWriterOptions options) {
+    final StringOutput output = new StringOutput();
+    this.writeBlock(output, value, options).assertDone();
+    return output.get();
   }
 
-  public <N> Write<?> writeInlineMarkup(Output<?> output, WamlMarkupForm<N, ?, ?> form,
-                                        Iterator<? extends N> nodes,
-                                        Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlMarkup.write(output, this, form, nodes, attrs, null, null, null, true, 0, 0, 1);
+  default String toBlockString(@Nullable T value) {
+    return this.toBlockString(value, WamlWriterOptions.readable());
   }
 
-  public <K, V> Write<?> writeObject(Output<?> output, WamlObjectForm<K, V, ?, ?> form,
-                                     Iterator<? extends Map.Entry<K, V>> fields,
-                                     Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlObject.write(output, this, form, fields, attrs, null, null, null, 1);
+  default Write<?> writeUnit(Output<?> output) {
+    return Text.write(output, "()");
   }
 
-  public <T> Write<?> writeTuple(Output<?> output, WamlForm<T> form, T value,
-                                 Iterator<? extends Map.Entry<String, ?>> attrs) {
-    return WriteWamlTuple.write(output, this, form, value, attrs, null, 1);
+  default boolean isInline(@Nullable T value) {
+    return false;
   }
 
-  public <L, P> Write<?> writeBlock(Output<?> output, WamlTupleForm<L, P, ?, ?> form,
-                                    Iterator<? extends Map.Entry<L, P>> params) {
-    return WriteWamlBlock.write(output, this, form, params, null, null, null, 1);
+  default Write<?> writeInline(Output<?> output, @Nullable T value, WamlWriterOptions options) {
+    return this.write(output, value, options);
   }
 
-  public <A> Write<?> writeAttr(Output<?> output, WamlAttrForm<A, ?> form,
-                                String name, A args) {
-    return WriteWamlAttr.write(output, this, form, name, args, null, 0, 0, 1);
+  default Write<?> writeUnit(Output<?> output, @Nullable Object attrs, WamlWriterOptions options) {
+    return WriteWamlUnit.write(output, this, options, attrs, null, 1);
+  }
+
+  default Write<?> writeTuple(Output<?> output, @Nullable Object attrs,
+                              @Nullable T value, WamlWriterOptions options) {
+    return WriteWamlTuple.write(output, this, options, attrs, value, null, 1);
+  }
+
+  default Write<?> writeTerm(Output<?> output, @Nullable Object attrs,
+                             Term term, WamlWriterOptions options) {
+    return WriteWamlTerm.write(output, this, options, attrs, term, null, 1);
+  }
+
+  @Override
+  default Write<?> writeTerm(Output<?> output, Term term, TermWriterOptions options) {
+    options = WamlWriterOptions.readable().withOptions(options);
+    if (term instanceof Expr) {
+      return ((Expr) term).write(output, this, options);
+    }
+    final Object value;
+    try {
+      value = options.termRegistry().fromTerm(term);
+    } catch (TermException cause) {
+      return Write.error(cause);
+    }
+    return Waml.metaCodec().write(output, value, options);
+  }
+
+  default <S> WamlWriter<S> unmap(Function<? super S, ? extends T> unmapper) {
+    return new WamlWriterUnmapper<S, T>(this, unmapper);
+  }
+
+  static <T> WamlWriter<T> unsupported() {
+    return Assume.conforms(WamlWriterUnsupported.INSTANCE);
+  }
+
+}
+
+final class WamlWriterUnmapper<T, U> implements WamlWriter<T>, ToSource {
+
+  final WamlWriter<U> writer;
+  final Function<? super T, ? extends U> unmapper;
+
+  WamlWriterUnmapper(WamlWriter<U> writer, Function<? super T, ? extends U> unmapper) {
+    this.writer = writer;
+    this.unmapper = unmapper;
+  }
+
+  @Override
+  public @Nullable String typeName() {
+    return this.writer.typeName();
+  }
+
+  @Override
+  public WamlAttrsWriter<?, Object> attrsWriter() {
+    return this.writer.attrsWriter();
+  }
+
+  @Override
+  public @Nullable Object getAttrs(@Nullable T value) throws WamlException {
+    try {
+      return this.writer.getAttrs(this.unmapper.apply(value));
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      throw new WamlException(cause);
+    }
+  }
+
+  @Override
+  public boolean filter(@Nullable T value, FilterMode filterMode) throws WamlException {
+    try {
+      return this.writer.filter(this.unmapper.apply(value), filterMode);
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      throw new WamlException(cause);
+    }
+  }
+
+  @Override
+  public Write<?> write(Output<?> output, @Nullable Object attrs,
+                        @Nullable T value, WamlWriterOptions options) {
+    try {
+      return this.writer.write(output, attrs, this.unmapper.apply(value), options);
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      return Write.error(cause);
+    }
+  }
+
+  @Override
+  public Write<?> write(Output<?> output, @Nullable T value, WamlWriterOptions options) {
+    final U mapped;
+    try {
+      mapped = this.unmapper.apply(value);
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      return Write.error(cause);
+    }
+    final Object attrs;
+    try {
+      attrs = this.writer.getAttrs(mapped);
+    } catch (WamlException cause) {
+      return Write.error(cause);
+    }
+    return this.writer.write(output, attrs, mapped, options);
+  }
+
+  @Override
+  public Write<?> writeBlock(Output<?> output, @Nullable T value, WamlWriterOptions options) {
+    try {
+      return this.writer.writeBlock(output, this.unmapper.apply(value), options);
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      return Write.error(cause);
+    }
+  }
+
+  @Override
+  public boolean isInline(@Nullable T value) {
+    try {
+      return this.writer.isInline(this.unmapper.apply(value));
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+    }
+    return false;
+  }
+
+  @Override
+  public Write<?> writeInline(Output<?> output, @Nullable T value, WamlWriterOptions options) {
+    try {
+      return this.writer.writeInline(output, this.unmapper.apply(value), options);
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      return Write.error(cause);
+    }
+  }
+
+  @Override
+  public Write<?> writeTuple(Output<?> output, @Nullable Object attrs,
+                              @Nullable T value, WamlWriterOptions options) {
+    try {
+      return this.writer.writeTuple(output, attrs, this.unmapper.apply(value), options);
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      return Write.error(cause);
+    }
+  }
+
+  @Override
+  public <S> WamlWriter<S> unmap(Function<? super S, ? extends T> unmapper) {
+    return new WamlWriterUnmapper<S, U>(this.writer, this.unmapper.compose(unmapper));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Waml", "writer")
-            .appendArgument(this.options)
+    notation.appendSource(this.writer)
+            .beginInvoke("unmap")
+            .appendArgument(this.unmapper)
             .endInvoke();
   }
 
-  static final WamlWriter COMPACT = new WamlWriter(WamlWriterOptions.compact());
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
 
-  static final WamlWriter READABLE = new WamlWriter(WamlWriterOptions.readable());
+}
+
+final class WamlWriterUnsupported implements WamlWriter<Object>, ToSource {
+
+  private WamlWriterUnsupported() {
+    // singleton
+  }
+
+  @Override
+  public @Nullable String typeName() {
+    return null;
+  }
+
+  @Override
+  public @Nullable Object getAttrs(@Nullable Object value) throws WamlException {
+    throw new WamlException("unsupported");
+  }
+
+  @Override
+  public boolean filter(@Nullable Object value, FilterMode filterMode) throws WamlException {
+    throw new WamlException("unsupported");
+  }
+
+  @Override
+  public Write<?> write(Output<?> output, @Nullable Object attrs,
+                        @Nullable Object value, WamlWriterOptions options) {
+    return Write.error(new WamlException("unsupported"));
+  }
+
+  @Override
+  public Write<?> write(Output<?> output, @Nullable Object value, WamlWriterOptions options) {
+    return Write.error(new WamlException("unsupported"));
+  }
+
+  @Override
+  public Write<?> writeBlock(Output<?> output, @Nullable Object value, WamlWriterOptions options) {
+    return Write.error(new WamlException("unsupported"));
+  }
+
+  @Override
+  public Write<?> writeInline(Output<?> output, @Nullable Object value, WamlWriterOptions options) {
+    return Write.error(new WamlException("unsupported"));
+  }
+
+  @Override
+  public Write<?> writeTuple(Output<?> output, @Nullable Object attrs,
+                              @Nullable Object value, WamlWriterOptions options) {
+    return Write.error(new WamlException("unsupported"));
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.beginInvoke("WamlWriter", "unsupported").endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+  static final WamlWriterUnsupported INSTANCE = new WamlWriterUnsupported();
+
+}
+
+final class WriteWamlUnit extends Write<Object> {
+
+  final WamlWriter<?> writer;
+  final WamlWriterOptions options;
+  final @Nullable Object attrs;
+  final @Nullable Write<?> write;
+  final int step;
+
+  WriteWamlUnit(WamlWriter<?> writer, WamlWriterOptions options,
+                @Nullable Object attrs, @Nullable Write<?> write, int step) {
+    this.writer = writer;
+    this.options = options;
+    this.attrs = attrs;
+    this.write = write;
+    this.step = step;
+  }
+
+  @Override
+  public Write<Object> produce(Output<?> output) {
+    return WriteWamlUnit.write(output, this.writer, this.options,
+                               this.attrs, this.write, this.step);
+  }
+
+  static Write<Object> write(Output<?> output, WamlWriter<?> writer, WamlWriterOptions options,
+                             @Nullable Object attrs, @Nullable Write<?> write, int step) {
+    if (step == 1) {
+      if (write == null) {
+        final WamlAttrsWriter<?, Object> attrsWriter = writer.attrsWriter();
+        if (attrsWriter.isEmptyAttrs(attrs)) {
+          step = 2;
+        } else {
+          write = attrsWriter.writeAttrs(output, attrs, options, false);
+        }
+      } else {
+        write = write.produce(output);
+      }
+      if (write != null) {
+        if (write.isDone()) {
+          return Write.done();
+        } else if (write.isError()) {
+          return write.asError();
+        }
+      }
+    }
+    if (step == 2 && output.isCont()) {
+      output.write('(');
+      step = 3;
+    }
+    if (step == 3 && output.isCont()) {
+      output.write(')');
+      return Write.done();
+    }
+    if (output.isDone()) {
+      return Write.error(new WriteException("truncated write"));
+    } else if (output.isError()) {
+      return Write.error(output.getError());
+    }
+    return new WriteWamlUnit(writer, options, attrs, write, step);
+  }
+
+}
+
+final class WriteWamlTuple<T> extends Write<Object> {
+
+  final WamlWriter<T> writer;
+  final WamlWriterOptions options;
+  final @Nullable Object attrs;
+  final @Nullable T value;
+  final @Nullable Write<?> write;
+  final int step;
+
+  WriteWamlTuple(WamlWriter<T> writer, WamlWriterOptions options, @Nullable Object attrs,
+                 @Nullable T value, @Nullable Write<?> write, int step) {
+    this.writer = writer;
+    this.options = options;
+    this.attrs = attrs;
+    this.value = value;
+    this.write = write;
+    this.step = step;
+  }
+
+  @Override
+  public Write<Object> produce(Output<?> output) {
+    return WriteWamlTuple.write(output, this.writer, this.options, this.attrs,
+                                this.value, this.write, this.step);
+  }
+
+  static <T> Write<Object> write(Output<?> output, WamlWriter<T> writer,
+                                 WamlWriterOptions options, @Nullable Object attrs,
+                                 @Nullable T value, @Nullable Write<?> write, int step) {
+    if (step == 1) {
+      if (write == null) {
+        write = writer.attrsWriter().writeAttrs(output, attrs, options, true);
+      } else {
+        write = write.produce(output);
+      }
+      if (write.isDone()) {
+        write = null;
+        step = 2;
+      } else if (write.isError()) {
+        return write.asError();
+      }
+    }
+    if (step == 2 && output.isCont()) {
+      output.write('(');
+      step = 3;
+    }
+    if (step == 3) {
+      if (write == null) {
+        write = writer.writeBlock(output, value, options);
+      } else {
+        write = write.produce(output);
+      }
+      if (write.isDone()) {
+        write = null;
+        step = 4;
+      } else if (write.isError()) {
+        return write.asError();
+      }
+    }
+    if (step == 4 && output.isCont()) {
+      output.write(')');
+      return Write.done();
+    }
+    if (output.isDone()) {
+      return Write.error(new WriteException("truncated write"));
+    } else if (output.isError()) {
+      return Write.error(output.getError());
+    }
+    return new WriteWamlTuple<T>(writer, options, attrs, value, write, step);
+  }
+
+}
+
+final class WriteWamlTerm extends Write<Object> {
+
+  final WamlWriter<?> writer;
+  final WamlWriterOptions options;
+  final @Nullable Object attrs;
+  final Term term;
+  final @Nullable Write<?> write;
+  final int step;
+
+  WriteWamlTerm(WamlWriter<?> writer, WamlWriterOptions options, @Nullable Object attrs,
+                Term term, @Nullable Write<?> write, int step) {
+    this.writer = writer;
+    this.options = options;
+    this.attrs = attrs;
+    this.term = term;
+    this.write = write;
+    this.step = step;
+  }
+
+  @Override
+  public Write<Object> produce(Output<?> output) {
+    return WriteWamlTerm.write(output, this.writer, this.options, this.attrs,
+                               this.term, this.write, this.step);
+  }
+
+  static Write<Object> write(Output<?> output, WamlWriter<?> writer,
+                             WamlWriterOptions options, @Nullable Object attrs,
+                             Term term, @Nullable Write<?> write, int step) {
+    if (step == 1) {
+      if (write == null) {
+        write = writer.attrsWriter().writeAttrs(output, attrs, options, true);
+      } else {
+        write = write.produce(output);
+      }
+      if (write.isDone()) {
+        write = null;
+        step = 2;
+      } else if (write.isError()) {
+        return write.asError();
+      }
+    }
+    if (step == 2) {
+      return Assume.covariant(writer.writeTerm(output, term, options));
+    }
+    if (output.isDone()) {
+      return Write.error(new WriteException("truncated write"));
+    } else if (output.isError()) {
+      return Write.error(output.getError());
+    }
+    return new WriteWamlTerm(writer, options, attrs, term, write, step);
+  }
 
 }

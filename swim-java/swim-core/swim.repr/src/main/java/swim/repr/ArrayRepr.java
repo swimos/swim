@@ -64,10 +64,9 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   public ArrayRepr letAttrs(Attrs attrs) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
       return this.withAttrs(attrs);
-    } else {
-      this.attrs = attrs;
-      return this;
     }
+    this.attrs = attrs;
+    return this;
   }
 
   @Override
@@ -85,10 +84,9 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   public ArrayRepr withAttrs(Attrs attrs) {
     if (attrs == this.attrs) {
       return this;
-    } else {
-      this.flags |= ALIASED_FLAG;
-      return new ArrayRepr(this.flags, this.size, attrs, this.array);
     }
+    this.flags |= ALIASED_FLAG;
+    return new ArrayRepr(this.flags, this.size, attrs, this.array);
   }
 
   @Override
@@ -102,7 +100,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   }
 
   @Override
-  public boolean isDefinite() {
+  public boolean isDistinct() {
     return this.size != 0;
   }
 
@@ -354,12 +352,11 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
       throw new UnsupportedOperationException("immutable");
     }
     final int index = this.indexOf(element);
-    if (index >= 0) {
-      this.remove(index);
-      return true;
-    } else {
+    if (index < 0) {
       return false;
     }
+    this.remove(index);
+    return true;
   }
 
   @Override
@@ -378,11 +375,10 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   @Override
   public ArrayRepr removed(@Nullable Object element) {
     final int index = this.indexOf(element);
-    if (index >= 0) {
-      return this.removed(index);
-    } else {
+    if (index < 0) {
       return this;
     }
+    return this.removed(index);
   }
 
   @Override
@@ -409,22 +405,20 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
       }
       i += 1;
     }
-    if (i > j) {
-      if ((this.flags & ALIASED_FLAG) != 0) {
-        array = newArray;
-        this.array = array;
-        this.flags &= ~ALIASED_FLAG;
-      } else {
-        while (i > j) {
-          i -= 1;
-          array[i] = null;
-        }
-      }
-      this.size = j;
-      return true;
-    } else {
+    if (i <= j) {
       return false;
+    } else if ((this.flags & ALIASED_FLAG) != 0) {
+      array = newArray;
+      this.array = array;
+      this.flags &= ~ALIASED_FLAG;
+    } else {
+      while (i > j) {
+        i -= 1;
+        array[i] = null;
+      }
     }
+    this.size = j;
+    return true;
   }
 
   @Override
@@ -451,22 +445,20 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
       }
       i += 1;
     }
-    if (i > j) {
-      if ((this.flags & ALIASED_FLAG) != 0) {
-        array = newArray;
-        this.array = array;
-        this.flags &= ~ALIASED_FLAG;
-      } else {
-        while (i > j) {
-          i -= 1;
-          array[i] = null;
-        }
-      }
-      this.size = j;
-      return true;
-    } else {
+    if (i <= j) {
       return false;
+    } else if ((this.flags & ALIASED_FLAG) != 0) {
+      array = newArray;
+      this.array = array;
+      this.flags &= ~ALIASED_FLAG;
+    } else {
+      while (i > j) {
+        i -= 1;
+        array[i] = null;
+      }
     }
+    this.size = j;
+    return true;
   }
 
   @Override
@@ -484,12 +476,11 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   }
 
   public ArrayRepr asMarkup() {
-    if ((this.flags & IMMUTABLE_FLAG) == 0) {
-      this.flags |= MARKUP_HINT;
-      return this;
-    } else {
+    if ((this.flags & IMMUTABLE_FLAG) != 0) {
       return this.clone().asMarkup();
     }
+    this.flags |= MARKUP_HINT;
+    return this;
   }
 
   @Override
@@ -590,18 +581,16 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof List<?>) {
-      final List<?> that = (List<?>) other;
-      if (!(that instanceof ArrayRepr) || this.attrs.equals(((ArrayRepr) that).attrs)) {
-        final Iterator<Repr> xs = this.iterator();
-        final Iterator<?> ys = that.iterator();
-        while (xs.hasNext() && ys.hasNext()) {
-          if (!xs.next().equals(ys.next())) {
-            return false;
-          }
+    } else if (other instanceof List<?> that
+          && (!(that instanceof ArrayRepr) || this.attrs.equals(((ArrayRepr) that).attrs))) {
+      final Iterator<Repr> xs = this.iterator();
+      final Iterator<?> ys = that.iterator();
+      while (xs.hasNext() && ys.hasNext()) {
+        if (!xs.next().equals(ys.next())) {
+          return false;
         }
-        return !xs.hasNext() && !ys.hasNext();
       }
+      return !xs.hasNext() && !ys.hasNext();
     }
     return false;
   }
@@ -643,10 +632,10 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
 
   static final int MARKUP_HINT = 1 << 2;
 
-  private static final Repr[] EMPTY_ARRAY = new Repr[0];
+  static final Repr[] EMPTY_ARRAY = new Repr[0];
 
-  private static final ArrayRepr EMPTY = new ArrayRepr(IMMUTABLE_FLAG | ALIASED_FLAG,
-                                                       0, Attrs.empty(), EMPTY_ARRAY);
+  static final ArrayRepr EMPTY = new ArrayRepr(IMMUTABLE_FLAG | ALIASED_FLAG,
+                                               0, Attrs.empty(), EMPTY_ARRAY);
 
   public static ArrayRepr empty() {
     return EMPTY;

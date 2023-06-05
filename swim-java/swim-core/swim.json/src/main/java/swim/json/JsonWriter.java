@@ -14,114 +14,202 @@
 
 package swim.json;
 
-import java.math.BigInteger;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.function.Function;
+import swim.annotations.Contravariant;
+import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Base10;
+import swim.codec.BinaryOutput;
 import swim.codec.Output;
+import swim.codec.StringOutput;
 import swim.codec.Text;
 import swim.codec.Write;
-import swim.codec.WriteException;
+import swim.decl.FilterMode;
 import swim.expr.Expr;
-import swim.expr.ExprWriter;
-import swim.expr.Term;
-import swim.expr.TermForm;
-import swim.json.writer.WriteJsonArray;
-import swim.json.writer.WriteJsonIdentifier;
-import swim.json.writer.WriteJsonObject;
-import swim.json.writer.WriteJsonString;
+import swim.term.Term;
+import swim.term.TermException;
+import swim.term.TermWriter;
+import swim.term.TermWriterOptions;
 import swim.util.Assume;
 import swim.util.Notation;
+import swim.util.Result;
+import swim.util.ToSource;
 
 /**
- * Factory for constructing JSON writers.
+ * A writer of values to JSON.
+ *
+ * @param <T> the type of values to write to JSON
  */
 @Public
 @Since("5.0")
-public class JsonWriter extends ExprWriter {
+public interface JsonWriter<@Contravariant T> extends TermWriter<T> {
 
-  protected JsonWriter(JsonWriterOptions options) {
-    super(options);
-  }
+  @Nullable String typeName();
 
-  @Override
-  public JsonWriterOptions options() {
-    return (JsonWriterOptions) this.options;
-  }
-
-  @Override
-  public Write<?> writeTerm(Output<?> output, TermForm<?> form, Term term) {
-    if (term instanceof Expr) {
-      return this.writeExpr(output, form, (Expr) term);
-    } else if (form instanceof JsonForm<?>) {
-      return Assume.<JsonForm<Object>>conforms(form).write(output, term, this);
-    } else {
-      return Write.error(new WriteException("unsupported term: " + term));
+  default boolean filter(@Nullable T value, FilterMode filterMode) throws JsonException {
+    switch (filterMode) {
+      case DEFINED:
+      case TRUTHY:
+      case DISTINCT:
+        return value != null;
+      default:
+        return true;
     }
   }
 
-  public Write<?> writeUndefined(Output<?> output) {
-    return WriteJsonIdentifier.write(output, this, "undefined", 0);
+  @Override
+  default Write<?> write(Output<?> output, @Nullable T value, TermWriterOptions options) {
+    return this.write(output, value, JsonWriterOptions.standard().withOptions(options));
   }
 
-  public Write<?> writeNull(Output<?> output) {
-    return WriteJsonIdentifier.write(output, this, "null", 0);
+  Write<?> write(Output<?> output, @Nullable T value, JsonWriterOptions options);
+
+  @Override
+  default Write<?> write(Output<?> output, @Nullable T value) {
+    return this.write(output, value, JsonWriterOptions.standard());
   }
 
-  public Write<?> writeBoolean(Output<?> output, boolean value) {
-    return WriteJsonIdentifier.write(output, this, value ? "true" : "false", 0);
+  default Write<?> write(@Nullable T value, JsonWriterOptions options) {
+    return this.write(BinaryOutput.full(), value, options);
   }
 
-  public Write<?> writeNumber(Output<?> output, int value) {
-    return Base10.writeInt(output, value);
+  @Override
+  default Write<?> write(@Nullable T value) {
+    return this.write(value, JsonWriterOptions.standard());
   }
 
-  public Write<?> writeNumber(Output<?> output, long value) {
-    return Base10.writeLong(output, value);
+  default String toString(@Nullable T value, JsonWriterOptions options) {
+    final StringOutput output = new StringOutput();
+    this.write(output, value, options).assertDone();
+    return output.get();
   }
 
-  public Write<?> writeNumber(Output<?> output, float value) {
-    return Text.transcoder().write(output, Float.toString(value));
+  @Override
+  default String toString(@Nullable T value) {
+    return this.toString(value, JsonWriterOptions.standard());
   }
 
-  public Write<?> writeNumber(Output<?> output, double value) {
-    return Text.transcoder().write(output, Double.toString(value));
+  default Write<?> writeUndefined(Output<?> output) {
+    return Text.write(output, "undefined");
   }
 
-  public Write<?> writeNumber(Output<?> output, BigInteger value) {
-    return Text.transcoder().write(output, value.toString());
+  default Write<?> writeNull(Output<?> output) {
+    return Text.write(output, "null");
   }
 
-  public Write<?> writeIdentifier(Output<?> output, String value) {
-    return WriteJsonIdentifier.write(output, this, value, 0);
+  @Override
+  default Write<?> writeTerm(Output<?> output, Term term, TermWriterOptions options) {
+    options = JsonWriterOptions.standard().withOptions(options);
+    if (term instanceof Expr) {
+      return ((Expr) term).write(output, this, options);
+    }
+    final Object value;
+    try {
+      value = options.termRegistry().fromTerm(term);
+    } catch (TermException cause) {
+      return Write.error(cause);
+    }
+    return Json.metaCodec().write(output, value, options);
   }
 
-  public Write<?> writeString(Output<?> output, String value) {
-    return WriteJsonString.write(output, value, 0, 0, 1);
+  default <S> JsonWriter<S> unmap(Function<? super S, ? extends T> unmapper) {
+    return new JsonWriterUnmapper<S, T>(this, unmapper);
   }
 
-  public <E> Write<?> writeArray(Output<?> output, JsonArrayForm<E, ?, ?> form,
-                                 Iterator<? extends E> elements) {
-    return WriteJsonArray.write(output, this, form, elements, null, 1);
+  static <T> JsonWriter<T> unsupported() {
+    return Assume.conforms(JsonWriterUnsupported.INSTANCE);
   }
 
-  public <K, V> Write<?> writeObject(Output<?> output, JsonObjectForm<K, V, ?, ?> form,
-                                     Iterator<? extends Map.Entry<K, V>> fields) {
-    return WriteJsonObject.write(output, this, form, fields, null, null, null, 1);
+}
+
+final class JsonWriterUnmapper<T, U> implements JsonWriter<T>, ToSource {
+
+  final JsonWriter<U> writer;
+  final Function<? super T, ? extends U> unmapper;
+
+  JsonWriterUnmapper(JsonWriter<U> writer, Function<? super T, ? extends U> unmapper) {
+    this.writer = writer;
+    this.unmapper = unmapper;
+  }
+
+  @Override
+  public @Nullable String typeName() {
+    return this.writer.typeName();
+  }
+
+  @Override
+  public boolean filter(@Nullable T value, FilterMode filterMode) throws JsonException {
+    try {
+      return this.writer.filter(this.unmapper.apply(value), filterMode);
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      throw new JsonException(cause);
+    }
+  }
+
+  @Override
+  public Write<?> write(Output<?> output, @Nullable T value, JsonWriterOptions options) {
+    try {
+      return this.writer.write(output, this.unmapper.apply(value), options);
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      return Write.error(cause);
+    }
+  }
+
+  @Override
+  public <S> JsonWriter<S> unmap(Function<? super S, ? extends T> unmapper) {
+    return new JsonWriterUnmapper<S, U>(this.writer, this.unmapper.compose(unmapper));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Json", "writer")
-            .appendArgument(this.options)
+    notation.appendSource(this.writer)
+            .beginInvoke("unmap")
+            .appendArgument(this.unmapper)
             .endInvoke();
   }
 
-  static final JsonWriter COMPACT = new JsonWriter(JsonWriterOptions.compact());
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
 
-  static final JsonWriter READABLE = new JsonWriter(JsonWriterOptions.readable());
+}
+
+final class JsonWriterUnsupported implements JsonWriter<Object>, ToSource {
+
+  private JsonWriterUnsupported() {
+    // singleton
+  }
+
+  @Override
+  public @Nullable String typeName() {
+    return null;
+  }
+
+  @Override
+  public boolean filter(@Nullable Object value, FilterMode filterMode) throws JsonException {
+    throw new JsonException("unsupported");
+  }
+
+  @Override
+  public Write<?> write(Output<?> output, @Nullable Object value, JsonWriterOptions options) {
+    return Write.error(new JsonException("unsupported"));
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.beginInvoke("JsonWriter", "unsupported").endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+  static final JsonWriterUnsupported INSTANCE = new JsonWriterUnsupported();
 
 }

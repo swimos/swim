@@ -19,7 +19,7 @@ import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.expr.Term;
+import swim.term.Term;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -64,10 +64,9 @@ public final class Attr implements Term, Map.Entry<String, Repr>, ToSource {
     Objects.requireNonNull(value);
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
       return Attr.of(this.key, value);
-    } else {
-      this.value = value;
-      return this;
     }
+    this.value = value;
+    return this;
   }
 
   public Attr withValue(Repr value) {
@@ -90,11 +89,10 @@ public final class Attr implements Term, Map.Entry<String, Repr>, ToSource {
   }
 
   public Attr asMutable() {
-    if ((this.flags & IMMUTABLE_FLAG) != 0) {
-      return Attr.of(this.key, this.value);
-    } else {
+    if ((this.flags & IMMUTABLE_FLAG) == 0) {
       return this;
     }
+    return Attr.of(this.key, this.value);
   }
 
   void alias() {
@@ -114,8 +112,7 @@ public final class Attr implements Term, Map.Entry<String, Repr>, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Attr) {
-      final Attr that = (Attr) other;
+    } else if (other instanceof Attr that) {
       return this.key.equals(that.key) && this.value.equals(that.value);
     }
     return false;
@@ -129,8 +126,8 @@ public final class Attr implements Term, Map.Entry<String, Repr>, ToSource {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Attr", "of");
-    notation.appendArgument(this.key);
+    notation.beginInvoke("Attr", "of")
+            .appendArgument(this.key);
     if (!(this.value instanceof UnitRepr)) {
       notation.appendArgument(this.value);
     }

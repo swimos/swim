@@ -16,19 +16,11 @@ package swim.waml;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Output;
-import swim.codec.Write;
-import swim.collections.HashTrieMap;
-import swim.expr.Term;
-import swim.expr.TermException;
+import swim.collections.UniformMap;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -49,13 +41,13 @@ public final class WamlThrowables implements WamlProvider, ToSource {
   }
 
   @Override
-  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
-    if (javaType instanceof Class<?>) {
-      final Class<?> javaClass = (Class<?>) javaType;
-      if (StackTraceElement.class.isAssignableFrom(javaClass)) {
-        return WamlThrowables.stackTraceElementForm();
-      } else if (Throwable.class.isAssignableFrom(javaClass)) {
-        return WamlThrowables.throwableForm();
+  public @Nullable WamlFormat<?> resolveWamlFormat(Type type) throws WamlProviderException {
+    if (type instanceof Class<?>) {
+      final Class<?> classType = (Class<?>) type;
+      if (StackTraceElement.class.isAssignableFrom(classType)) {
+        return WamlThrowables.stackTraceElementFormat();
+      } else if (Throwable.class.isAssignableFrom(classType)) {
+        return WamlThrowables.throwableFormat();
       }
     }
     return null;
@@ -76,80 +68,87 @@ public final class WamlThrowables implements WamlProvider, ToSource {
     return this.toSource();
   }
 
-  private static final WamlThrowables PROVIDER = new WamlThrowables(GENERIC_PRIORITY);
+  static final WamlThrowables PROVIDER = new WamlThrowables(GENERIC_PRIORITY);
 
   public static WamlThrowables provider(int priority) {
     if (priority == GENERIC_PRIORITY) {
       return PROVIDER;
-    } else {
-      return new WamlThrowables(priority);
     }
+    return new WamlThrowables(priority);
   }
 
   public static WamlThrowables provider() {
     return PROVIDER;
   }
 
-  public static WamlForm<StackTraceElement> stackTraceElementForm() {
-    return WamlStackTraceElementForm.INSTANCE;
+  public static WamlFormat<StackTraceElement> stackTraceElementFormat() {
+    return WamlStackTraceElementFormat.INSTANCE;
   }
 
-  public static WamlForm<Throwable> throwableForm() {
-    return WamlThrowableForm.INSTANCE;
+  public static WamlFormat<Throwable> throwableFormat() {
+    return WamlThrowableFormat.INSTANCE;
   }
 
 }
 
-final class WamlStackTraceElementForm implements WamlObjectForm<String, Object, StackTraceElement, StackTraceElement>, ToSource {
+final class WamlStackTraceElementFormat implements WamlFormat<StackTraceElement>, WamlObjectParser<Object, WamlStackTraceElementBuilder, StackTraceElement>, WamlObjectWriter<Object, StackTraceElement>, ToSource {
 
   @Override
-  public WamlForm<String> keyForm() {
-    return WamlJava.keyForm();
+  public @Nullable String typeName() {
+    return "StackTraceElement";
   }
 
   @Override
-  public WamlFieldForm<String, Object, StackTraceElement> getFieldForm(String key) throws WamlException {
-    final WamlFieldForm<String, Object, StackTraceElement> field = Assume.conformsNullable(FIELDS.get(key));
-    if (field != null) {
-      return field;
-    } else {
-      return WamlObjectForm.super.getFieldForm(key);
+  public WamlStackTraceElementBuilder objectBuilder(@Nullable Object attrs) {
+    return new WamlStackTraceElementBuilder();
+  }
+
+  @Override
+  public WamlFieldParser<?, WamlStackTraceElementBuilder> getFieldParser(WamlStackTraceElementBuilder builder, String key) throws WamlException {
+    final WamlFieldParser<?, WamlStackTraceElementBuilder> fieldParser = FIELD_PARSERS.get(key);
+    if (fieldParser == null) {
+      throw new WamlException(Notation.of("unsupported key: ")
+                                      .appendSource(key)
+                                      .toString());
+    }
+    return fieldParser;
+  }
+
+  @Override
+  public @Nullable StackTraceElement buildObject(@Nullable Object attrs, WamlStackTraceElementBuilder builder) throws WamlException {
+    try {
+      return new StackTraceElement(builder.classLoaderName, builder.moduleName, builder.moduleVersion,
+                                   builder.className, builder.methodName, builder.fileName, builder.lineNumber);
+    } catch (NullPointerException cause) {
+      throw new WamlException(cause);
     }
   }
 
   @Override
-  public StackTraceElement objectBuilder() {
-    return new StackTraceElement(null, null, null, "", "", null, -1);
-  }
-
-  @Override
-  public StackTraceElement buildObject(StackTraceElement element) {
-    return element;
-  }
-
-  @Override
-  public Write<?> write(Output<?> output, @Nullable StackTraceElement value, WamlWriter writer) {
-    if (value != null) {
-      return writer.writeObject(output, this, new WamlStackTraceElementForm.FieldIterator(value, 0), Collections.emptyIterator());
-    } else {
-      return writer.writeUnit(output, this, Collections.emptyIterator());
+  public WamlFieldWriter<?, StackTraceElement> getFieldWriter(StackTraceElement object, String key) throws WamlException {
+    final WamlFieldWriter<?, StackTraceElement> fieldWriter = FIELD_WRITERS.get(key);
+    if (fieldWriter == null) {
+      throw new WamlException(Notation.of("unsupported key: ")
+                                      .appendSource(key)
+                                      .toString());
     }
+    return fieldWriter;
   }
 
   @Override
-  public Term intoTerm(@Nullable StackTraceElement value) throws TermException {
-    return Term.from(value);
+  public Iterator<WamlFieldWriter<?, StackTraceElement>> getFieldWriters(StackTraceElement object) {
+    return FIELD_WRITERS.valueIterator();
   }
 
   @Override
-  public @Nullable StackTraceElement fromTerm(Term term) {
-    return term.objectValue(StackTraceElement.class);
+  public @Nullable StackTraceElement initializer(@Nullable Object attrs) {
+    return null;
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("WamlJava", "stackTraceElementForm").endInvoke();
+    notation.beginInvoke("WamlThrowables", "stackTraceElementFormat").endInvoke();
   }
 
   @Override
@@ -157,643 +156,633 @@ final class WamlStackTraceElementForm implements WamlObjectForm<String, Object, 
     return this.toSource();
   }
 
-  static final HashTrieMap<String, WamlFieldForm<String, ?, StackTraceElement>> FIELDS;
+  @SuppressWarnings("SameNameButDifferent")
+  static final UniformMap<String, WamlFieldParser<?, WamlStackTraceElementBuilder>> FIELD_PARSERS =
+      UniformMap.of("loader", LoaderField.INSTANCE,
+                    "module", ModuleField.INSTANCE,
+                    "version", VersionField.INSTANCE,
+                    "class", ClassField.INSTANCE,
+                    "method", MethodField.INSTANCE,
+                    "file", FileField.INSTANCE,
+                    "line", LineField.INSTANCE,
+                    "native", NativeField.INSTANCE);
 
-  static {
-    HashTrieMap<String, WamlFieldForm<String, ?, StackTraceElement>> fields = HashTrieMap.empty();
-    fields = fields.updated("loader", new WamlStackTraceElementForm.ClassLoaderNameField());
-    fields = fields.updated("module", new WamlStackTraceElementForm.ModuleNameField());
-    fields = fields.updated("version", new WamlStackTraceElementForm.ModuleVersionField());
-    fields = fields.updated("class", new WamlStackTraceElementForm.ClassNameField());
-    fields = fields.updated("method", new WamlStackTraceElementForm.MethodNameField());
-    fields = fields.updated("file", new WamlStackTraceElementForm.FileNameField());
-    fields = fields.updated("line", new WamlStackTraceElementForm.LineNumberField());
-    fields = fields.updated("native", new WamlStackTraceElementForm.IsNativeField());
-    FIELDS = fields;
-  }
+  static final UniformMap<String, WamlFieldWriter<?, StackTraceElement>> FIELD_WRITERS =
+      Assume.conforms(FIELD_PARSERS);
 
-  static final WamlStackTraceElementForm INSTANCE = new WamlStackTraceElementForm();
+  static final WamlStackTraceElementFormat INSTANCE = new WamlStackTraceElementFormat();
 
-  static final WamlForm<StackTraceElement[]> ARRAY_FORM =
-      WamlJava.arrayForm(StackTraceElement.class, INSTANCE);
-
-  static final class ClassLoaderNameField implements WamlFieldForm<String, String, StackTraceElement> {
+  static final class LoaderField implements WamlFieldParser<String, WamlStackTraceElementBuilder>, WamlFieldWriter<String, StackTraceElement> {
 
     @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
+    public String key() {
+      return "loader";
     }
 
     @Override
-    public WamlForm<String> valueForm() {
-      return WamlJava.stringForm();
+    public WamlParser<String> valueParser() {
+      return WamlLang.stringFormat();
     }
 
     @Override
-    public StackTraceElement updateField(StackTraceElement element, String key, @Nullable String classLoaderName) {
-      return new StackTraceElement(classLoaderName,
-                                   element.getModuleName(),
-                                   element.getModuleVersion(),
-                                   element.getClassName(),
-                                   element.getMethodName(),
-                                   element.getFileName(),
-                                   element.getLineNumber());
-    }
-
-  }
-
-  static final class ModuleNameField implements WamlFieldForm<String, String, StackTraceElement> {
-
-    @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
+    public WamlWriter<String> valueWriter() {
+      return WamlLang.stringFormat();
     }
 
     @Override
-    public WamlForm<String> valueForm() {
-      return WamlJava.stringForm();
+    public boolean filterValue(StackTraceElement object, @Nullable String classLoaderName) {
+      return classLoaderName != null;
     }
 
     @Override
-    public StackTraceElement updateField(StackTraceElement element, String key, @Nullable String moduleName) {
-      return new StackTraceElement(element.getClassLoaderName(),
-                                   moduleName,
-                                   element.getModuleVersion(),
-                                   element.getClassName(),
-                                   element.getMethodName(),
-                                   element.getFileName(),
-                                   element.getLineNumber());
+    public @Nullable String getValue(StackTraceElement object) {
+      return object.getClassLoaderName();
     }
+
+    @Override
+    public WamlStackTraceElementBuilder updatedValue(WamlStackTraceElementBuilder builder, @Nullable String classLoaderName) {
+      builder.classLoaderName = classLoaderName;
+      return builder;
+    }
+
+    static final LoaderField INSTANCE = new LoaderField();
 
   }
 
-  static final class ModuleVersionField implements WamlFieldForm<String, String, StackTraceElement> {
+  static final class ModuleField implements WamlFieldParser<String, WamlStackTraceElementBuilder>, WamlFieldWriter<String, StackTraceElement> {
 
     @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
+    public String key() {
+      return "module";
     }
 
     @Override
-    public WamlForm<String> valueForm() {
-      return WamlJava.stringForm();
+    public WamlParser<String> valueParser() {
+      return WamlLang.stringFormat();
     }
 
     @Override
-    public StackTraceElement updateField(StackTraceElement element, String key, @Nullable String moduleVersion) {
-      return new StackTraceElement(element.getClassLoaderName(),
-                                   element.getModuleName(),
-                                   moduleVersion,
-                                   element.getClassName(),
-                                   element.getMethodName(),
-                                   element.getFileName(),
-                                   element.getLineNumber());
+    public WamlWriter<String> valueWriter() {
+      return WamlLang.stringFormat();
     }
+
+    @Override
+    public boolean filterValue(StackTraceElement object, @Nullable String moduleName) {
+      return moduleName != null;
+    }
+
+    @Override
+    public @Nullable String getValue(StackTraceElement object) {
+      return object.getModuleName();
+    }
+
+    @Override
+    public WamlStackTraceElementBuilder updatedValue(WamlStackTraceElementBuilder builder, @Nullable String moduleName) {
+      builder.moduleName = moduleName;
+      return builder;
+    }
+
+    static final ModuleField INSTANCE = new ModuleField();
 
   }
 
-  static final class ClassNameField implements WamlFieldForm<String, String, StackTraceElement> {
+  static final class VersionField implements WamlFieldParser<String, WamlStackTraceElementBuilder>, WamlFieldWriter<String, StackTraceElement> {
 
     @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
+    public String key() {
+      return "version";
     }
 
     @Override
-    public WamlForm<String> valueForm() {
-      return WamlJava.stringForm();
+    public WamlParser<String> valueParser() {
+      return WamlLang.stringFormat();
     }
 
     @Override
-    public StackTraceElement updateField(StackTraceElement element, String key, @Nullable String className) {
-      return new StackTraceElement(element.getClassLoaderName(),
-                                   element.getModuleName(),
-                                   element.getModuleVersion(),
-                                   className,
-                                   element.getMethodName(),
-                                   element.getFileName(),
-                                   element.getLineNumber());
+    public WamlWriter<String> valueWriter() {
+      return WamlLang.stringFormat();
     }
+
+    @Override
+    public boolean filterValue(StackTraceElement object, @Nullable String moduleVersion) {
+      return moduleVersion != null;
+    }
+
+    @Override
+    public @Nullable String getValue(StackTraceElement object) {
+      return object.getModuleVersion();
+    }
+
+    @Override
+    public WamlStackTraceElementBuilder updatedValue(WamlStackTraceElementBuilder builder, @Nullable String moduleVersion) {
+      builder.moduleVersion = moduleVersion;
+      return builder;
+    }
+
+    static final VersionField INSTANCE = new VersionField();
 
   }
 
-  static final class MethodNameField implements WamlFieldForm<String, String, StackTraceElement> {
+  static final class ClassField implements WamlFieldParser<String, WamlStackTraceElementBuilder>, WamlFieldWriter<String, StackTraceElement> {
 
     @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
+    public String key() {
+      return "class";
     }
 
     @Override
-    public WamlForm<String> valueForm() {
-      return WamlJava.stringForm();
+    public WamlParser<String> valueParser() {
+      return WamlLang.stringFormat();
     }
 
     @Override
-    public StackTraceElement updateField(StackTraceElement element, String key, @Nullable String methodName) {
-      return new StackTraceElement(element.getClassLoaderName(),
-                                   element.getModuleName(),
-                                   element.getModuleVersion(),
-                                   element.getClassName(),
-                                   methodName,
-                                   element.getFileName(),
-                                   element.getLineNumber());
+    public WamlWriter<String> valueWriter() {
+      return WamlLang.stringFormat();
     }
+
+    @Override
+    public boolean filterValue(StackTraceElement object, @Nullable String className) {
+      return className != null;
+    }
+
+    @Override
+    public @Nullable String getValue(StackTraceElement object) {
+      return object.getClassName();
+    }
+
+    @Override
+    public WamlStackTraceElementBuilder updatedValue(WamlStackTraceElementBuilder builder, @Nullable String className) {
+      builder.className = className;
+      return builder;
+    }
+
+    static final ClassField INSTANCE = new ClassField();
 
   }
 
-  static final class FileNameField implements WamlFieldForm<String, String, StackTraceElement> {
+  static final class MethodField implements WamlFieldParser<String, WamlStackTraceElementBuilder>, WamlFieldWriter<String, StackTraceElement> {
 
     @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
+    public String key() {
+      return "method";
     }
 
     @Override
-    public WamlForm<String> valueForm() {
-      return WamlJava.stringForm();
+    public WamlParser<String> valueParser() {
+      return WamlLang.stringFormat();
     }
 
     @Override
-    public StackTraceElement updateField(StackTraceElement element, String key, @Nullable String fileName) {
-      return new StackTraceElement(element.getClassLoaderName(),
-                                   element.getModuleName(),
-                                   element.getModuleVersion(),
-                                   element.getClassName(),
-                                   element.getMethodName(),
-                                   fileName,
-                                   element.getLineNumber());
+    public WamlWriter<String> valueWriter() {
+      return WamlLang.stringFormat();
     }
+
+    @Override
+    public boolean filterValue(StackTraceElement object, @Nullable String methodName) {
+      return methodName != null;
+    }
+
+    @Override
+    public @Nullable String getValue(StackTraceElement object) {
+      return object.getMethodName();
+    }
+
+    @Override
+    public WamlStackTraceElementBuilder updatedValue(WamlStackTraceElementBuilder builder, @Nullable String methodName) {
+      builder.methodName = methodName;
+      return builder;
+    }
+
+    static final MethodField INSTANCE = new MethodField();
 
   }
 
-  static final class LineNumberField implements WamlFieldForm<String, Integer, StackTraceElement> {
+  static final class FileField implements WamlFieldParser<String, WamlStackTraceElementBuilder>, WamlFieldWriter<String, StackTraceElement> {
 
     @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
+    public String key() {
+      return "file";
     }
 
     @Override
-    public WamlForm<Integer> valueForm() {
-      return WamlJava.intForm();
+    public WamlParser<String> valueParser() {
+      return WamlLang.stringFormat();
     }
 
     @Override
-    public StackTraceElement updateField(StackTraceElement element, String key, @Nullable Integer lineNumber) {
-      return new StackTraceElement(element.getClassLoaderName(),
-                                   element.getModuleName(),
-                                   element.getModuleVersion(),
-                                   element.getClassName(),
-                                   element.getMethodName(),
-                                   element.getFileName(),
-                                   lineNumber);
+    public WamlWriter<String> valueWriter() {
+      return WamlLang.stringFormat();
     }
+
+    @Override
+    public boolean filterValue(StackTraceElement object, @Nullable String fileName) {
+      return fileName != null;
+    }
+
+    @Override
+    public @Nullable String getValue(StackTraceElement object) {
+      return object.getFileName();
+    }
+
+    @Override
+    public WamlStackTraceElementBuilder updatedValue(WamlStackTraceElementBuilder builder, @Nullable String fileName) {
+      builder.fileName = fileName;
+      return builder;
+    }
+
+    static final FileField INSTANCE = new FileField();
 
   }
 
-  static final class IsNativeField implements WamlFieldForm<String, Boolean, StackTraceElement> {
+  static final class LineField implements WamlFieldParser<Integer, WamlStackTraceElementBuilder>, WamlFieldWriter<Integer, StackTraceElement> {
 
     @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
+    public String key() {
+      return "line";
     }
 
     @Override
-    public WamlForm<Boolean> valueForm() {
-      return WamlJava.booleanForm();
+    public WamlParser<Integer> valueParser() {
+      return WamlLang.intFormat();
     }
 
     @Override
-    public StackTraceElement updateField(StackTraceElement element, String key, @Nullable Boolean value) {
-      return element; // can't create native stack trace elements
+    public WamlWriter<Integer> valueWriter() {
+      return WamlLang.intFormat();
     }
+
+    @Override
+    public boolean filterValue(StackTraceElement object, @Nullable Integer lineNumber) {
+      return lineNumber != null && lineNumber.intValue() >= 0;
+    }
+
+    @Override
+    public @Nullable Integer getValue(StackTraceElement object) {
+      return Integer.valueOf(object.getLineNumber());
+    }
+
+    @Override
+    public WamlStackTraceElementBuilder updatedValue(WamlStackTraceElementBuilder builder, @Nullable Integer lineNumber) {
+      builder.lineNumber = lineNumber != null ? lineNumber.intValue() : -1;
+      return builder;
+    }
+
+    static final LineField INSTANCE = new LineField();
 
   }
 
-  static final class FieldIterator implements Iterator<Map.Entry<String, Object>> {
+  static final class NativeField implements WamlFieldParser<Boolean, WamlStackTraceElementBuilder>, WamlFieldWriter<Boolean, StackTraceElement> {
 
-    final StackTraceElement element;
-    int index;
-
-    FieldIterator(StackTraceElement element, int index) {
-      this.element = element;
-      this.index = index;
+    @Override
+    public String key() {
+      return "native";
     }
 
-    @SuppressWarnings("fallthrough")
     @Override
-    public boolean hasNext() {
-      switch (this.index) {
-        case 0:
-          if (this.element.getClassLoaderName() != null) {
-            return true;
-          } else {
-            this.index = 1;
-          }
-        case 1:
-          if (this.element.getModuleName() != null) {
-            return true;
-          } else {
-            this.index = 2;
-          }
-        case 2:
-          if (this.element.getModuleVersion() != null) {
-            return true;
-          } else {
-            this.index = 3;
-          }
-        case 3:
-          if (this.element.getClassName() != null) {
-            return true;
-          } else {
-            this.index = 4;
-          }
-        case 4:
-          if (this.element.getMethodName() != null) {
-            return true;
-          } else {
-            this.index = 5;
-          }
-        case 5:
-          if (this.element.getFileName() != null) {
-            return true;
-          } else {
-            this.index = 6;
-          }
-        case 6:
-          if (this.element.getLineNumber() >= 0) {
-            return true;
-          } else {
-            this.index = 7;
-          }
-        case 7:
-          if (this.element.isNativeMethod()) {
-            return true;
-          } else {
-            this.index = 8;
-          }
-        default:
-          return false;
+    public WamlParser<Boolean> valueParser() {
+      return WamlLang.booleanFormat();
+    }
+
+    @Override
+    public WamlWriter<Boolean> valueWriter() {
+      return WamlLang.booleanFormat();
+    }
+
+    @Override
+    public boolean filterValue(StackTraceElement object, @Nullable Boolean nativeMethod) {
+      return nativeMethod != null && nativeMethod.booleanValue();
+    }
+
+    @Override
+    public @Nullable Boolean getValue(StackTraceElement object) {
+      return Boolean.valueOf(object.isNativeMethod());
+    }
+
+    @Override
+    public WamlStackTraceElementBuilder updatedValue(WamlStackTraceElementBuilder builder, @Nullable Boolean nativeMethod) {
+      if (builder.lineNumber == -1 && nativeMethod != null && nativeMethod.booleanValue()) {
+        builder.lineNumber = -2;
+      } else if (builder.lineNumber == -2 && (nativeMethod == null || !nativeMethod.booleanValue())) {
+        builder.lineNumber = -1;
       }
+      return builder;
     }
 
-    @SuppressWarnings("fallthrough")
-    @Override
-    public Map.Entry<String, Object> next() {
-      switch (this.index) {
-        case 0:
-          this.index = 1;
-          if (this.element.getClassLoaderName() != null) {
-            return new SimpleImmutableEntry<String, Object>("loader", this.element.getClassLoaderName());
-          }
-        case 1:
-          this.index = 2;
-          if (this.element.getModuleName() != null) {
-            return new SimpleImmutableEntry<String, Object>("module", this.element.getModuleName());
-          }
-        case 2:
-          this.index = 3;
-          if (this.element.getModuleVersion() != null) {
-            return new SimpleImmutableEntry<String, Object>("version", this.element.getModuleVersion());
-          }
-        case 3:
-          this.index = 4;
-          if (this.element.getClassName() != null) {
-            return new SimpleImmutableEntry<String, Object>("class", this.element.getClassName());
-          }
-        case 4:
-          this.index = 5;
-          if (this.element.getMethodName() != null) {
-            return new SimpleImmutableEntry<String, Object>("method", this.element.getMethodName());
-          }
-        case 5:
-          this.index = 6;
-          if (this.element.getFileName() != null) {
-            return new SimpleImmutableEntry<String, Object>("file", this.element.getFileName());
-          }
-        case 6:
-          this.index = 7;
-          if (this.element.getLineNumber() >= 0) {
-            return new SimpleImmutableEntry<String, Object>("line", this.element.getLineNumber());
-          }
-        case 7:
-          this.index = 8;
-          if (this.element.isNativeMethod()) {
-            return new SimpleImmutableEntry<String, Object>("native", this.element.isNativeMethod());
-          }
-        default:
-          throw new NoSuchElementException();
-      }
-    }
+    static final NativeField INSTANCE = new NativeField();
 
   }
 
 }
 
-final class WamlThrowableForm implements WamlObjectForm<String, Object, Throwable, Throwable>, ToSource {
+final class WamlStackTraceElementBuilder {
 
-  @Override
-  public WamlForm<String> keyForm() {
-    return WamlJava.keyForm();
+  @Nullable String classLoaderName;
+  @Nullable String moduleName;
+  @Nullable String moduleVersion;
+  @Nullable String className;
+  @Nullable String methodName;
+  @Nullable String fileName;
+  int lineNumber;
+
+  WamlStackTraceElementBuilder() {
+    this.classLoaderName = null;
+    this.moduleName = null;
+    this.moduleVersion = null;
+    this.className = null;
+    this.methodName = null;
+    this.fileName = null;
+    this.lineNumber = -1;
   }
 
-  @Override
-  public WamlFieldForm<String, Object, Throwable> getFieldForm(String key) throws WamlException {
-    final WamlFieldForm<String, Object, Throwable> field = Assume.conformsNullable(FIELDS.get(key));
-    if (field != null) {
-      return field;
-    } else {
-      return WamlObjectForm.super.getFieldForm(key);
-    }
-  }
+}
+
+final class WamlThrowableFormat implements WamlFormat<Throwable>, WamlObjectParser<Object, WamlThrowableBuilder, Throwable>, WamlObjectWriter<Object, Throwable>, ToSource {
 
   @Override
-  public Throwable objectBuilder() {
-    return new Throwable();
-  }
-
-  @Override
-  public Throwable buildObject(Throwable throwable) {
-    return throwable;
-  }
-
-  @Override
-  public Write<?> write(Output<?> output, @Nullable Throwable throwable, WamlWriter writer) {
-    if (throwable != null) {
-      return writer.writeObject(output, this, new WamlThrowableForm.FieldIterator(throwable, 0), Collections.emptyIterator());
-    } else {
-      return writer.writeUnit(output, this, Collections.emptyIterator());
-    }
+  public @Nullable String typeName() {
+    return "Throwable";
   }
 
   @Override
-  public Term intoTerm(@Nullable Throwable value) throws TermException {
-    return Term.from(value);
+  public WamlThrowableBuilder objectBuilder(@Nullable Object attrs) {
+    return new WamlThrowableBuilder();
   }
 
   @Override
-  public @Nullable Throwable fromTerm(Term term) {
-    return term.objectValue(Throwable.class);
+  public WamlFieldParser<?, WamlThrowableBuilder> getFieldParser(WamlThrowableBuilder builder, String key) throws WamlException {
+    final WamlFieldParser<?, WamlThrowableBuilder> fieldParser = FIELD_PARSERS.get(key);
+    if (fieldParser == null) {
+      throw new WamlException(Notation.of("unsupported key: ")
+                                      .appendSource(key)
+                                      .toString());
+    }
+    return fieldParser;
   }
 
   @Override
-  public void writeSource(Appendable output) {
-    final Notation notation = Notation.from(output);
-    notation.beginInvoke("WamlJava", "throwableForm").endInvoke();
-  }
-
-  @Override
-  public String toString() {
-    return this.toSource();
-  }
-
-  static final HashTrieMap<String, WamlFieldForm<String, ?, Throwable>> FIELDS;
-
-  static {
-    HashTrieMap<String, WamlFieldForm<String, ?, Throwable>> fields = HashTrieMap.empty();
-    fields = fields.updated("class", new WamlThrowableForm.ClassField());
-    fields = fields.updated("message", new WamlThrowableForm.MessageField());
-    fields = fields.updated("trace", new WamlThrowableForm.StackTraceField());
-    fields = fields.updated("cause", new WamlThrowableForm.CauseField());
-    FIELDS = fields;
-  }
-
-  static final WamlThrowableForm INSTANCE = new WamlThrowableForm();
-
-  static final class ClassField implements WamlFieldForm<String, String, Throwable> {
-
-    @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
+  public @Nullable Throwable buildObject(@Nullable Object attrs, WamlThrowableBuilder builder) throws WamlException {
+    final Class<?> throwableClass;
+    try {
+      throwableClass = Class.forName(builder.className);
+    } catch (ReflectiveOperationException cause) {
+      throw new WamlException("unknown throwable class: " + builder.className, cause);
+    }
+    if (!Throwable.class.isAssignableFrom(throwableClass)) {
+      throw new WamlException("non-throwable class: " + builder.className);
     }
 
-    @Override
-    public WamlForm<String> valueForm() {
-      return WamlJava.stringForm();
-    }
-
-    @Override
-    public Throwable updateField(Throwable throwable, String key, @Nullable String className) throws WamlException {
-      final Class<?> throwableClass;
-      try {
-        throwableClass = Class.forName(className);
-      } catch (ReflectiveOperationException cause) {
-        throw new WamlException("unknown throwable class: " + className, cause);
-      }
-      if (!Throwable.class.isAssignableFrom(throwableClass)) {
-        throw new WamlException("non-throwable class: " + className);
-      }
-
-      try {
-        // new Throwable(String message, Throwable cause);
-        final Constructor<?> constructor = throwableClass.getConstructor(String.class, Throwable.class);
-        final Throwable newThrowable = (Throwable) constructor.newInstance(throwable.getMessage(), throwable.getCause());
-        newThrowable.setStackTrace(throwable.getStackTrace());
-        return newThrowable;
-      } catch (ReflectiveOperationException cause) {
-        // ignore
-      }
-
-      try {
-        // new Throwable(String message);
-        final Constructor<?> constructor = throwableClass.getConstructor(String.class);
-        final Throwable newThrowable = (Throwable) constructor.newInstance(throwable.getMessage());
-        newThrowable.setStackTrace(throwable.getStackTrace());
-        return newThrowable;
-      } catch (ReflectiveOperationException cause) {
-        // ignore
-      }
-
-      try {
-        // new Throwable(Throwable cause);
-        final Constructor<?> constructor = throwableClass.getConstructor(Throwable.class);
-        final Throwable newThrowable = (Throwable) constructor.newInstance(throwable.getCause());
-        newThrowable.setStackTrace(throwable.getStackTrace());
-        return newThrowable;
-      } catch (ReflectiveOperationException cause) {
-        // ignore
-      }
-
-      try {
-        // new Throwable();
-        final Constructor<?> constructor = throwableClass.getConstructor();
-        final Throwable newThrowable = (Throwable) constructor.newInstance();
-        newThrowable.setStackTrace(throwable.getStackTrace());
-        return newThrowable;
-      } catch (ReflectiveOperationException cause) {
-        // ignore
-      }
-
-      throw new WamlException("unable to construct throwable class: " + className);
-    }
-
-  }
-
-  static final class MessageField implements WamlFieldForm<String, String, Throwable> {
-
-    @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
-    }
-
-    @Override
-    public WamlForm<String> valueForm() {
-      return WamlJava.stringForm();
-    }
-
-    @Override
-    public Throwable updateField(Throwable throwable, String key, @Nullable String message) throws WamlException {
-      final Class<?> throwableClass = throwable.getClass();
-
-      try {
-        // new Throwable(String message, Throwable cause);
-        final Constructor<?> constructor = throwableClass.getConstructor(String.class, Throwable.class);
-        final Throwable newThrowable = (Throwable) constructor.newInstance(message, throwable.getCause());
-        newThrowable.setStackTrace(throwable.getStackTrace());
-        return newThrowable;
-      } catch (ReflectiveOperationException cause) {
-        // ignore
-      }
-
-      try {
-        // new Throwable(String message);
-        final Constructor<?> constructor = throwableClass.getConstructor(String.class);
-        final Throwable newThrowable = (Throwable) constructor.newInstance(message);
-        newThrowable.setStackTrace(throwable.getStackTrace());
-        return newThrowable;
-      } catch (ReflectiveOperationException cause) {
-        // ignore
-      }
-
-      throw new WamlException("unable to set message for throwable class: " + throwableClass.getName());
-    }
-
-  }
-
-  static final class StackTraceField implements WamlFieldForm<String, StackTraceElement[], Throwable> {
-
-    @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
-    }
-
-    @Override
-    public WamlForm<StackTraceElement[]> valueForm() {
-      return WamlStackTraceElementForm.ARRAY_FORM;
-    }
-
-    @Override
-    public Throwable updateField(Throwable throwable, String key, @Nullable StackTraceElement[] stackTrace) {
-      throwable.setStackTrace(stackTrace);
+    try {
+      // new Throwable(String message, Throwable cause);
+      final Constructor<?> constructor = throwableClass.getConstructor(String.class, Throwable.class);
+      final Throwable throwable = (Throwable) constructor.newInstance(builder.message, builder.cause);
+      throwable.setStackTrace(builder.stackTrace);
       return throwable;
+    } catch (ReflectiveOperationException cause) {
+      // ignore
     }
+
+    try {
+      // new Throwable(String message);
+      final Constructor<?> constructor = throwableClass.getConstructor(String.class);
+      final Throwable throwable = (Throwable) constructor.newInstance(builder.message);
+      throwable.setStackTrace(builder.stackTrace);
+      return throwable;
+    } catch (ReflectiveOperationException cause) {
+      // ignore
+    }
+
+    try {
+      // new Throwable(Throwable cause);
+      final Constructor<?> constructor = throwableClass.getConstructor(Throwable.class);
+      final Throwable throwable = (Throwable) constructor.newInstance(builder.cause);
+      throwable.setStackTrace(builder.stackTrace);
+      return throwable;
+    } catch (ReflectiveOperationException cause) {
+      // ignore
+    }
+
+    try {
+      // new Throwable();
+      final Constructor<?> constructor = throwableClass.getConstructor();
+      final Throwable throwable = (Throwable) constructor.newInstance();
+      throwable.setStackTrace(builder.stackTrace);
+      return throwable;
+    } catch (ReflectiveOperationException cause) {
+      // ignore
+    }
+
+    throw new WamlException("unable to construct throwable class: " + builder.className);
+  }
+
+  @Override
+  public WamlFieldWriter<?, Throwable> getFieldWriter(Throwable object, String key) throws WamlException {
+    final WamlFieldWriter<?, Throwable> fieldWriter = FIELD_WRITERS.get(key);
+    if (fieldWriter == null) {
+      throw new WamlException(Notation.of("unsupported key: ")
+                                      .appendSource(key)
+                                      .toString());
+    }
+    return fieldWriter;
+  }
+
+  @Override
+  public Iterator<WamlFieldWriter<?, Throwable>> getFieldWriters(Throwable object) {
+    return FIELD_WRITERS.valueIterator();
+  }
+
+  @Override
+  public @Nullable Throwable initializer(@Nullable Object attrs) {
+    return null;
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.beginInvoke("WamlThrowables", "throwableFormat").endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+  @SuppressWarnings("SameNameButDifferent")
+  static final UniformMap<String, WamlFieldParser<?, WamlThrowableBuilder>> FIELD_PARSERS =
+      UniformMap.of("class", ClassField.INSTANCE,
+                    "message", MessageField.INSTANCE,
+                    "trace", TraceField.INSTANCE,
+                    "cause", CauseField.INSTANCE);
+
+  static final UniformMap<String, WamlFieldWriter<?, Throwable>> FIELD_WRITERS =
+      Assume.conforms(FIELD_PARSERS);
+
+  static final WamlThrowableFormat INSTANCE = new WamlThrowableFormat();
+
+  static final class ClassField implements WamlFieldParser<String, WamlThrowableBuilder>, WamlFieldWriter<String, Throwable> {
+
+    @Override
+    public String key() {
+      return "class";
+    }
+
+    @Override
+    public WamlParser<String> valueParser() {
+      return WamlLang.stringFormat();
+    }
+
+    @Override
+    public WamlWriter<String> valueWriter() {
+      return WamlLang.stringFormat();
+    }
+
+    @Override
+    public boolean filterValue(Throwable object, @Nullable String className) {
+      return true;
+    }
+
+    @Override
+    public @Nullable String getValue(Throwable object) {
+      return object.getClass().getName();
+    }
+
+    @Override
+    public WamlThrowableBuilder updatedValue(WamlThrowableBuilder builder, @Nullable String className) {
+      builder.className = className;
+      return builder;
+    }
+
+    static final ClassField INSTANCE = new ClassField();
 
   }
 
-  static final class CauseField implements WamlFieldForm<String, Throwable, Throwable> {
+  static final class MessageField implements WamlFieldParser<String, WamlThrowableBuilder>, WamlFieldWriter<String, Throwable> {
 
     @Override
-    public WamlForm<String> keyForm() {
-      return WamlJava.keyForm();
+    public String key() {
+      return "message";
     }
 
     @Override
-    public WamlForm<Throwable> valueForm() {
-      return WamlThrowables.throwableForm();
+    public WamlParser<String> valueParser() {
+      return WamlLang.stringFormat();
     }
 
     @Override
-    public Throwable updateField(Throwable throwable, String key, @Nullable Throwable cause) throws WamlException {
-      final Class<?> throwableClass = throwable.getClass();
-
-      try {
-        // new Throwable(String message, Throwable cause);
-        final Constructor<?> constructor = throwableClass.getConstructor(String.class, Throwable.class);
-        final Throwable newThrowable = (Throwable) constructor.newInstance(throwable.getMessage(), cause);
-        newThrowable.setStackTrace(throwable.getStackTrace());
-        return newThrowable;
-      } catch (ReflectiveOperationException error) {
-        // ignore
-      }
-
-      try {
-        throwable.initCause(cause);
-      } catch (IllegalStateException error) {
-        // ignore
-      }
-
-      throw new WamlException("unable to set cause for throwable class: " + throwableClass.getName());
+    public WamlWriter<String> valueWriter() {
+      return WamlLang.stringFormat();
     }
+
+    @Override
+    public boolean filterValue(Throwable object, @Nullable String message) {
+      return message != null;
+    }
+
+    @Override
+    public @Nullable String getValue(Throwable object) {
+      return object.getMessage();
+    }
+
+    @Override
+    public WamlThrowableBuilder updatedValue(WamlThrowableBuilder builder, @Nullable String message) {
+      builder.message = message;
+      return builder;
+    }
+
+    static final MessageField INSTANCE = new MessageField();
 
   }
 
-  static final class FieldIterator implements Iterator<Map.Entry<String, Object>> {
+  static final class TraceField implements WamlFieldParser<StackTraceElement[], WamlThrowableBuilder>, WamlFieldWriter<StackTraceElement[], Throwable> {
 
-    final Throwable throwable;
-    int index;
-
-    FieldIterator(Throwable throwable, int index) {
-      this.throwable = throwable;
-      this.index = index;
-    }
-
-    @SuppressWarnings("fallthrough")
     @Override
-    public boolean hasNext() {
-      switch (this.index) {
-        case 0:
-          return true;
-        case 1:
-          if (this.throwable.getMessage() != null) {
-            return true;
-          } else {
-            this.index = 2;
-          }
-        case 2:
-          if (this.throwable.getStackTrace().length != 0) {
-            return true;
-          } else {
-            this.index = 3;
-          }
-        case 3:
-          if (this.throwable.getCause() != null) {
-            return true;
-          } else {
-            this.index = 4;
-          }
-        default:
-          return false;
-      }
+    public String key() {
+      return "trace";
     }
 
-    @SuppressWarnings("fallthrough")
     @Override
-    public Map.Entry<String, Object> next() {
-      switch (this.index) {
-        case 0:
-          this.index = 1;
-          return new SimpleImmutableEntry<String, Object>("class", this.throwable.getClass().getName());
-        case 1:
-          this.index = 2;
-          if (this.throwable.getMessage() != null) {
-            return new SimpleImmutableEntry<String, Object>("message", this.throwable.getMessage());
-          }
-        case 2:
-          this.index = 3;
-          if (this.throwable.getStackTrace().length != 0) {
-            return new SimpleImmutableEntry<String, Object>("trace", this.throwable.getStackTrace());
-          }
-        case 3:
-          this.index = 4;
-          if (this.throwable.getCause() != null) {
-            return new SimpleImmutableEntry<String, Object>("cause", this.throwable.getCause());
-          }
-        default:
-          throw new NoSuchElementException();
-      }
+    public WamlParser<StackTraceElement[]> valueParser() {
+      return VALUE_FORMAT;
     }
 
+    @Override
+    public WamlWriter<StackTraceElement[]> valueWriter() {
+      return VALUE_FORMAT;
+    }
+
+    @Override
+    public boolean filterValue(Throwable object, @Nullable StackTraceElement[] stackTrace) {
+      return stackTrace != null && stackTrace.length != 0;
+    }
+
+    @Override
+    public @Nullable StackTraceElement[] getValue(Throwable object) {
+      return object.getStackTrace();
+    }
+
+    @Override
+    public WamlThrowableBuilder updatedValue(WamlThrowableBuilder builder, @Nullable StackTraceElement[] stackTrace) {
+      builder.stackTrace = stackTrace;
+      return builder;
+    }
+
+    static final WamlFormat<StackTraceElement[]> VALUE_FORMAT =
+        WamlLang.arrayFormat(StackTraceElement.class, WamlThrowables.stackTraceElementFormat());
+
+    static final TraceField INSTANCE = new TraceField();
+
+  }
+
+  static final class CauseField implements WamlFieldParser<Throwable, WamlThrowableBuilder>, WamlFieldWriter<Throwable, Throwable> {
+
+    @Override
+    public String key() {
+      return "cause";
+    }
+
+    @Override
+    public WamlParser<Throwable> valueParser() {
+      return WamlThrowables.throwableFormat();
+    }
+
+    @Override
+    public WamlWriter<Throwable> valueWriter() {
+      return WamlThrowables.throwableFormat();
+    }
+
+    @Override
+    public boolean filterValue(Throwable object, @Nullable Throwable cause) {
+      return cause != null;
+    }
+
+    @Override
+    public @Nullable Throwable getValue(Throwable object) {
+      return object.getCause();
+    }
+
+    @Override
+    public WamlThrowableBuilder updatedValue(WamlThrowableBuilder builder, @Nullable Throwable cause) {
+      builder.cause = cause;
+      return builder;
+    }
+
+    static final CauseField INSTANCE = new CauseField();
+
+  }
+
+}
+
+final class WamlThrowableBuilder {
+
+  @Nullable String className;
+  @Nullable String message;
+  @Nullable StackTraceElement[] stackTrace;
+  @Nullable Throwable cause;
+
+  WamlThrowableBuilder() {
+    this.className = null;
+    this.message = null;
+    this.stackTrace = null;
+    this.cause = null;
   }
 
 }

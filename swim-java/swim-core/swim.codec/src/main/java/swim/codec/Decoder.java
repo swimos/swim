@@ -14,13 +14,19 @@
 
 package swim.codec;
 
+import swim.annotations.Covariant;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A decoder of values from non-blocking chunked input buffers.
+ *
+ * @param <T> the type of values to decode
+ */
 @Public
 @Since("5.0")
 @FunctionalInterface
-public interface Decoder<T> {
+public interface Decoder<@Covariant T> {
 
   Decode<T> decode(InputBuffer input);
 

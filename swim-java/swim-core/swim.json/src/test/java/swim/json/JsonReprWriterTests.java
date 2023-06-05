@@ -124,7 +124,7 @@ public class JsonReprWriterTests {
                  JsonWriterOptions.readable());
     assertWrites("[1,2,\"3\",true]",
                  ArrayRepr.of(Repr.of(1), Repr.of(2), Repr.of("3"), Repr.of(true)),
-                 JsonWriterOptions.compact());
+                 JsonWriterOptions.standard());
   }
 
   @Test
@@ -134,7 +134,7 @@ public class JsonReprWriterTests {
                  JsonWriterOptions.readable());
     assertWrites("[1,[2,3],4]",
                  ArrayRepr.of(Repr.of(1), ArrayRepr.of(Repr.of(2), Repr.of(3)), Repr.of(4)),
-                 JsonWriterOptions.compact());
+                 JsonWriterOptions.standard());
   }
 
   @Test
@@ -150,7 +150,7 @@ public class JsonReprWriterTests {
                  JsonWriterOptions.readable());
     assertWrites("{\"a\":1}",
                  ObjectRepr.of("a", Repr.of(1)),
-                 JsonWriterOptions.compact());
+                 JsonWriterOptions.standard());
   }
 
   @Test
@@ -160,7 +160,7 @@ public class JsonReprWriterTests {
                  JsonWriterOptions.readable());
     assertWrites("{\"a\":1,\"b\":\"2\"}",
                  ObjectRepr.of("a", Repr.of(1), "b", Repr.of("2")),
-                 JsonWriterOptions.compact());
+                 JsonWriterOptions.standard());
   }
 
   @Test
@@ -170,16 +170,16 @@ public class JsonReprWriterTests {
                  JsonWriterOptions.readable());
     assertWrites("{\"a\":{\"b\":2}}",
                  ObjectRepr.of("a", ObjectRepr.of("b", Repr.of(2))),
-                 JsonWriterOptions.compact());
+                 JsonWriterOptions.standard());
   }
 
   public static void assertWrites(String expected, Repr value, JsonWriterOptions options) {
-    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(options)));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.valueFormat().write(value, options));
   }
 
   public static void assertWrites(String expected, Repr value) {
-    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(JsonWriterOptions.readable())));
-    JsonAssertions.assertWrites(expected, () -> JsonReprs.reprForm().write(value, Json.writer(JsonWriterOptions.compact())));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.valueFormat().write(value, JsonWriterOptions.readable()));
+    JsonAssertions.assertWrites(expected, () -> JsonReprs.valueFormat().write(value, JsonWriterOptions.standard()));
   }
 
 }

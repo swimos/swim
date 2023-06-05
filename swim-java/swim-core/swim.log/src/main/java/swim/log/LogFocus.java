@@ -44,11 +44,10 @@ final class LogFocus implements Log, ToSource {
   @Override
   public Log withFocus(String focus) {
     Objects.requireNonNull(focus);
-    if (!this.focus.equals(focus)) {
-      return this.log.withFocus(focus);
-    } else {
+    if (this.focus.equals(focus)) {
       return this;
     }
+    return this.log.withFocus(focus);
   }
 
   @Override
@@ -65,8 +64,7 @@ final class LogFocus implements Log, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof LogFocus) {
-      final LogFocus that = (LogFocus) other;
+    } else if (other instanceof LogFocus that) {
       return this.log.equals(that.log)
           && this.focus.equals(that.focus);
     }

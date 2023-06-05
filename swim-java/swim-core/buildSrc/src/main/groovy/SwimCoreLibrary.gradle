@@ -53,6 +53,7 @@ tasks.withType(JavaCompile) {
   options.errorprone {
     option('NullAway:AnnotatedPackages', 'swim')
     error('NullAway')
+    disable('NotJavadoc')
   }
 }
 

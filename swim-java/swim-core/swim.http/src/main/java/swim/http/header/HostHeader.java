@@ -82,7 +82,7 @@ public final class HostHeader extends HttpHeader {
     return HostHeader.of(NAME, value);
   }
 
-  private static UriAuthority parseValue(String value) throws HttpException {
+  static UriAuthority parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     final UriHost host;
     try {
@@ -107,7 +107,7 @@ public final class HostHeader extends HttpHeader {
     return UriAuthority.of(null, host, port);
   }
 
-  private static String writeValue(UriAuthority authority) {
+  static String writeValue(UriAuthority authority) {
     final StringBuilder output = new StringBuilder();
     try {
       authority.host().writeString(output);

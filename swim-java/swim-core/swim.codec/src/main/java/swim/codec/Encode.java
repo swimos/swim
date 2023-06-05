@@ -16,8 +16,10 @@ package swim.codec;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.Covariant;
 import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -82,9 +84,9 @@ import swim.util.ToSource;
  * <li>{@link #getNonNullUnchecked()}: returns the encoded value, if available
  *     and not {@code null}; otherwise throws an unchecked exception
  * <li>{@link #getOr(Object) getOr(T)}: returns the encoded value, if available;
- *     otherwise returns a default value
+ *     otherwise returns some other value
  * <li>{@link #getNonNullOr(Object) getNonNullOr(T)}: returns the encoded value,
- *     if available and not {@code null}; otherwise returns a default value
+ *     if available and not {@code null}; otherwise returns some other value
  * <li>{@link #getOrElse(Supplier)}: returns the encoded value, if available;
  *     otherwise returns a value supplied by a function
  * <li>{@link #getNonNullOrElse(Supplier)}: returns the encoded value,
@@ -118,12 +120,14 @@ import swim.util.ToSource;
  * nested @code Encode} instances that were captured when the encode operation
  * was previously interrupted.
  *
+ * @param <T> the type encoded value
+ *
  * @see OutputBuffer
  * @see Encoder
  */
 @Public
 @Since("5.0")
-public abstract class Encode<T> {
+public abstract class Encode<@Covariant T> {
 
   /**
    * Constructs an {@code Encode} instance in the {@code encode-cont} state.
@@ -198,10 +202,10 @@ public abstract class Encode<T> {
    * {@code encode-backoff} state and invoke {@code produce} with a
    * terminated output in order to terminate an encode operation.
    * <p>
-   * Consider the example of a proxy transcoder that decodes one input,
+   * Consider the example of a proxy stream that decodes one input,
    * and encodes another output. There's no point invoking {@code produce}
-   * on the encode end of the transcoder if the decode end's input is empty.
-   * Such a transcoder can wait for input to become available before calling
+   * on the encode end of the stream if the decode end's input is empty.
+   * Such a stream can wait for input to become available before calling
    * {@code future.requestOutput()}.
    *
    * @param future an output future that will trigger an invocation of
@@ -242,11 +246,10 @@ public abstract class Encode<T> {
   @CheckReturnValue
   public @NonNull T getNonNull() throws EncodeException {
     final T value = this.get();
-    if (value != null) {
-      return value;
-    } else {
+    if (value == null) {
       throw new NullPointerException("encoded value is null");
     }
+    return value;
   }
 
   /**
@@ -293,48 +296,46 @@ public abstract class Encode<T> {
 
   /**
    * Returns the encoded value, if in the {@code encode-done} state;
-   * otherwise returns the given {@code defaultValue}. The default
-   * implementation delegates to {@link #get()}, catching any
-   * {@code EncodeException} or {@code IllegalStateException}
-   * to instead return {@code defaultValue}.
+   * otherwise returns some {@code other} value. The default implementation
+   * delegates to {@link #get()}, catching any {@code EncodeException}
+   * or {@code IllegalStateException} to instead return {@code other}.
    *
-   * @param defaultValue returned when a encoded value is not available
-   * @return either the encoded value, or the {@code defaultValue}
+   * @param other returned when a encoded value is not available
+   * @return either the encoded value, or the {@code other} value
    */
   @CheckReturnValue
-  public @Nullable T getOr(@Nullable T defaultValue) {
+  public @Nullable T getOr(@Nullable T other) {
     try {
       return this.get();
     } catch (EncodeException | IllegalStateException cause) {
-      return defaultValue;
+      return other;
     }
   }
 
   /**
-   * Returns the encoded value, if in the {@code encode-done} state and
-   * the encoded value is not {@code null}; otherwise returns the given
-   * non-{@code null} {@code defaultValue}. The default implementation
-   * delegates to {@link #getNonNull()}, catching any {@code EncodeException},
+   * Returns the encoded value, if in the {@code encode-done} state
+   * and the encoded value is not {@code null}; otherwise returns some
+   * non-{@code null} {@code other}. The default implementation delegates
+   * to {@link #getNonNull()}, catching any {@code EncodeException},
    * {@code IllegalStateException}, or {@code NullPointerException}
-   * to instead {@code null}-check and return the {@code defaultValue}.
+   * to instead {@code null}-check and return the {@code other} value.
    *
-   * @param defaultValue non-{@code null} value returned when
+   * @param other non-{@code null} value returned when
    *        the encoded value is {@code null} or not available
    * @return either the non-{@code null} encoded value,
-   *         or the non-{@code null} {@code defaultValue}
+   *         or the non-{@code null} {@code other} value
    * @throws NullPointerException if the encoded value and
-   *         the {@code defaultValue} are both {@code null}
+   *         the {@code other} value are both {@code null}
    */
   @CheckReturnValue
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+  public @NonNull T getNonNullOr(@NonNull T other) {
     try {
       return this.getNonNull();
     } catch (EncodeException | IllegalStateException | NullPointerException cause) {
-      if (defaultValue != null) {
-        return defaultValue;
-      } else {
-        throw new NullPointerException("default value is null");
+      if (other == null) {
+        throw new NullPointerException("other value is null");
       }
+      return other;
     }
   }
 
@@ -381,11 +382,10 @@ public abstract class Encode<T> {
       return this.getNonNull();
     } catch (EncodeException | IllegalStateException | NullPointerException cause) {
       final T value = supplier.get();
-      if (value != null) {
-        return value;
-      } else {
+      if (value == null) {
         throw new NullPointerException("supplied value is null");
       }
+      return value;
     }
   }
 
@@ -461,6 +461,24 @@ public abstract class Encode<T> {
   }
 
   /**
+   * Returns an {@code Encode} instance that continues encoding {@code that}
+   * after it finishes encoding {@code this}.
+   *
+   * @param that the {@code Encode} instance to encode after {@code this}
+   * @return an {@code Encode} instance that encodes {@code this},
+   *         followed by {@code that}
+   */
+  public <T2> Encode<T2> andThen(Encode<T2> that) {
+    Objects.requireNonNull(that);
+    return new EncodeAndThen<T2>(this, that);
+  }
+
+  @CheckReturnValue
+  public <U> Encode<U> map(Function<? super T, ? extends U> mapper) {
+    return new EncodeMapper<T, U>(this, mapper);
+  }
+
+  /**
    * Converts this {@code Encode} instance to a {@link Result}. {@code Encode}
    * states map to {@code Result} states according to the following rules:
    * <ul>
@@ -481,19 +499,6 @@ public abstract class Encode<T> {
     } catch (EncodeException | IllegalStateException cause) {
       return Result.error(cause);
     }
-  }
-
-  /**
-   * Returns an {@code Encode} instance that continues encoding {@code that}
-   * after it finishes encoding {@code this}.
-   *
-   * @param that the {@code Encode} instance to encode after {@code this}
-   * @return an {@code Encode} instance that encodes {@code this},
-   *         followed by {@code that}
-   */
-  public <T2> Encode<T2> andThen(Encode<T2> that) {
-    Objects.requireNonNull(that);
-    return new EncodeAndThen<T2>(this, that);
   }
 
   /**
@@ -551,7 +556,7 @@ public abstract class Encode<T> {
 
 }
 
-final class EncodeDone<T> extends Encode<T> implements ToSource {
+final class EncodeDone<@Covariant T> extends Encode<T> implements ToSource {
 
   private final @Nullable T value;
 
@@ -583,11 +588,10 @@ final class EncodeDone<T> extends Encode<T> implements ToSource {
   @CheckReturnValue
   @Override
   public @NonNull T getNonNull() {
-    if (this.value != null) {
-      return this.value;
-    } else {
+    if (this.value == null) {
       throw new NullPointerException("encoded value is null");
     }
+    return this.value;
   }
 
   @CheckReturnValue
@@ -599,28 +603,27 @@ final class EncodeDone<T> extends Encode<T> implements ToSource {
   @CheckReturnValue
   @Override
   public @NonNull T getNonNullUnchecked() {
-    if (this.value != null) {
-      return this.value;
-    } else {
+    if (this.value == null) {
       throw new NullPointerException("encoded value is null");
     }
-  }
-
-  @CheckReturnValue
-  @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
     return this.value;
   }
 
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
+  public @Nullable T getOr(@Nullable T other) {
+    return this.value;
+  }
+
+  @CheckReturnValue
+  @Override
+  public @NonNull T getNonNullOr(@NonNull T other) {
     if (this.value != null) {
       return this.value;
-    } else if (defaultValue != null) {
-      return defaultValue;
+    } else if (other != null) {
+      return other;
     } else {
-      throw new NullPointerException("default value is null");
+      throw new NullPointerException("other value is null");
     }
   }
 
@@ -637,11 +640,10 @@ final class EncodeDone<T> extends Encode<T> implements ToSource {
       return this.value;
     } else {
       final T value = supplier.get();
-      if (value != null) {
-        return value;
-      } else {
+      if (value == null) {
         throw new NullPointerException("supplied value is null");
       }
+      return value;
     }
   }
 
@@ -655,6 +657,25 @@ final class EncodeDone<T> extends Encode<T> implements ToSource {
     return this;
   }
 
+  @Override
+  public <T2> Encode<T2> andThen(Encode<T2> that) {
+    Objects.requireNonNull(that);
+    return that;
+  }
+
+  @CheckReturnValue
+  @Override
+  public <U> Encode<U> map(Function<? super T, ? extends U> mapper) {
+    try {
+      return Encode.done(mapper.apply(this.value));
+    } catch (Throwable cause) {
+      if (Result.isFatal(cause)) {
+        throw cause;
+      }
+      return Encode.error(cause);
+    }
+  }
+
   @CheckReturnValue
   @Override
   public Result<T> toResult() {
@@ -662,14 +683,10 @@ final class EncodeDone<T> extends Encode<T> implements ToSource {
   }
 
   @Override
-  public <T2> Encode<T2> andThen(Encode<T2> that) {
-    Objects.requireNonNull(that);
-    return that;
-  }
-
-  @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof EncodeDone<?> that) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof EncodeDone<?> that) {
       return Objects.equals(this.value, that.value);
     }
     return false;
@@ -699,7 +716,7 @@ final class EncodeDone<T> extends Encode<T> implements ToSource {
 
 }
 
-final class EncodeError<T> extends Encode<T> implements ToSource {
+final class EncodeError<@Covariant T> extends Encode<T> implements ToSource {
 
   private final Throwable error;
 
@@ -756,18 +773,17 @@ final class EncodeError<T> extends Encode<T> implements ToSource {
 
   @CheckReturnValue
   @Override
-  public @Nullable T getOr(@Nullable T defaultValue) {
-    return defaultValue;
+  public @Nullable T getOr(@Nullable T other) {
+    return other;
   }
 
   @CheckReturnValue
   @Override
-  public @NonNull T getNonNullOr(@NonNull T defaultValue) {
-    if (defaultValue != null) {
-      return defaultValue;
-    } else {
-      throw new NullPointerException("default value is null");
+  public @NonNull T getNonNullOr(@NonNull T other) {
+    if (other == null) {
+      throw new NullPointerException("other value is null");
     }
+    return other;
   }
 
   @CheckReturnValue
@@ -780,11 +796,10 @@ final class EncodeError<T> extends Encode<T> implements ToSource {
   @Override
   public @NonNull T getNonNullOrElse(Supplier<? extends T> supplier) {
     final T value = supplier.get();
-    if (value != null) {
-      return value;
-    } else {
+    if (value == null) {
       throw new NullPointerException("supplied value is null");
     }
+    return value;
   }
 
   @Override
@@ -820,6 +835,18 @@ final class EncodeError<T> extends Encode<T> implements ToSource {
     throw new AssertionError("encode failed", this.error);
   }
 
+  @Override
+  public <T2> Encode<T2> andThen(Encode<T2> that) {
+    Objects.requireNonNull(that);
+    return Assume.conforms(this);
+  }
+
+  @CheckReturnValue
+  @Override
+  public <U> Encode<U> map(Function<? super T, ? extends U> mapper) {
+    return Assume.conforms(this);
+  }
+
   @CheckReturnValue
   @Override
   public Result<T> toResult() {
@@ -827,14 +854,10 @@ final class EncodeError<T> extends Encode<T> implements ToSource {
   }
 
   @Override
-  public <T2> Encode<T2> andThen(Encode<T2> that) {
-    Objects.requireNonNull(that);
-    return Assume.conforms(this);
-  }
-
-  @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof EncodeError<?> that) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof EncodeError<?> that) {
       return this.error.equals(that.error);
     }
     return false;
@@ -862,7 +885,7 @@ final class EncodeError<T> extends Encode<T> implements ToSource {
 
 }
 
-final class EncodeAndThen<T> extends Encode<T> implements ToSource {
+final class EncodeAndThen<@Covariant T> extends Encode<T> implements ToSource {
 
   private final Encode<?> head;
   private final Encode<T> tail;
@@ -889,7 +912,9 @@ final class EncodeAndThen<T> extends Encode<T> implements ToSource {
 
   @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof EncodeAndThen<?> that) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof EncodeAndThen<?> that) {
       return this.head.equals(that.head)
           && this.tail.equals(that.tail);
     }
@@ -910,6 +935,42 @@ final class EncodeAndThen<T> extends Encode<T> implements ToSource {
     notation.appendSource(this.head)
             .beginInvoke("andThen")
             .appendArgument(this.tail)
+            .endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+}
+
+final class EncodeMapper<S, T> extends Encode<T> implements ToSource {
+
+  final Encode<S> encode;
+  final Function<? super S, ? extends T> mapper;
+
+  EncodeMapper(Encode<S> encode, Function<? super S, ? extends T> mapper) {
+    this.encode = encode;
+    this.mapper = mapper;
+  }
+
+  @Override
+  public Encode<T> produce(OutputBuffer<?> output) {
+    return this.encode.produce(output).map(this.mapper);
+  }
+
+  @Override
+  public <U> Encode<U> map(Function<? super T, ? extends U> mapper) {
+    return new EncodeMapper<S, U>(this.encode, this.mapper.andThen(mapper));
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.appendSource(this.encode)
+            .beginInvoke("map")
+            .appendArgument(this.mapper)
             .endInvoke();
   }
 

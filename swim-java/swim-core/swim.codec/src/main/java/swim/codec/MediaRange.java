@@ -138,8 +138,7 @@ public final class MediaRange implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof MediaRange) {
-      final MediaRange that = (MediaRange) other;
+    } else if (other instanceof MediaRange that) {
       return this.type.equals(that.type) && this.subtype.equals(that.subtype)
           && this.params.equals(that.params) && this.weight == that.weight
           && this.extParams.equals(that.extParams);
@@ -160,26 +159,26 @@ public final class MediaRange implements ToSource, ToString {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("MediaRange", "of");
-    notation.appendArgument(this.type);
-    notation.appendArgument(this.subtype);
-    notation.endInvoke();
+    notation.beginInvoke("MediaRange", "of")
+            .appendArgument(this.type)
+            .appendArgument(this.subtype)
+            .endInvoke();
     for (Map.Entry<String, String> param : this.params) {
-      notation.beginInvoke("withParam");
-      notation.appendArgument(param.getKey());
-      notation.appendArgument(param.getValue());
-      notation.endInvoke();
+      notation.beginInvoke("withParam")
+              .appendArgument(param.getKey())
+              .appendArgument(param.getValue())
+              .endInvoke();
     }
     if (this.weight != 1000) {
-      notation.beginInvoke("withWeight");
-      notation.appendArgument(this.weight);
-      notation.endInvoke();
+      notation.beginInvoke("withWeight")
+              .appendArgument(this.weight)
+              .endInvoke();
     }
     for (Map.Entry<String, String> extParam : this.extParams) {
-      notation.beginInvoke("withExtParam");
-      notation.appendArgument(extParam.getKey());
-      notation.appendArgument(extParam.getValue());
-      notation.endInvoke();
+      notation.beginInvoke("withExtParam")
+              .appendArgument(extParam.getKey())
+              .appendArgument(extParam.getValue())
+              .endInvoke();
     }
   }
 
@@ -236,7 +235,7 @@ public final class MediaRange implements ToSource, ToString {
     return parseMediaRange;
   }
 
-  private static @Nullable CacheMap<String, Parse<MediaRange>> cache;
+  static @Nullable CacheMap<String, Parse<MediaRange>> cache;
 
   static CacheMap<String, Parse<MediaRange>> cache() {
     if (MediaRange.cache == null) {

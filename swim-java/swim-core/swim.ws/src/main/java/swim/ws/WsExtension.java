@@ -73,21 +73,18 @@ public final class WsExtension implements ToSource, ToString {
   }
 
   public Write<?> write(Output<?> output) {
-    return WriteWsExtension.write(output, this.name, this.params.iterator(),
-                                  null, null, 0, 0, 1);
+    return WriteWsExtension.write(output, this.name, this.params.iterator(), null, null, 0, 0, 1);
   }
 
   public Write<?> write() {
-    return new WriteWsExtension(this.name, this.params.iterator(),
-                                null, null, 0, 0, 1);
+    return new WriteWsExtension(this.name, this.params.iterator(), null, null, 0, 0, 1);
   }
 
   @Override
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WsExtension) {
-      final WsExtension that = (WsExtension) other;
+    } else if (other instanceof WsExtension that) {
       return this.name.equals(that.name) && this.params.equals(that.params);
     }
     return false;
@@ -389,9 +386,8 @@ final class WriteWsExtension extends Write<Object> {
 
   @Override
   public Write<Object> produce(Output<?> output) {
-    return WriteWsExtension.write(output, this.name, this.params,
-                                  this.key, this.value, this.index,
-                                  this.escape, this.step);
+    return WriteWsExtension.write(output, this.name, this.params, this.key, this.value,
+                                  this.index, this.escape, this.step);
   }
 
   static Write<Object> write(Output<?> output, String name,

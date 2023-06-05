@@ -266,28 +266,26 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   public void dispatchConnect() {
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & CONNECT_READY) == 0) {
-        // The transport doesn't currently have a pending connect operation.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | CONNECT_READY;
-        // Try to set the connect ready flag;
-        // must happen before scheduling the reader task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The connect ready flag has been set.
-          status = newStatus;
-          this.log.trace("ready to connect");
-          // Schedule the reader task to complete the connection.
-          this.reader.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & CONNECT_READY) != 0) {
         // The transport already has a pending connect operation.
         break;
       }
+      // The transport doesn't currently have a pending connect operation.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | CONNECT_READY;
+      // Try to set the connect ready flag;
+      // must happen before scheduling the reader task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The connect ready flag has been set.
+      status = newStatus;
+      this.log.trace("ready to connect");
+      // Schedule the reader task to complete the connection.
+      this.reader.schedule();
+      break;
     } while (true);
   }
 
@@ -296,36 +294,34 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final boolean connecting;
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & (STATE_MASK | CONNECT_REQUEST | CLOSE_REQUEST)) == INITIAL_STATE) {
-        // The transport is still in its initial state, and has not been
-        // requested to connect or close.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | CONNECT_REQUEST;
-        // Try to set the connect request flag;
-        // must happen before scheduling the reader task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The connect request flag has been set.
-          status = newStatus;
-          connecting = true;
-          // Store the address to which the transport should connect.
-          this.remoteAddress = remoteAddress;
-          // Focus the log now that remoteAddress is known.
-          this.setLog(this.log);
-          this.log.trace("request connect");
-          // Schedule the reader task to perform the connect operation.
-          this.reader.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & (STATE_MASK | CONNECT_REQUEST | CLOSE_REQUEST)) != INITIAL_STATE) {
         // The transport is no longer in the initial state, or has already been
         // requested to connect or close.
         connecting = false;
         break;
       }
+      // The transport is still in its initial state, and has not been
+      // requested to connect or close.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | CONNECT_REQUEST;
+      // Try to set the connect request flag;
+      // must happen before scheduling the reader task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The connect request flag has been set.
+      status = newStatus;
+      connecting = true;
+      // Store the address to which the transport should connect.
+      this.remoteAddress = remoteAddress;
+      // Focus the log now that remoteAddress is known.
+      this.setLog(this.log);
+      this.log.trace("request connect");
+      // Schedule the reader task to perform the connect operation.
+      this.reader.schedule();
+      break;
     } while (true);
     // Return whether or not this call caused the transport to begin connecting.
     return connecting;
@@ -344,37 +340,32 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to transition the transport into the connecting state;
       // must happen before initiating the connection.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The transport has transitioned into the connecting state.
-        status = newStatus;
-        try {
-          // Invoke willConnect callback before initiating the connection.
-          this.willConnect();
-        } catch (IOException cause) {
-          // Initiate transport close.
-          status = this.readerRequestClose(status);
-          // Report the exception.
-          this.log.warningStatus("willConnect callback failed", this.socket, cause);
-          // Abort and close the socket.
-          return status;
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            // Initiate transport close.
-            status = this.readerRequestClose(status);
-            // Report the non-fatal exception.
-            this.log.errorStatus("willConnect callback failed", this.socket, cause);
-            // Abort and close the socket.
-            return status;
-          } else {
-            // Rethrow the fatal exception.
-            throw cause;
-          }
-        }
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The transport has transitioned into the connecting state.
+      status = newStatus;
+      try {
+        // Invoke willConnect callback before initiating the connection.
+        this.willConnect();
+      } catch (IOException cause) {
+        this.log.warningStatus("willConnect callback failed", this.socket, cause);
+        // Initiate transport close.
+        status = this.readerRequestClose(status);
+        // Abort and close the socket.
+        return status;
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.log.errorStatus("willConnect callback failed", this.socket, cause);
+        // Initiate transport close.
+        status = this.readerRequestClose(status);
+        // Abort and close the socket.
+        return status;
+      }
+      break;
     } while (true);
 
     final boolean connected;
@@ -382,24 +373,20 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Connect the network channel.
       connected = this.channel.connect(this.remoteAddress);
     } catch (IOException cause) {
+      this.log.warningStatus("failed to connect socket", this.socket, cause);
       // Initiate transport close.
       status = this.readerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("failed to connect socket", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.readerRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("failed to connect socket", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("failed to connect socket", this.socket, cause);
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     if (connected) {
@@ -410,14 +397,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         // Try to set the connect ready flag;
         // must happen after initiating the connection.
         status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The connect ready flag has been set.
-          status = newStatus;
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        // The connect ready flag has been set.
+        status = newStatus;
+        break;
       } while (true);
     } else {
       // The connection operation is still in progress; ask the I/O dispatcher
@@ -448,37 +434,35 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final boolean opening;
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & (STATE_MASK | CONNECT_REQUEST | CLOSE_REQUEST)) == INITIAL_STATE) {
-        // The transport is still in its initial state, and has not been
-        // requested to connect or close.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | ACCEPTED | CONNECTING_STATE | CONNECT_READY;
-        // Try to transition the transport into the connecting state, with the
-        // connect ready flag set so as to immediately complete the connection;
-        // must happen before scheduling the reader task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The transport has transitioned into the connecting state.
-          status = newStatus;
-          opening = true;
-          // Store the address to which the transport is connected.
-          this.remoteAddress = (InetSocketAddress) this.channel.socket().getRemoteSocketAddress();
-          // Focus the log now that remoteAddress is known.
-          this.setLog(this.log);
-          this.log.trace("request open");
-          // Schedule the reader task to begin the open operation.
-          this.reader.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & (STATE_MASK | CONNECT_REQUEST | CLOSE_REQUEST)) != INITIAL_STATE) {
         // The transport is no longer in the initial state, or has already been
         // requested to connect or close.
         opening = false;
         break;
       }
+      // The transport is still in its initial state, and has not been
+      // requested to connect or close.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | ACCEPTED | CONNECTING_STATE | CONNECT_READY;
+      // Try to transition the transport into the connecting state, with the
+      // connect ready flag set so as to immediately complete the connection;
+      // must happen before scheduling the reader task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The transport has transitioned into the connecting state.
+      status = newStatus;
+      opening = true;
+      // Store the address to which the transport is connected.
+      this.remoteAddress = (InetSocketAddress) this.channel.socket().getRemoteSocketAddress();
+      // Focus the log now that remoteAddress is known.
+      this.setLog(this.log);
+      this.log.trace("request open");
+      // Schedule the reader task to begin the open operation.
+      this.reader.schedule();
+      break;
     } while (true);
     // Return whether or not this call caused the transport to begin opening.
     return opening;
@@ -492,14 +476,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the connect ready flag;
       // must happen before trying to finish connecting.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The connect ready flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The connect ready flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     final boolean connected;
@@ -507,31 +490,26 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to finish connecting the network channel.
       connected = this.channel.finishConnect();
     } catch (ConnectException cause) {
+      this.log.infoStatus("failed to establish connection", this.socket, cause);
       // Initiate transport close.
       status = this.readerRequestClose(status);
-      // Report connect exception.
-      this.log.infoStatus("failed to establish connection", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (IOException cause) {
+      this.log.warningStatus("failed to establish connection", this.socket, cause);
       // Initiate transport close.
       status = this.readerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("failed to establish connection", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.readerRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("failed to establish connection", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("failed to establish connection", this.socket, cause);
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     if (connected) {
@@ -542,37 +520,32 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
         // Try to transition the transport into the opening state;
         // must happen before initiating any opening handshake.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The transport has transitioned into the opening state.
-          status = newStatus;
-          try {
-            // Invoke willOpen callback before performing any opening handshake.
-            this.willOpen();
-          } catch (IOException cause) {
-            // Initiate transport close.
-            status = this.readerRequestClose(status);
-            // Report the exception.
-            this.log.warningStatus("willOpen callback failed", this.socket, cause);
-            // Abort and close the socket.
-            return status;
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Initiate transport close.
-              status = this.readerRequestClose(status);
-              // Report the non-fatal exception.
-              this.log.errorStatus("willOpen callback failed", this.socket, cause);
-              // Abort and close the socket.
-              return status;
-            } else {
-              // Rethrow the fatal exception.
-              throw cause;
-            }
-          }
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        // The transport has transitioned into the opening state.
+        status = newStatus;
+        try {
+          // Invoke willOpen callback before performing any opening handshake.
+          this.willOpen();
+        } catch (IOException cause) {
+          this.log.warningStatus("willOpen callback failed", this.socket, cause);
+          // Initiate transport close.
+          status = this.readerRequestClose(status);
+          // Abort and close the socket.
+          return status;
+        } catch (Throwable cause) {
+          if (Result.isFatal(cause)) {
+            throw cause;
+          }
+          this.log.errorStatus("willOpen callback failed", this.socket, cause);
+          // Initiate transport close.
+          status = this.readerRequestClose(status);
+          // Abort and close the socket.
+          return status;
+        }
+        break;
       } while (true);
     } else {
       // The connection operation is still in progress; ask the I/O dispatcher
@@ -609,14 +582,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the read ready flag;
       // must happen before performing the read operation.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The read ready flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The read ready flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
@@ -628,24 +600,20 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Abort and close the socket.
       return status;
     } catch (IOException cause) {
+      this.log.warningStatus("doOpeningRead failed", this.socket, cause);
       // Initiate transport close.
       status = this.readerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("doOpeningRead failed", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.readerRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("doOpeningRead failed", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("doOpeningRead failed", this.socket, cause);
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Check if the network channel has closed.
@@ -671,14 +639,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the write ready flag;
       // must happen before performing the write operation.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The write ready flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The write ready flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
@@ -690,24 +657,20 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Abort and close the socket.
       return status;
     } catch (IOException cause) {
+      this.log.warningStatus("doOpeningWrite failed", this.socket, cause);
       // Initiate transport close.
       status = this.writerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("doOpeningWrite failed", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.writerRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("doOpeningWrite failed", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("doOpeningWrite failed", this.socket, cause);
+      // Initiate transport close.
+      status = this.writerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Check if the network channel has closed.
@@ -728,28 +691,26 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   protected void requestOpen() {
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & OPEN_REQUEST) == 0) {
-        // The transport has not been requested to finish opening.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | OPEN_REQUEST;
-        // Try to set the open request flag;
-        // must happen before scheduling the reader task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The open request flag has been set.
-          status = newStatus;
-          this.log.trace("request open");
-          // Schedule the reader task to finish the opening operation.
-          this.reader.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & OPEN_REQUEST) != 0) {
         // The transport has already been requested to finish opening.
         break;
       }
+      // The transport has not been requested to finish opening.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | OPEN_REQUEST;
+      // Try to set the open request flag;
+      // must happen before scheduling the reader task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The open request flag has been set.
+      status = newStatus;
+      this.log.trace("request open");
+      // Schedule the reader task to finish the opening operation.
+      this.reader.schedule();
+      break;
     } while (true);
   }
 
@@ -761,46 +722,41 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to transition the transport into the opened state, clearing the open request flag;
       // must happen before finishing the open operation.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The transport has transitioned into the opened state.
-        status = newStatus;
-        try {
-          // Invoke didOpen callback now that any opening handshake has been completed.
-          this.didOpen();
-        } catch (IOException cause) {
-          // Initiate transport close.
-          status = this.readerRequestClose(status);
-          // Report the exception.
-          this.log.warningStatus("didOpen callback failed", this.socket, cause);
-          // Abort and close the socket.
-          return status;
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            // Initiate transport close.
-            status = this.readerRequestClose(status);
-            // Report none-fatal exception.
-            this.log.errorStatus("didOpen callback failed", this.socket, cause);
-            // Abort and close the socket.
-            return status;
-          } else {
-            // Rethrow the fatal exception.
-            throw cause;
-          }
-        }
-        // Schedule any pending read request.
-        if ((oldStatus & READ_REQUEST) != 0) {
-          this.getTransportContext().requestRead();
-        }
-        // Schedule any pending write request.
-        if ((oldStatus & WRITE_REQUEST) != 0) {
-          this.getTransportContext().requestWrite();
-        }
-        // Done opening the socket.
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The transport has transitioned into the opened state.
+      status = newStatus;
+      try {
+        // Invoke didOpen callback now that any opening handshake has been completed.
+        this.didOpen();
+      } catch (IOException cause) {
+        this.log.warningStatus("didOpen callback failed", this.socket, cause);
+        // Initiate transport close.
+        status = this.readerRequestClose(status);
+        // Abort and close the socket.
+        return status;
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.log.errorStatus("didOpen callback failed", this.socket, cause);
+        // Initiate transport close.
+        status = this.readerRequestClose(status);
+        // Abort and close the socket.
+        return status;
+      }
+      // Schedule any pending read request.
+      if ((oldStatus & READ_REQUEST) != 0) {
+        this.getTransportContext().requestRead();
+      }
+      // Schedule any pending write request.
+      if ((oldStatus & WRITE_REQUEST) != 0) {
+        this.getTransportContext().requestWrite();
+      }
+      // Done opening the socket.
+      break;
     } while (true);
 
     // Check if the network channel has closed.
@@ -831,19 +787,18 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to set the become request flag; must happen before
       // assigning the becoming socket and scheduling the reader task.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The become request flag has been set.
-        status = newStatus;
-        // Store the new socket type to become.
-        this.becoming = socket;
-        this.log.debugEntity("request become", socket);
-        // Schedule the reader task to become the new socket type.
-        this.reader.schedule();
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The become request flag has been set.
+      status = newStatus;
+      // Store the new socket type to become.
+      this.becoming = socket;
+      this.log.debugEntity("request become", socket);
+      // Schedule the reader task to become the new socket type.
+      this.reader.schedule();
+      break;
     } while (true);
   }
 
@@ -855,23 +810,21 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the become request flag;
       // must happen before becoming the new socket.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The become request flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The become request flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     final NetSocket oldSocket = this.socket;
     final NetSocket newSocket = this.becoming;
     if (newSocket == null) {
+      this.log.errorStatus("tried to become null socket", oldSocket);
       // Initiate transport close.
       status = this.readerRequestClose(status);
-      // Report the failure.
-      this.log.errorStatus("tried to become null socket", oldSocket);
       // Abort and close the socket.
       return status;
     } else if (newSocket == oldSocket) {
@@ -883,17 +836,14 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Invoke willBecome callback before becoming the new socket.
       this.willBecome(newSocket, oldSocket);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.readerRequestClose(status);
-        // Report none-fatal exception.
-        this.log.errorStatus("willBecome callback failed", oldSocket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willBecome callback failed", oldSocket, cause);
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Become the new socket.
@@ -905,41 +855,34 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     try {
       newSocket.didOpen();
     } catch (IOException cause) {
+      this.log.warningStatus("didOpen callback failed", newSocket, cause);
       // Initiate transport close.
       status = this.readerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("didOpen callback failed", newSocket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.readerRequestClose(status);
-        // Report none-fatal exception.
-        this.log.errorStatus("didOpen callback failed", newSocket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didOpen callback failed", newSocket, cause);
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     try {
       // Invoke didBecome callback after becoming the new socket.
       this.didBecome(newSocket, oldSocket);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.readerRequestClose(status);
-        // Report the exception.
-        this.log.errorStatus("didBecome callback failed", oldSocket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didBecome callback failed", oldSocket, cause);
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Check if the network channel has closed.
@@ -970,35 +913,33 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final boolean requested;
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & READ_REQUEST) == 0) {
-        // The transport does not have a pending read request.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | READ_REQUEST;
-        // Try to set the read request flag;
-        // must happen before requesting the I/O event.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The read request flag has been set.
-          status = newStatus;
-          requested = true;
-          this.log.trace("request read");
-          final TransportContext context = this.context;
-          if (context != null && (status & CONNECTED) != 0) {
-            // Only schedule reads when the transport is in the connected state.
-            context.requestRead();
-          } else {
-            // Non-connected read requests will be scheduled once connected.
-          }
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & READ_REQUEST) != 0) {
         // The transport already has a pending read request.
         requested = false;
         break;
       }
+      // The transport does not have a pending read request.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | READ_REQUEST;
+      // Try to set the read request flag;
+      // must happen before requesting the I/O event.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The read request flag has been set.
+      status = newStatus;
+      requested = true;
+      this.log.trace("request read");
+      final TransportContext context = this.context;
+      if (context != null && (status & CONNECTED) != 0) {
+        // Only schedule reads when the transport is in the connected state.
+        context.requestRead();
+      } else {
+        // Non-connected read requests will be scheduled once connected.
+      }
+      break;
     } while (true);
     return requested;
   }
@@ -1008,33 +949,31 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final boolean cancelled;
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & READ_REQUEST) != 0) {
-        // The transport has a pending read request.
-        final int oldStatus = status;
-        final int newStatus = oldStatus & ~READ_REQUEST;
-        // Try to clear the read request flag;
-        // must happen before cancelling the I/O event.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The read request flag has been cleared.
-          status = newStatus;
-          cancelled = true;
-          this.log.trace("cancel read");
-          final TransportContext context = this.context;
-          if (context != null && (status & CONNECTED) != 0) {
-            // Only cancel reads when the transport is in the connected state.
-            context.cancelRead();
-          }
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & READ_REQUEST) == 0) {
         // The transport does not have a pending read request.
         cancelled = false;
         break;
       }
+      // The transport has a pending read request.
+      final int oldStatus = status;
+      final int newStatus = oldStatus & ~READ_REQUEST;
+      // Try to clear the read request flag;
+      // must happen before cancelling the I/O event.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The read request flag has been cleared.
+      status = newStatus;
+      cancelled = true;
+      this.log.trace("cancel read");
+      final TransportContext context = this.context;
+      if (context != null && (status & CONNECTED) != 0) {
+        // Only cancel reads when the transport is in the connected state.
+        context.cancelRead();
+      }
+      break;
     } while (true);
     return cancelled;
   }
@@ -1044,30 +983,28 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final boolean triggered;
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & READ_READY) == 0) {
-        // The transport is not currently awaiting a read.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | READ_READY;
-        // Try to set the read ready flag;
-        // must happen before scheduling the reader task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The read ready flag has been set.
-          status = newStatus;
-          triggered = true;
-          this.log.trace("trigger read");
-          // Schedule the reader task to perform the read.
-          this.reader.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & READ_READY) != 0) {
         // The transport is already awaiting a read.
         triggered = false;
         break;
       }
+      // The transport is not currently awaiting a read.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | READ_READY;
+      // Try to set the read ready flag;
+      // must happen before scheduling the reader task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The read ready flag has been set.
+      status = newStatus;
+      triggered = true;
+      this.log.trace("trigger read");
+      // Schedule the reader task to perform the read.
+      this.reader.schedule();
+      break;
     } while (true);
     return triggered;
   }
@@ -1076,28 +1013,26 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   public void dispatchRead() {
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & READ_READY) == 0) {
-        // The transport is not currently awaiting a read.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | READ_READY;
-        // Try to set the read ready flag;
-        // must happen before scheduling the reader task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The read ready flag has been set.
-          status = newStatus;
-          this.log.trace("ready to read");
-          // Schedule the reader task to perform the read.
-          this.reader.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & READ_READY) != 0) {
         // The transport is already awaiting a read.
         break;
       }
+      // The transport is not currently awaiting a read.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | READ_READY;
+      // Try to set the read ready flag;
+      // must happen before scheduling the reader task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The read ready flag has been set.
+      status = newStatus;
+      this.log.trace("ready to read");
+      // Schedule the reader task to perform the read.
+      this.reader.schedule();
+      break;
     } while (true);
   }
 
@@ -1109,14 +1044,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the read request and read ready flags;
       // must happen before performing the read operation.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The read ready flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The read ready flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
@@ -1128,24 +1062,20 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Abort and close the socket.
       return status;
     } catch (IOException cause) {
+      this.log.warningStatus("doRead failed", this.socket, cause);
       // Initiate transport close.
       status = this.readerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("doRead failed", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.readerRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("doRead failed", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("doRead failed", this.socket, cause);
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Check if the network channel has closed.
@@ -1174,35 +1104,33 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final boolean requested;
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & WRITE_REQUEST) == 0) {
-        // The transport does not have a pending write request.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | WRITE_REQUEST;
-        // Try to set the write request flag;
-        // must happen before requesting the I/O event.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The write request flag has been set.
-          status = newStatus;
-          requested = true;
-          this.log.trace("request write");
-          final TransportContext context = this.context;
-          if (context != null && (status & CONNECTED) != 0) {
-            // Only schedule writes when the transport is in the connected state.
-            context.requestWrite();
-          } else {
-            // Non-connected write requests will be scheduled once connected.
-          }
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & WRITE_REQUEST) != 0) {
         // The transport already has a pending write request.
         requested = false;
         break;
       }
+      // The transport does not have a pending write request.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | WRITE_REQUEST;
+      // Try to set the write request flag;
+      // must happen before requesting the I/O event.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The write request flag has been set.
+      status = newStatus;
+      requested = true;
+      this.log.trace("request write");
+      final TransportContext context = this.context;
+      if (context != null && (status & CONNECTED) != 0) {
+        // Only schedule writes when the transport is in the connected state.
+        context.requestWrite();
+      } else {
+        // Non-connected write requests will be scheduled once connected.
+      }
+      break;
     } while (true);
     return requested;
   }
@@ -1212,33 +1140,31 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final boolean cancelled;
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & WRITE_REQUEST) != 0) {
-        // The transport has a pending write request.
-        final int oldStatus = status;
-        final int newStatus = oldStatus & ~WRITE_REQUEST;
-        // Try to clear the write request flag;
-        // must happen before cancelling the I/O event.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The write request flag has been cleared.
-          status = newStatus;
-          cancelled = true;
-          this.log.trace("cancel write");
-          final TransportContext context = this.context;
-          if (context != null && (status & CONNECTED) != 0) {
-            // Only cancel writes when the transport is in the connected state.
-            context.cancelWrite();
-          }
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & WRITE_REQUEST) == 0) {
         // The transport does not have a pending write request.
         cancelled = false;
         break;
       }
+      // The transport has a pending write request.
+      final int oldStatus = status;
+      final int newStatus = oldStatus & ~WRITE_REQUEST;
+      // Try to clear the write request flag;
+      // must happen before cancelling the I/O event.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The write request flag has been cleared.
+      status = newStatus;
+      cancelled = true;
+      this.log.trace("cancel write");
+      final TransportContext context = this.context;
+      if (context != null && (status & CONNECTED) != 0) {
+        // Only cancel writes when the transport is in the connected state.
+        context.cancelWrite();
+      }
+      break;
     } while (true);
     return cancelled;
   }
@@ -1248,30 +1174,28 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final boolean triggered;
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & WRITE_READY) == 0) {
-        // The transport is not currently awaiting a write.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | WRITE_READY;
-        // Try to set the write ready flag
-        // must happen before scheduling the writer task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The write ready flag has been set.
-          status = newStatus;
-          triggered = true;
-          this.log.trace("trigger write");
-          // Schedule the writer task to perform the operation.
-          this.writer.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & WRITE_READY) != 0) {
         // The transport is already awaiting a write.
         triggered = false;
         break;
       }
+      // The transport is not currently awaiting a write.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | WRITE_READY;
+      // Try to set the write ready flag
+      // must happen before scheduling the writer task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The write ready flag has been set.
+      status = newStatus;
+      triggered = true;
+      this.log.trace("trigger write");
+      // Schedule the writer task to perform the operation.
+      this.writer.schedule();
+      break;
     } while (true);
     return triggered;
   }
@@ -1280,28 +1204,26 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   public void dispatchWrite() {
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & WRITE_READY) == 0) {
-        // The transport is not currently awaiting a write.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | WRITE_READY;
-        // Try to set the write ready flag
-        // must happen before scheduling the writer task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The write ready flag has been set.
-          status = newStatus;
-          this.log.trace("ready to write");
-          // Schedule the writer task to perform the operation.
-          this.writer.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & WRITE_READY) != 0) {
         // The transport is already awaiting a write.
         break;
       }
+      // The transport is not currently awaiting a write.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | WRITE_READY;
+      // Try to set the write ready flag
+      // must happen before scheduling the writer task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The write ready flag has been set.
+      status = newStatus;
+      this.log.trace("ready to write");
+      // Schedule the writer task to perform the operation.
+      this.writer.schedule();
+      break;
     } while (true);
   }
 
@@ -1313,14 +1235,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the write request and write ready flags;
       // must happen before performing the write operation.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The write ready flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The write ready flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
@@ -1332,24 +1253,20 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Abort and close the socket.
       return status;
     } catch (IOException cause) {
+      this.log.warningStatus("doWrite failed", this.socket, cause);
       // Initiate transport close.
       status = this.writerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("doWrite failed", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.writerRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("doWrite failed", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("doWrite failed", this.socket, cause);
+      // Initiate transport close.
+      status = this.writerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Check if the network channel has closed.
@@ -1377,28 +1294,26 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   public void dispatchTimeout() {
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & TIMEOUT_REQUEST) == 0) {
-        // The transport does not have a pending timeout request.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | TIMEOUT_REQUEST;
-        // Try to set the timeout request flag;
-        // must happen before scheduling the reader task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The timeout request flag has been set.
-          status = newStatus;
-          this.log.trace("transport timed out");
-          // Schedule the reader task to execute the timeout.
-          this.reader.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & TIMEOUT_REQUEST) != 0) {
         // The transport already has a pending timeout request.
         break;
       }
+      // The transport does not have a pending timeout request.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | TIMEOUT_REQUEST;
+      // Try to set the timeout request flag;
+      // must happen before scheduling the reader task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The timeout request flag has been set.
+      status = newStatus;
+      this.log.trace("transport timed out");
+      // Schedule the reader task to execute the timeout.
+      this.reader.schedule();
+      break;
     } while (true);
   }
 
@@ -1410,38 +1325,33 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the timeout request flag;
       // must happen before timing out the socket.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The timeout request flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The timeout request flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
       // Invoke I/O callback.
       this.doTimeout();
     } catch (IOException cause) {
+      this.log.warningStatus("doTimeout failed", this.socket, cause);
       // Initiate transport close.
       status = this.readerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("doTimeout failed", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.readerRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("doTimeout failed", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("doTimeout failed", this.socket, cause);
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Check if the network channel has closed.
@@ -1471,31 +1381,29 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final boolean closed;
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & (CONNECTED | DONE_READING)) == CONNECTED) {
-        // The transport is connected and open for reading.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | (DONE_READING | CLOSE_INBOUND_REQUEST);
-        // Try to close the socket for reading, and request that the transport
-        // close its inbound stream; must happen before scheduling the reader task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The socket has been closed for reading, and the transport
-          // has been requested to close its inbound stream.
-          status = newStatus;
-          closed = true;
-          this.log.trace("request close inbound");
-          // Schedule the reader task to perform the inbound close.
-          this.reader.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & (CONNECTED | DONE_READING)) != CONNECTED) {
         // The transport is not connected, or is already closed for reading.
         closed = false;
         break;
       }
+      // The transport is connected and open for reading.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | (DONE_READING | CLOSE_INBOUND_REQUEST);
+      // Try to close the socket for reading, and request that the transport
+      // close its inbound stream; must happen before scheduling the reader task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The socket has been closed for reading, and the transport
+      // has been requested to close its inbound stream.
+      status = newStatus;
+      closed = true;
+      this.log.trace("request close inbound");
+      // Schedule the reader task to perform the inbound close.
+      this.reader.schedule();
+      break;
     } while (true);
     // Return whether or not this call caused the socket to close for reading.
     return closed;
@@ -1509,14 +1417,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the close inbound request flag;
       // must happen before closing the inbound transport stream.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The close inbound request flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The close inbound request flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
@@ -1528,24 +1435,20 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Abort and close the socket.
       return status;
     } catch (IOException cause) {
+      this.log.warningStatus("doCloseInbound failed", this.socket, cause);
       // Initiate transport close.
       status = this.readerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("doCloseInbound failed", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.readerRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("doCloseInbound failed", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("doCloseInbound failed", this.socket, cause);
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Check if the network channel has closed.
@@ -1576,31 +1479,29 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
     final boolean closed;
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & (CONNECTED | DONE_WRITING)) == CONNECTED) {
-        // The transport is connected and open for writing.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | (DONE_WRITING | CLOSE_OUTBOUND_REQUEST);
-        // Try to close the socket for writing, and request that the transport
-        // close its outbound stream; must happen before scheduling the writer task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The socket has been closed for writing, and the transport
-          // has been requested to close its outbound stream.
-          status = newStatus;
-          closed = true;
-          this.log.trace("request close outbound");
-          // Schedule the writer task to perform the outbound close.
-          this.writer.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & (CONNECTED | DONE_WRITING)) != CONNECTED) {
         // The transport is not connected, or is already closed for writing.
         closed = false;
         break;
       }
+      // The transport is connected and open for writing.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | (DONE_WRITING | CLOSE_OUTBOUND_REQUEST);
+      // Try to close the socket for writing, and request that the transport
+      // close its outbound stream; must happen before scheduling the writer task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The socket has been closed for writing, and the transport
+      // has been requested to close its outbound stream.
+      status = newStatus;
+      closed = true;
+      this.log.trace("request close outbound");
+      // Schedule the writer task to perform the outbound close.
+      this.writer.schedule();
+      break;
     } while (true);
     // Return whether or not this call caused the socket to close for writing.
     return closed;
@@ -1614,14 +1515,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the close outbound request flag;
       // must happen before closing the outbound transport stream.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The close outbound request flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The close outbound request flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
@@ -1633,24 +1533,20 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Abort and close the socket.
       return status;
     } catch (IOException cause) {
+      this.log.warningStatus("doCloseOutbound failed", this.socket, cause);
       // Initiate transport close.
       status = this.writerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("doCloseOutbound failed", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.writerRequestClose(status);
-        // Report none-fatal exception.
-        this.log.errorStatus("doCloseOutbound failed", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("doCloseOutbound failed", this.socket, cause);
+      // Initiate transport close.
+      status = this.writerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Check if the network channel has closed.
@@ -1680,14 +1576,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the read ready flag;
       // must happen before performing the closing read.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The read ready flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The read ready flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
@@ -1699,24 +1594,20 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Abort and close the socket.
       return status;
     } catch (IOException cause) {
+      this.log.warningStatus("doClosingRead failed", this.socket, cause);
       // Initiate transport close.
       status = this.readerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("doClosingRead failed", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.readerRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("doClosingRead failed", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("doClosingRead failed", this.socket, cause);
+      // Initiate transport close.
+      status = this.readerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Check if the network channel has closed.
@@ -1754,14 +1645,13 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to clear the write ready flag
       // must happen before performing the closing write.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The write ready flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The write ready flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
@@ -1773,24 +1663,20 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Abort and close the socket.
       return status;
     } catch (IOException cause) {
+      this.log.warningStatus("doClosingWrite failed", this.socket, cause);
       // Initiate transport close.
       status = this.writerRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("doClosingWrite failed", this.socket, cause);
       // Abort and close the socket.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate transport close.
-        status = this.writerRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("doClosingWrite failed", this.socket, cause);
-        // Abort and close the socket.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("doClosingWrite failed", this.socket, cause);
+      // Initiate transport close.
+      status = this.writerRequestClose(status);
+      // Abort and close the socket.
+      return status;
     }
 
     // Check if the network channel has closed.
@@ -1812,25 +1698,23 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   int readerRequestClose(int status) {
     // Request socket close; must only be called from the reader task.
     do {
-      if ((status & CLOSE_REQUEST) == 0) {
-        // The transport does not have a pending close request.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | CLOSE_REQUEST;
-        // Try to request socket close; must happen before continuing.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The transport has transitioned into the closing state.
-          status = newStatus;
-          this.log.trace("request close");
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & CLOSE_REQUEST) != 0) {
         // The transport already has a pending close request.
         break;
       }
+      // The transport does not have a pending close request.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | CLOSE_REQUEST;
+      // Try to request socket close; must happen before continuing.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The transport has transitioned into the closing state.
+      status = newStatus;
+      this.log.trace("request close");
+      break;
     } while (true);
     return status;
   }
@@ -1839,27 +1723,25 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   int writerRequestClose(int status) {
     // Request socket close; must only be called from the writer task.
     do {
-      if ((status & CLOSE_REQUEST) == 0) {
-        // The transport does not have a pending close request.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | CLOSE_REQUEST;
-        // Try to request socket close; must happen before continuing.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The transport has transitioned into the closing state.
-          status = newStatus;
-          this.log.trace("request close");
-          // Schedule the reader task to perform the close.
-          this.reader.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & CLOSE_REQUEST) != 0) {
         // The transport already has a pending close request.
         break;
       }
+      // The transport does not have a pending close request.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | CLOSE_REQUEST;
+      // Try to request socket close; must happen before continuing.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The transport has transitioned into the closing state.
+      status = newStatus;
+      this.log.trace("request close");
+      // Schedule the reader task to perform the close.
+      this.reader.schedule();
+      break;
     } while (true);
     return status;
   }
@@ -1874,28 +1756,26 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
   public void close() {
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & CLOSE_REQUEST) == 0) {
-        // The transport does not have a pending close request.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | CLOSE_REQUEST;
-        // Try to request socket close;
-        // must happen before scheduling the reader task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The transport has been requested to close.
-          status = newStatus;
-          this.log.trace("request close");
-          // Schedule the reader task to perform the close.
-          this.reader.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & CLOSE_REQUEST) != 0) {
         // The transport already has a pending close request.
         break;
       }
+      // The transport does not have a pending close request.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | CLOSE_REQUEST;
+      // Try to request socket close;
+      // must happen before scheduling the reader task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The transport has been requested to close.
+      status = newStatus;
+      this.log.trace("request close");
+      // Schedule the reader task to perform the close.
+      this.reader.schedule();
+      break;
     } while (true);
   }
 
@@ -1905,36 +1785,28 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Invoke willClose callback before closing the network channel.
       this.willClose();
     } catch (IOException cause) {
-      // Report the exception and continue closing.
       this.log.warningStatus("willClose callback failed", this.socket, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception and continue closing.
-        this.log.errorStatus("willClose callback failed", this.socket, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willClose callback failed", this.socket, cause);
     }
 
     try {
       // Cancel I/O scheduling for the network channel.
       this.getTransportContext().cancel();
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception and continue closing.
-        this.log.errorStatus("failed to cancel transport", this.socket, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("failed to cancel transport", this.socket, cause);
     }
 
     try {
       // Close the network channel.
       this.channel.close();
     } catch (IOException cause) {
-      // Report exception and continue closing.
       this.log.warningStatus("failed to close channel", this.socket, cause);
     }
 
@@ -1944,30 +1816,25 @@ public class TcpSocket implements Transport, NetSocketContext, LogEntity, LogCon
       // Try to transition the transport into the closed state;
       // must happen after closing the network channel.
       status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        // The transport has transitioned into the closed state.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The transport has transitioned into the closed state.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
       // Invoke didClose callback now that the network channel has been closed.
       this.didClose();
     } catch (IOException cause) {
-      // Report the exception and continue closing.
       this.log.warningStatus("didClose callback failed", this.socket, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception and continue closing.
-        this.log.errorStatus("didClose callback failed", this.socket, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didClose callback failed", this.socket, cause);
     }
     status = (int) STATUS.getAcquire(this);
 

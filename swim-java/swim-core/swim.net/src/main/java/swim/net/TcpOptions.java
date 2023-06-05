@@ -166,8 +166,7 @@ public class TcpOptions implements ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof TcpOptions) {
-      final TcpOptions that = (TcpOptions) other;
+    } else if (other instanceof TcpOptions that) {
       return that.canEqual(this)
           && this.backlog == that.backlog
           && this.recvBufferSize == that.recvBufferSize

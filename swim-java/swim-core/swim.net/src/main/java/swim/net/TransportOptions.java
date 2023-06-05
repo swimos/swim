@@ -88,8 +88,7 @@ public class TransportOptions implements ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof TransportOptions) {
-      final TransportOptions that = (TransportOptions) other;
+    } else if (other instanceof TransportOptions that) {
       return that.canEqual(this)
           && this.idleInterval == that.idleInterval
           && this.idleTimeout == that.idleTimeout;

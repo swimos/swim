@@ -37,19 +37,18 @@ public abstract class UriQueryPattern extends UriPathPattern {
 
   @Override
   boolean matches(UriPath path, UriQuery query, UriFragment fragment) {
-    if (path.isEmpty()) {
-      return this.matches(query, fragment);
-    } else {
+    if (!path.isEmpty()) {
       return false;
     }
+    return this.matches(query, fragment);
   }
 
   public static UriQueryPattern compile(Uri pattern, UriQuery query, UriFragment fragment) {
-    if (query.isDefined()) {
-      return new UriQueryLiteral(query, UriFragmentPattern.compile(pattern, fragment));
-    } else {
-      return UriFragmentPattern.compile(pattern, fragment);
+    final UriFragmentPattern fragmentPattern = UriFragmentPattern.compile(pattern, fragment);
+    if (!query.isDefined()) {
+      return fragmentPattern;
     }
+    return new UriQueryLiteral(query, fragmentPattern);
   }
 
 }

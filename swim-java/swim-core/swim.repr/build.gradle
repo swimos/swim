@@ -9,8 +9,9 @@ ext.moduleName = 'swim.repr'
 
 dependencies {
   api project(':swim-annotations')
+  api project(':swim-decl')
   api project(':swim-util')
   api project(':swim-collections')
   api project(':swim-codec')
-  api project(':swim-expr')
+  api project(':swim-term')
 }

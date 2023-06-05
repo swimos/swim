@@ -113,30 +113,29 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
         // Try to acquire the config lock;
         // must happen before invoking the configuration function.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The config lock has been acquired.
-          status = newStatus;
-          configured = true;
-          try {
-            // Invoke the configuration function.
-            configuration.run();
-          } finally {
-            // Prepare to notify waiters upon releasing the config lock.
-            synchronized (this) {
-              // Release the config lock; must happen before notifying waiters.
-              status = (int) STATUS.compareAndExchangeAcquire(this, newStatus, oldStatus);
-              // Verify that the service status didn't change while configuring.
-              assert status == newStatus;
-              status = oldStatus;
-              // Notify waiters that the config lock has been released.
-              this.notifyAll();
-            }
-          }
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        // The config lock has been acquired.
+        status = newStatus;
+        configured = true;
+        try {
+          // Invoke the configuration function.
+          configuration.run();
+        } finally {
+          // Prepare to notify waiters upon releasing the config lock.
+          synchronized (this) {
+            // Release the config lock; must happen before notifying waiters.
+            status = (int) STATUS.compareAndExchangeAcquire(this, newStatus, oldStatus);
+            // Verify that the service status didn't change while configuring.
+            assert status == newStatus;
+            status = oldStatus;
+            // Notify waiters that the config lock has been released.
+            this.notifyAll();
+          }
+        }
+        break;
       } else if ((status & STATE_MASK) == CONFIG_LOCK) {
         // Another thread currently holds the config lock;
         // prepare to wait for the config lock to be released.
@@ -156,11 +155,10 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
         }
         // Continue trying to acquire the config lock.
         continue;
-      } else {
-        // The service has already been started; to ensure consistent operation,
-        // configuration is no longer permitted.
-        break;
       }
+      // The service has already been started; to ensure consistent operation,
+      // configuration is no longer permitted.
+      break;
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service configuration.
@@ -184,17 +182,14 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
             // Invoke didStart callback now that the thread pool has started.
             this.didStart();
           } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("didStart callback failed", cause);
-              // Stop the service on lifecycle callback failure.
-              this.stop();
-              // Reload service status after stop.
-              status = (int) STATUS.getOpaque(this);
-            } else {
-              // Rethrow the fatal exception.
+            if (Result.isFatal(cause)) {
               throw cause;
             }
+            this.log.error("didStart callback failed", cause);
+            // Stop the service on lifecycle callback failure.
+            this.stop();
+            // Reload service status after stop.
+            status = (int) STATUS.getOpaque(this);
           }
         }
         break;
@@ -226,53 +221,48 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
         // Try to transition the service into the starting state;
         // must happen before initiating service startup.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The service has transitioned into the starting state.
-          status = newStatus;
-          causedStart = true;
-          try {
-            // Invoke willStart callback prior to starting the thread pool.
-            this.willStart();
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("willStart callback failed", cause);
-              // Stop the service on lifecycle callback failure.
-              this.stop();
-              // Reload service status after stop.
-              status = (int) STATUS.getOpaque(this);
-            } else {
-              // Rethrow the fatal exception.
-              throw cause;
-            }
-          }
-          // No explicit action required to start the thread pool;
-          // prepare to complete service startup.
-          synchronized (this) {
-            oldStatus = status;
-            newStatus = (oldStatus & ~STATE_MASK) | STARTED_STATE;
-            // Transition the service into the started state;
-            // must happen before notifying waiters.
-            status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-            // Verify that the service status didn't change while starting.
-            assert status == oldStatus;
-            status = newStatus;
-            // Notify waiters of service startup completion.
-            this.notifyAll();
-          }
-          // Continue startup sequence.
-          continue;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        // The service has transitioned into the starting state.
+        status = newStatus;
+        causedStart = true;
+        try {
+          // Invoke willStart callback prior to starting the thread pool.
+          this.willStart();
+        } catch (Throwable cause) {
+          if (Result.isFatal(cause)) {
+            throw cause;
+          }
+          this.log.error("willStart callback failed", cause);
+          // Stop the service on lifecycle callback failure.
+          this.stop();
+          // Reload service status after stop.
+          status = (int) STATUS.getOpaque(this);
+        }
+        // No explicit action required to start the thread pool;
+        // prepare to complete service startup.
+        synchronized (this) {
+          oldStatus = status;
+          newStatus = (oldStatus & ~STATE_MASK) | STARTED_STATE;
+          // Transition the service into the started state;
+          // must happen before notifying waiters.
+          status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+          // Verify that the service status didn't change while starting.
+          assert status == oldStatus;
+          status = newStatus;
+          // Notify waiters of service startup completion.
+          this.notifyAll();
+        }
+        // Continue startup sequence.
+        continue;
       } else if ((status & STATE_MASK) == STOPPING_STATE
               || (status & STATE_MASK) == STOPPED_STATE) {
         // The service is concurrently stopping, or has permanently stopped.
         break;
-      } else {
-        throw new AssertionError("unreachable");
       }
+      throw new AssertionError("unreachable");
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service startup.
@@ -324,13 +314,10 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
             // Invoke didStop callback now that the thread pool has shutdown.
             this.didStop();
           } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("didStop callback failed", cause);
-            } else {
-              // Rethrow the fatal exception.
+            if (Result.isFatal(cause)) {
               throw cause;
             }
+            this.log.error("didStop callback failed", cause);
           }
         }
         break;
@@ -365,55 +352,50 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
         // Try to transition the service into the stopping state;
         // must happen before initiating service shutdown.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The service has transitioned into the stopping state.
-          status = newStatus;
-          causedStop = true;
-          try {
-            // Invoke willStop callback prior to stopping the thread pool.
-            this.willStop();
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("willStop callback failed", cause);
-            } else {
-              // Rethrow the fatal exception.
-              throw cause;
-            }
-          }
-          // Stop the thread pool.
-          this.pool.shutdown();
-          while (!this.pool.isTerminated()) {
-            try {
-              // Wait for the thread pool to terminate.
-              this.pool.awaitTermination(100, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException cause) {
-              // Defer thread interrupt.
-              interrupted = true;
-            }
-          }
-          // Prepare to complete service shutdown.
-          synchronized (this) {
-            oldStatus = status;
-            newStatus = (oldStatus & ~STATE_MASK) | STOPPED_STATE;
-            // Transition the service into the stopped state;
-            // must happen before notifying waiters.
-            status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-            // Verify that the service status didn't change while stopping.
-            assert status == oldStatus;
-            status = newStatus;
-            // Notify waiters of service shutdown completion.
-            this.notifyAll();
-          }
-          // Continue shutdown sequence.
-          continue;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
-      } else {
-        throw new AssertionError("unreachable");
+        // The service has transitioned into the stopping state.
+        status = newStatus;
+        causedStop = true;
+        try {
+          // Invoke willStop callback prior to stopping the thread pool.
+          this.willStop();
+        } catch (Throwable cause) {
+          if (Result.isFatal(cause)) {
+            throw cause;
+          }
+          this.log.error("willStop callback failed", cause);
+        }
+        // Stop the thread pool.
+        this.pool.shutdown();
+        while (!this.pool.isTerminated()) {
+          try {
+            // Wait for the thread pool to terminate.
+            this.pool.awaitTermination(100, TimeUnit.MILLISECONDS);
+          } catch (InterruptedException cause) {
+            // Defer thread interrupt.
+            interrupted = true;
+          }
+        }
+        // Prepare to complete service shutdown.
+        synchronized (this) {
+          oldStatus = status;
+          newStatus = (oldStatus & ~STATE_MASK) | STOPPED_STATE;
+          // Transition the service into the stopped state;
+          // must happen before notifying waiters.
+          status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+          // Verify that the service status didn't change while stopping.
+          assert status == oldStatus;
+          status = newStatus;
+          // Notify waiters of service shutdown completion.
+          this.notifyAll();
+        }
+        // Continue shutdown sequence.
+        continue;
       }
+      throw new AssertionError("unreachable");
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service shutdown.
@@ -497,14 +479,11 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
     } catch (Throwable cause) {
       // `handle.task()` should never throw; but in case it does,
       // don't let it take down the worker thread.
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.error("invalid task handle: " + handle, cause);
-        return;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.error("invalid task handle: " + handle, cause);
+      return;
     }
     if (task == null) {
       // `handle.task()` should never be null; but if it is,
@@ -517,37 +496,29 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
       // Invoke service introspection callback.
       this.willRunTask(handle);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willRunTask callback failed", handle, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willRunTask callback failed", handle, cause);
     }
 
     try {
       // Execute the task function.
       task.run();
     } catch (Throwable exception) {
-      if (Result.isNonFatal(exception)) {
-        try {
-          // Invoke service introspection callback.
-          this.didAbortTask(handle, exception);
-          return;
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            // Report the non-fatal exception.
-            this.log.errorStatus("didAbortTask callback failed", handle, cause);
-            return;
-          } else {
-            // Rethrow the fatal exception.
-            throw cause;
-          }
-        }
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(exception)) {
         throw exception;
+      }
+      try {
+        // Invoke service introspection callback.
+        this.didAbortTask(handle, exception);
+        return;
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.log.errorStatus("didAbortTask callback failed", handle, cause);
+        return;
       }
     }
 
@@ -555,13 +526,10 @@ public class ThreadPool implements TaskService, Thread.UncaughtExceptionHandler 
       // Invoke service introspection callback.
       this.didRunTask(handle);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("didRunTask callback failed", handle, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didRunTask callback failed", handle, cause);
     }
   }
 
@@ -697,60 +665,52 @@ class TaskHandle implements TaskContext, Runnable, LogEntity {
   public boolean schedule() {
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & SCHEDULED) == 0) {
-        // The task isn't currently scheduled for execution.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | SCHEDULED;
-        // Try to set the scheduled flag; must happen before scheduling the task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The scheduled flag has been set; the task is now ready to be scheduled.
-          status = newStatus;
-          try {
-            // Invoke service introspection callback.
-            this.service.willScheduleTask(this);
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.service.log.error("willScheduleTask callback failed", cause);
-            } else {
-              // Rethrow the fatal exception.
-              throw cause;
-            }
-          }
-          if (this.task instanceof TaskFunction) {
-            try {
-              // Invoke task lifecycle callback.
-              ((TaskFunction) this.task).willSchedule();
-            } catch (Throwable cause) {
-              if (Result.isNonFatal(cause)) {
-                // Report the non-fatal exception.
-                this.service.log.error("willSchedule callback failed", cause);
-              } else {
-                // Rethrow the fatal exception.
-                throw cause;
-              }
-            }
-          }
-          // Never enqueue the task while it's running; doing so could cause
-          // multiple threads to concurrently execute the same task.
-          if ((status & RUNNING) == 0) {
-            // The task isn't currently running; enqueue it for execution
-            // on the thread pool.
-            this.service.pool.execute(this);
-          } else {
-            // The task will be re-enqueued for execution after the current
-            // run completes.
-          }
-          return true;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & SCHEDULED) != 0) {
         // The task is already scheduled for execution.
         return false;
       }
+      // The task isn't currently scheduled for execution.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | SCHEDULED;
+      // Try to set the scheduled flag; must happen before scheduling the task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The scheduled flag has been set; the task is now ready to be scheduled.
+      status = newStatus;
+      try {
+        // Invoke service introspection callback.
+        this.service.willScheduleTask(this);
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.service.log.error("willScheduleTask callback failed", cause);
+      }
+      if (this.task instanceof TaskFunction) {
+        try {
+          // Invoke task lifecycle callback.
+          ((TaskFunction) this.task).willSchedule();
+        } catch (Throwable cause) {
+          if (Result.isFatal(cause)) {
+            throw cause;
+          }
+          this.service.log.error("willSchedule callback failed", cause);
+        }
+      }
+      // Never enqueue the task while it's running; doing so could cause
+      // multiple threads to concurrently execute the same task.
+      if ((status & RUNNING) == 0) {
+        // The task isn't currently running; enqueue it for execution
+        // on the thread pool.
+        this.service.pool.execute(this);
+      } else {
+        // The task will be re-enqueued for execution after the current
+        // run completes.
+      }
+      return true;
     } while (true);
   }
 
@@ -758,50 +718,42 @@ class TaskHandle implements TaskContext, Runnable, LogEntity {
   public boolean cancel() {
     int status = (int) STATUS.getOpaque(this);
     do {
-      if ((status & SCHEDULED) != 0) {
-        // The task is currently scheduled for execution.
-        final int oldStatus = status;
-        final int newStatus = oldStatus & ~SCHEDULED;
-        // Try to clear the scheduled flag; must happen before cancelling the task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The scheduled flag has been cleared; the task is now cancelled.
-          status = newStatus;
-          try {
-            // Invoke service introspection callback.
-            this.service.didCancelTask(this);
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.service.log.error("didCancelTask callback failed", cause);
-            } else {
-              // Rethrow the fatal exception.
-              throw cause;
-            }
-          }
-          if (this.task instanceof TaskFunction) {
-            try {
-              // Invoke task lifecycle callback.
-              ((TaskFunction) this.task).didCancel();
-            } catch (Throwable cause) {
-              if (Result.isNonFatal(cause)) {
-                // Report the non-fatal exception.
-                this.service.log.error("didCancel callback failed", cause);
-              } else {
-                // Rethrow the fatal exception.
-                throw cause;
-              }
-            }
-          }
-          return true;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & SCHEDULED) == 0) {
         // The task isn't currently scheduled for execution.
         return false;
       }
+      // The task is currently scheduled for execution.
+      final int oldStatus = status;
+      final int newStatus = oldStatus & ~SCHEDULED;
+      // Try to clear the scheduled flag; must happen before cancelling the task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The scheduled flag has been cleared; the task is now cancelled.
+      status = newStatus;
+      try {
+        // Invoke service introspection callback.
+        this.service.didCancelTask(this);
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.service.log.error("didCancelTask callback failed", cause);
+      }
+      if (this.task instanceof TaskFunction) {
+        try {
+          // Invoke task lifecycle callback.
+          ((TaskFunction) this.task).didCancel();
+        } catch (Throwable cause) {
+          if (Result.isFatal(cause)) {
+            throw cause;
+          }
+          this.service.log.error("didCancel callback failed", cause);
+        }
+      }
+      return true;
     } while (true);
   }
 
@@ -811,53 +763,49 @@ class TaskHandle implements TaskContext, Runnable, LogEntity {
     do {
       // Verify that the task isn't concurrently running.
       assert (status & RUNNING) == 0;
-      if ((status & SCHEDULED) != 0) {
-        // The task is currently scheduled for execution.
-        final int oldStatus = status;
-        final int newStatus = (oldStatus & ~SCHEDULED) | RUNNING;
-        // Try to clear the scheduled flag; must happen before executing the task.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The scheduled flag has been cleared, and the running flag has been set;
-          // the task is now ready to be executed.
-          status = newStatus;
-          // Run the task function.
-          this.service.runTask(this);
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & SCHEDULED) == 0) {
         // The task isn't currently scheduled for execution.
         break;
       }
+      // The task is currently scheduled for execution.
+      final int oldStatus = status;
+      final int newStatus = (oldStatus & ~SCHEDULED) | RUNNING;
+      // Try to clear the scheduled flag; must happen before executing the task.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The scheduled flag has been cleared, and the running flag has been set;
+      // the task is now ready to be executed.
+      status = newStatus;
+      // Run the task function.
+      this.service.runTask(this);
+      break;
     } while (true);
 
     do {
-      if ((status & RUNNING) != 0) {
-        // The task is currently running.
-        final int oldStatus = status;
-        final int newStatus = oldStatus & ~RUNNING;
-        // Try to clear the running flag; must happen after executing the task.
-        status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          if ((status & SCHEDULED) != 0) {
-            // The task was concurrently rescheduled while running. To prevent
-            // concurrent execution, the task wasn't enqueued when at the time
-            // of scheduling. Enqueue the task now that it's no longer running.
-            this.service.pool.execute(this);
-          }
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & RUNNING) == 0) {
         // The task isn't currently running.
         break;
       }
+      // The task is currently running.
+      final int oldStatus = status;
+      final int newStatus = oldStatus & ~RUNNING;
+      // Try to clear the running flag; must happen after executing the task.
+      status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      status = newStatus;
+      if ((status & SCHEDULED) != 0) {
+        // The task was concurrently rescheduled while running. To prevent
+        // concurrent execution, the task wasn't enqueued when at the time
+        // of scheduling. Enqueue the task now that it's no longer running.
+        this.service.pool.execute(this);
+      }
+      break;
     } while (true);
   }
 
@@ -866,11 +814,10 @@ class TaskHandle implements TaskContext, Runnable, LogEntity {
     final Object taskDetail = LogEntity.of(this.task, level);
     if (taskDetail != null) {
       return taskDetail;
-    } else {
-      final TupleRepr detail = TupleRepr.of();
-      detail.put("id", Repr.of(Log.uniqueFocus(this)));
-      return detail;
     }
+    final TupleRepr detail = TupleRepr.of();
+    detail.put("id", Repr.of(Log.uniqueFocus(this)));
+    return detail;
   }
 
   /**

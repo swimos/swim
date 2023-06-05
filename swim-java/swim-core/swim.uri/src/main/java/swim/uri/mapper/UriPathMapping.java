@@ -70,28 +70,26 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
 
   @Override
   UriMapper<T> getSuffix(UriPath path, UriQuery query, UriFragment fragment) {
-    if (!path.isEmpty()) {
-      UriPathMapper<T> mapping = this.table.get(path.head());
-      if (mapping == null) {
-        mapping = this.wildcard;
-      }
-      return mapping.getSuffix(path.tail(), query, fragment);
-    } else {
+    if (path.isEmpty()) {
       return this;
     }
+    UriPathMapper<T> mapping = this.table.get(path.head());
+    if (mapping == null) {
+      mapping = this.wildcard;
+    }
+    return mapping.getSuffix(path.tail(), query, fragment);
   }
 
   @Override
   @Nullable T get(UriPath path, UriQuery query, UriFragment fragment) {
-    if (!path.isEmpty()) {
-      UriPathMapper<T> mapping = this.table.get(path.head());
-      if (mapping == null) {
-        mapping = this.wildcard;
-      }
-      return mapping.get(path.tail(), query, fragment);
-    } else {
+    if (path.isEmpty()) {
       return this.terminal.get(query, fragment);
     }
+    UriPathMapper<T> mapping = this.table.get(path.head());
+    if (mapping == null) {
+      mapping = this.wildcard;
+    }
+    return mapping.get(path.tail(), query, fragment);
   }
 
   UriPathMapping<T> merged(UriPathMapping<T> that) {
@@ -117,61 +115,60 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
   UriPathMapper<T> merged(UriPathMapper<T> that) {
     if (that instanceof UriPathMapping<?>) {
       return this.merged((UriPathMapping<T>) that);
-    } else {
-      return that;
     }
+    return that;
   }
 
   @Override
   UriPathMapper<T> removed(UriPath path, UriQuery query, UriFragment fragment) {
-    if (!path.isEmpty()) {
-      final String segment = path.head();
-      if (!segment.isEmpty() && segment.charAt(0) == ':') {
-        final UriPathMapper<T> oldWildcard = this.wildcard;
-        if (oldWildcard != null) {
-          final UriPathMapper<T> newWildcard = oldWildcard.removed(path.tail(), query, fragment);
-          if (oldWildcard != newWildcard) {
-            if (!this.table.isEmpty() || !newWildcard.isEmpty() || !this.terminal.isEmpty()) {
-              return new UriPathMapping<T>(this.table, newWildcard, this.terminal);
-            } else {
-              return Assume.conforms(UriMapper.empty());
-            }
-          }
-        }
-      } else {
-        final HashTrieMap<String, UriPathMapper<T>> oldTable = this.table;
-        final UriPathMapper<T> oldMapping = oldTable.get(segment);
-        if (oldMapping != null) {
-          final UriPathMapper<T> newMapping = oldMapping.removed(path.tail(), query, fragment);
-          if (oldMapping != newMapping) {
-            final HashTrieMap<String, UriPathMapper<T>> newTable;
-            if (!newMapping.isEmpty()) {
-              newTable = oldTable.updated(segment, newMapping);
-            } else {
-              newTable = oldTable.removed(segment);
-            }
-            if (!newTable.isEmpty() || !this.wildcard.isEmpty() || !this.terminal.isEmpty()) {
-              return new UriPathMapping<T>(newTable, this.wildcard, this.terminal);
-            } else {
-              return Assume.conforms(UriMapper.empty());
-            }
-          }
-        }
-      }
-    } else {
+    if (path.isEmpty()) {
       final UriQueryMapper<T> oldTerminal = this.terminal;
-      if (oldTerminal != null) {
-        final UriQueryMapper<T> newTerminal = oldTerminal.removed(query, fragment);
-        if (oldTerminal != newTerminal) {
-          if (!this.table.isEmpty() || !this.wildcard.isEmpty() || !newTerminal.isEmpty()) {
-            return new UriPathMapping<T>(this.table, this.wildcard, newTerminal);
-          } else {
-            return Assume.conforms(UriMapper.empty());
-          }
-        }
+      if (oldTerminal == null) {
+        return this;
       }
+      final UriQueryMapper<T> newTerminal = oldTerminal.removed(query, fragment);
+      if (oldTerminal == newTerminal) {
+        return this;
+      } else if (this.table.isEmpty() && this.wildcard.isEmpty() && newTerminal.isEmpty()) {
+        return Assume.conforms(UriMapper.empty());
+      }
+      return new UriPathMapping<T>(this.table, this.wildcard, newTerminal);
     }
-    return this;
+
+    final String segment = path.head();
+    if (!segment.isEmpty() && segment.charAt(0) == ':') {
+      final UriPathMapper<T> oldWildcard = this.wildcard;
+      if (oldWildcard == null) {
+        return this;
+      }
+      final UriPathMapper<T> newWildcard = oldWildcard.removed(path.tail(), query, fragment);
+      if (oldWildcard == newWildcard) {
+        return this;
+      } else if (this.table.isEmpty() && newWildcard.isEmpty() && this.terminal.isEmpty()) {
+        return Assume.conforms(UriMapper.empty());
+      }
+      return new UriPathMapping<T>(this.table, newWildcard, this.terminal);
+    }
+
+    final HashTrieMap<String, UriPathMapper<T>> oldTable = this.table;
+    final UriPathMapper<T> oldMapping = oldTable.get(segment);
+    if (oldMapping == null) {
+      return this;
+    }
+    final UriPathMapper<T> newMapping = oldMapping.removed(path.tail(), query, fragment);
+    if (oldMapping == newMapping) {
+      return this;
+    }
+    final HashTrieMap<String, UriPathMapper<T>> newTable;
+    if (!newMapping.isEmpty()) {
+      newTable = oldTable.updated(segment, newMapping);
+    } else {
+      newTable = oldTable.removed(segment);
+    }
+    if (newTable.isEmpty() && this.wildcard.isEmpty() && this.terminal.isEmpty()) {
+      return Assume.conforms(UriMapper.empty());
+    }
+    return new UriPathMapping<T>(newTable, this.wildcard, this.terminal);
   }
 
   UriPathMapper<T> unmerged(UriPathMapping<T> that) {
@@ -181,31 +178,30 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
       final Map.Entry<String, UriPathMapper<T>> route = routes.next();
       final String segment = route.getKey();
       UriPathMapper<T> mapping = this.table.get(segment);
-      if (mapping != null) {
-        mapping = mapping.unmerged(route.getValue());
-        if (!mapping.isEmpty()) {
-          table = table.updated(segment, mapping);
-        } else {
-          table = table.removed(segment);
-        }
+      if (mapping == null) {
+        continue;
+      }
+      mapping = mapping.unmerged(route.getValue());
+      if (!mapping.isEmpty()) {
+        table = table.updated(segment, mapping);
+      } else {
+        table = table.removed(segment);
       }
     }
     final UriPathMapper<T> wildcard = this.wildcard.unmerged(that.wildcard);
     final UriQueryMapper<T> terminal = this.terminal.unmerged(that.terminal);
-    if (!table.isEmpty() || !wildcard.isEmpty() || !terminal.isEmpty()) {
-      return new UriPathMapping<T>(table, wildcard, terminal);
-    } else {
+    if (table.isEmpty() && wildcard.isEmpty() && terminal.isEmpty()) {
       return Assume.conforms(UriMapper.empty());
     }
+    return new UriPathMapping<T>(table, wildcard, terminal);
   }
 
   @Override
   UriPathMapper<T> unmerged(UriPathMapper<T> that) {
     if (that instanceof UriPathMapping<?>) {
       return this.unmerged((UriPathMapping<T>) that);
-    } else {
-      return this;
     }
+    return this;
   }
 
   @Override
@@ -240,8 +236,7 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UriPathMapping<?>) {
-      final UriPathMapping<?> that = (UriPathMapping<?>) other;
+    } else if (other instanceof UriPathMapping<?> that) {
       return this.table.equals(that.table) && this.wildcard.equals(that.wildcard)
           && this.terminal.equals(that.terminal);
     }

@@ -47,7 +47,7 @@ public class HttpSocketTests {
 
       @Override
       public void willWriteRequest() {
-        final HttpBody<String> payload = HttpBody.of("clientToServer", Text.transcoder());
+        final HttpBody<String> payload = HttpBody.of("clientToServer", Text.stringCodec());
         final HttpHeaders headers = payload.headers().prepended(HostHeader.of("localhost"));
         final HttpRequest<?> request = HttpRequest.of(HttpMethod.POST, "/test", headers, payload);
         this.writeRequest(request);
@@ -117,7 +117,7 @@ public class HttpSocketTests {
 
       @Override
       public void willWriteResponse() {
-        final HttpBody<String> payload = HttpBody.of("serverToClient", Text.transcoder());
+        final HttpBody<String> payload = HttpBody.of("serverToClient", Text.stringCodec());
         final HttpResponse<String> response = HttpResponse.of(HttpStatus.OK, payload.headers(), payload);
         this.writeResponse(response);
       }

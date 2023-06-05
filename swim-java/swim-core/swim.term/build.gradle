@@ -1,0 +1,16 @@
+plugins {
+  id 'SwimCoreLibrary'
+  id 'SwimCorePublish'
+}
+
+description = 'Generic structured expression language'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.term'
+ext.moduleName = 'swim.term'
+
+dependencies {
+  api project(':swim-annotations')
+  api project(':swim-decl')
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-codec')
+}

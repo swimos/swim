@@ -78,9 +78,8 @@ public class WsException extends Exception {
       return message;
     } else if (this.status != null) {
       return this.status.toString();
-    } else {
-      return null;
     }
+    return null;
   }
 
   private static final long serialVersionUID = 1L;

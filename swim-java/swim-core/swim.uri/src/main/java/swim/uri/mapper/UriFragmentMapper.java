@@ -44,9 +44,8 @@ public abstract class UriFragmentMapper<T> extends UriQueryMapper<T> {
   UriQueryMapper<T> merged(UriQueryMapper<T> that) {
     if (that instanceof UriFragmentMapper<?>) {
       return this.merged((UriFragmentMapper<T>) that);
-    } else {
-      return that;
     }
+    return that;
   }
 
   abstract UriFragmentMapper<T> removed(UriFragment fragment);
@@ -62,9 +61,8 @@ public abstract class UriFragmentMapper<T> extends UriQueryMapper<T> {
   UriQueryMapper<T> unmerged(UriQueryMapper<T> that) {
     if (that instanceof UriFragmentMapper<?>) {
       return this.unmerged((UriFragmentMapper<T>) that);
-    } else {
-      return this;
     }
+    return this;
   }
 
   public static <T> UriFragmentMapper<T> compile(Uri pattern, UriFragment fragment, T value) {

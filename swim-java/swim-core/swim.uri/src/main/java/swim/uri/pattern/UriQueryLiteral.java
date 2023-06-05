@@ -48,18 +48,16 @@ final class UriQueryLiteral extends UriQueryPattern {
   }
 
   @Override
-  Map<String, String> unapply(UriQuery query, UriFragment fragment,
-                              Map<String, String> args) {
+  Map<String, String> unapply(UriQuery query, UriFragment fragment, Map<String, String> args) {
     return this.rest.unapply(fragment, args);
   }
 
   @Override
   boolean matches(UriQuery query, UriFragment fragment) {
-    if (this.query.equals(query)) {
-      return this.rest.matches(fragment);
-    } else {
+    if (!this.query.equals(query)) {
       return false;
     }
+    return this.rest.matches(fragment);
   }
 
 }

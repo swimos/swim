@@ -330,7 +330,7 @@ public final class BinaryInput extends InputBuffer {
                            this.name, this.offset, this.last);
   }
 
-  private static final byte[] EMPTY_ARRAY = new byte[0];
+  static final byte[] EMPTY_ARRAY = new byte[0];
 
   public static BinaryInput empty() {
     return new BinaryInput(EMPTY_ARRAY, 0, 0, null, 0L, false);

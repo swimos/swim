@@ -19,7 +19,7 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Binary;
-import swim.codec.Transcoder;
+import swim.codec.Codec;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -29,11 +29,11 @@ import swim.util.ToSource;
 public final class WsCloseFrame<T> extends WsControlFrame<T> implements ToSource {
 
   final @Nullable T payload;
-  final Transcoder<T> transcoder;
+  final Codec<T> codec;
 
-  WsCloseFrame(@Nullable T payload, Transcoder<T> transcoder) {
+  WsCloseFrame(@Nullable T payload, Codec<T> codec) {
     this.payload = payload;
-    this.transcoder = transcoder;
+    this.codec = codec;
   }
 
   @Override
@@ -48,24 +48,22 @@ public final class WsCloseFrame<T> extends WsControlFrame<T> implements ToSource
 
   @Override
   public T getNonNull() {
-    if (this.payload != null) {
-      return this.payload;
-    } else {
+    if (this.payload == null) {
       throw new NullPointerException("null websocket payload");
     }
+    return this.payload;
   }
 
   @Override
-  public Transcoder<T> transcoder() {
-    return this.transcoder;
+  public Codec<T> codec() {
+    return this.codec;
   }
 
   @Override
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WsCloseFrame<?>) {
-      final WsCloseFrame<?> that = (WsCloseFrame<?>) other;
+    } else if (other instanceof WsCloseFrame<?> that) {
       return Objects.equals(this.payload, that.payload);
     }
     return false;
@@ -83,7 +81,7 @@ public final class WsCloseFrame<T> extends WsControlFrame<T> implements ToSource
     final Notation notation = Notation.from(output);
     notation.beginInvoke("WsCloseFrame", "of")
             .appendArgument(this.payload)
-            .appendArgument(this.transcoder)
+            .appendArgument(this.codec)
             .endInvoke();
   }
 
@@ -93,15 +91,15 @@ public final class WsCloseFrame<T> extends WsControlFrame<T> implements ToSource
   }
 
   public static <T> WsCloseFrame<T> empty() {
-    return new WsCloseFrame<T>(null, Binary.blankTranscoder());
+    return new WsCloseFrame<T>(null, Binary.blankCodec());
   }
 
-  public static <T> WsCloseFrame<T> of(@Nullable T payload, Transcoder<T> transcoder) {
-    return new WsCloseFrame<T>(payload, transcoder);
+  public static <T> WsCloseFrame<T> of(@Nullable T payload, Codec<T> codec) {
+    return new WsCloseFrame<T>(payload, codec);
   }
 
   public static WsCloseFrame<WsStatus> of(WsStatus payload) {
-    return new WsCloseFrame<WsStatus>(payload, WsStatus.transcoder());
+    return new WsCloseFrame<WsStatus>(payload, WsStatus.codec());
   }
 
   public static WsCloseFrame<WsStatus> of(int code, String reason) {

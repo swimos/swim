@@ -134,19 +134,17 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       final int oldStatus = status;
       final int newStatus = status | READ_REQUEST;
       status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        status = newStatus;
-        if ((oldStatus & READ_REQUEST) == 0) {
-          // Trigger a read to begin reading the request.
-          this.socket.triggerRead();
-          return true;
-        } else {
-          return false;
-        }
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      status = newStatus;
+      if ((oldStatus & READ_REQUEST) != 0) {
+        return false;
+      }
+      // Trigger a read to begin reading the request.
+      this.socket.triggerRead();
+      return true;
     } while (true);
   }
 
@@ -155,9 +153,8 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     final int readState = ((int) STATUS.getOpaque(this) & DECODE_MASK) >>> DECODE_SHIFT;
     if (readState == DECODE_PAYLOAD) {
       return this.socket.requestRead();
-    } else {
-      return false;
     }
+    return false;
   }
 
   @SuppressWarnings("checkstyle:RequireThis") // false positive
@@ -204,19 +201,18 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       final int oldStatus = status;
       final int newStatus = (oldStatus & ~DECODE_MASK) | (DECODE_MESSAGE << DECODE_SHIFT);
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        status = newStatus;
-        // Initiate the request.
-        this.willReadRequest();
-        // Initiate the request message.
-        this.willReadRequestMessage();
-        // Re-check status to pick up any callback changes.
-        status = (int) STATUS.getAcquire(this);
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      status = newStatus;
+      // Initiate the request.
+      this.willReadRequest();
+      // Initiate the request message.
+      this.willReadRequestMessage();
+      // Re-check status to pick up any callback changes.
+      status = (int) STATUS.getAcquire(this);
+      break;
     } while (true);
 
     return status;
@@ -239,11 +235,10 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     } catch (HttpException cause) {
       decode = Decode.error(cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        decode = Decode.error(cause);
-      } else {
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      decode = Decode.error(cause);
     }
     // Store the request message decode continuation.
     DECODE.setOpaque(this, decode);
@@ -262,27 +257,26 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~DECODE_MASK) | (DECODE_PAYLOAD << DECODE_SHIFT) | flags;
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Reset the request decode state.
-          DECODE.setOpaque(this, null);
-          // Store the successfully decoded request message.
-          final Result<HttpRequest<?>> decoded = Result.ok(request);
-          DECODED.setOpaque(this, decoded);
-          // Complete the request message.
-          this.didReadRequestMessage(decoded);
-          // Request a write to ensure that the response gets handled,
-          // even though we might not be the head of the responder pipeline.
-          this.socket.requestWrite();
-          // Initiate the request payload.
-          this.willReadRequestPayload(request);
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Reset the request decode state.
+        DECODE.setOpaque(this, null);
+        // Store the successfully decoded request message.
+        final Result<HttpRequest<?>> decoded = Result.ok(request);
+        DECODED.setOpaque(this, decoded);
+        // Complete the request message.
+        this.didReadRequestMessage(decoded);
+        // Request a write to ensure that the response gets handled,
+        // even though we might not be the head of the responder pipeline.
+        this.socket.requestWrite();
+        // Initiate the request payload.
+        this.willReadRequestPayload(request);
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else if (decode.isError()) {
       // Failed to decode the request message;
@@ -291,30 +285,29 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~DECODE_MASK) | (DECODE_ERROR << DECODE_SHIFT);
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Store the request message decode error.
-          final Result<HttpRequest<?>> decoded = Result.error(decode.getError());
-          DECODED.setOpaque(this, decoded);
-          // Close the socket for reading.
-          this.socket.doneReading();
-          // Complete the request message with the decode error;
-          // the responder can write an error response or close the connection.
-          this.didReadRequestMessage(decoded);
-          // Request a write to ensure that the response gets handled,
-          // even though we might not be the head of the responder pipeline.
-          this.socket.requestWrite();
-          // Dequeue the request handler from the requester queue.
-          this.socket.dequeueRequester(this);
-          // Complete the request without decoding the request payload.
-          this.didReadRequest(decoded);
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Store the request message decode error.
+        final Result<HttpRequest<?>> decoded = Result.error(decode.getError());
+        DECODED.setOpaque(this, decoded);
+        // Close the socket for reading.
+        this.socket.doneReading();
+        // Complete the request message with the decode error;
+        // the responder can write an error response or close the connection.
+        this.didReadRequestMessage(decoded);
+        // Request a write to ensure that the response gets handled,
+        // even though we might not be the head of the responder pipeline.
+        this.socket.requestWrite();
+        // Dequeue the request handler from the requester queue.
+        this.socket.dequeueRequester(this);
+        // Complete the request without decoding the request payload.
+        this.didReadRequest(decoded);
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else {
       throw new AssertionError("unreachable");
@@ -338,11 +331,10 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     } catch (HttpException cause) {
       decode = Decode.error(cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        decode = Decode.error(cause);
-      } else {
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      decode = Decode.error(cause);
     }
     // Store the request payload decode continuation.
     DECODE.setOpaque(this, decode);
@@ -362,33 +354,32 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~DECODE_MASK) | (DECODE_DONE << DECODE_SHIFT);
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Reset the request decode state.
-          DECODE.setOpaque(this, null);
-          // Attach the request payload to the request message
-          // and store the fully decoded request.
-          request = request.withPayload(decode.getNonNullUnchecked());
-          final Result<HttpRequest<?>> decoded = Result.ok(request);
-          DECODED.setOpaque(this, decoded);
-          // Complete the request payload.
-          this.didReadRequestPayload(decoded);
-          // Dequeue the request handler from the requester queue.
-          this.socket.dequeueRequester(this);
-          // Check if the request requires closing the connection.
-          if ((status & REQUEST_CLOSE) != 0) {
-            // Close the socket for reading.
-            this.socket.doneReading();
-          }
-          // Complete the request.
-          this.didReadRequest(decoded);
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Reset the request decode state.
+        DECODE.setOpaque(this, null);
+        // Attach the request payload to the request message
+        // and store the fully decoded request.
+        request = request.withPayload(decode.getNonNullUnchecked());
+        final Result<HttpRequest<?>> decoded = Result.ok(request);
+        DECODED.setOpaque(this, decoded);
+        // Complete the request payload.
+        this.didReadRequestPayload(decoded);
+        // Dequeue the request handler from the requester queue.
+        this.socket.dequeueRequester(this);
+        // Check if the request requires closing the connection.
+        if ((status & REQUEST_CLOSE) != 0) {
+          // Close the socket for reading.
+          this.socket.doneReading();
+        }
+        // Complete the request.
+        this.didReadRequest(decoded);
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else if (decode.isError()) {
       // Failed to decode the request payload;
@@ -397,27 +388,26 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~DECODE_MASK) | (DECODE_ERROR << DECODE_SHIFT);
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Store the request payload decode error.
-          final Result<HttpRequest<?>> decoded = Result.error(decode.getError());
-          DECODED.setOpaque(this, decoded);
-          // Close the socket for reading.
-          this.socket.doneReading();
-          // Complete the request payload with the decode error;
-          // the responder can write an error response or close the connection.
-          this.didReadRequestPayload(decoded);
-          // Dequeue the request handler from the requester queue.
-          this.socket.dequeueRequester(this);
-          // Complete the request.
-          this.didReadRequest(decoded);
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Store the request payload decode error.
+        final Result<HttpRequest<?>> decoded = Result.error(decode.getError());
+        DECODED.setOpaque(this, decoded);
+        // Close the socket for reading.
+        this.socket.doneReading();
+        // Complete the request payload with the decode error;
+        // the responder can write an error response or close the connection.
+        this.didReadRequestPayload(decoded);
+        // Dequeue the request handler from the requester queue.
+        this.socket.dequeueRequester(this);
+        // Complete the request.
+        this.didReadRequest(decoded);
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else {
       throw new AssertionError("unreachable");
@@ -435,20 +425,16 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke willReadRequest responder callback.
       this.responder.willReadRequest();
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("willReadRequest callback failed", this.responder, cause);
-      // Handle the internal server error.
+      // Handle internal server error.
       this.socket.handleServerError(cause, this);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("willReadRequest callback failed", this.responder, cause);
-        // Handle the internal server error.
-        this.socket.handleServerError(cause, this);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("willReadRequest callback failed", this.responder, cause);
+      // Handle internal server error.
+      this.socket.handleServerError(cause, this);
     }
   }
 
@@ -461,20 +447,16 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke willReadRequestMessage responder callback.
       this.responder.willReadRequestMessage();
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("willReadRequestMessage callback failed", this.responder, cause);
-      // Handle the internal server error.
+      // Handle internal server error.
       this.socket.handleServerError(cause, this);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("willReadRequestMessage callback failed", this.responder, cause);
-        // Handle the internal server error.
-        this.socket.handleServerError(cause, this);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("willReadRequestMessage callback failed", this.responder, cause);
+      // Handle internal server error.
+      this.socket.handleServerError(cause, this);
     }
   }
 
@@ -489,20 +471,16 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke didReadRequestMessage responder callback.
       this.responder.didReadRequestMessage(decoded);
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("didReadRequestMessage callback failed", this.responder, cause);
-      // Handle the internal server error.
+      // Handle internal server error.
       this.socket.handleServerError(cause, this);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("didReadRequestMessage callback failed", this.responder, cause);
-        // Handle the internal server error.
-        this.socket.handleServerError(cause, this);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("didReadRequestMessage callback failed", this.responder, cause);
+      // Handle internal server error.
+      this.socket.handleServerError(cause, this);
     }
     // Invoke didReadRequestMessage socket callback.
     this.socket.didReadRequestMessage(decoded, this);
@@ -517,20 +495,16 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke willReadRequestPayload responder callback.
       this.responder.willReadRequestPayload(request);
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("willReadRequestPayload callback failed", this.responder, cause);
-      // Handle the internal server error.
+      // Handle internal server error.
       this.socket.handleServerError(cause, this);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("willReadRequestPayload callback failed", this.responder, cause);
-        // Handle the internal server error.
-        this.socket.handleServerError(cause, this);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("willReadRequestPayload callback failed", this.responder, cause);
+      // Handle internal server error.
+      this.socket.handleServerError(cause, this);
     }
   }
 
@@ -545,20 +519,16 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke didReadRequestPayload responder callback.
       this.responder.didReadRequestPayload(decoded);
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("didReadRequestPayload callback failed", this.responder, cause);
-      // Handle the internal server error.
+      // Handle internal server error.
       this.socket.handleServerError(cause, this);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("didReadRequestPayload callback failed", this.responder, cause);
-        // Handle the internal server error.
-        this.socket.handleServerError(cause, this);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("didReadRequestPayload callback failed", this.responder, cause);
+      // Handle internal server error.
+      this.socket.handleServerError(cause, this);
     }
     // Invoke didReadRequestPayload socket callback.
     this.socket.didReadRequestPayload(decoded, this);
@@ -573,20 +543,16 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke didReadRequest responder callback.
       this.responder.didReadRequest(decoded);
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("didReadRequest callback failed", this.responder, cause);
-      // Handle the internal server error.
+      // Handle internal server error.
       this.socket.handleServerError(cause, this);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("didReadRequest callback failed", this.responder, cause);
-        // Handle the internal server error.
-        this.socket.handleServerError(cause, this);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("didReadRequest callback failed", this.responder, cause);
+      // Handle internal server error.
+      this.socket.handleServerError(cause, this);
     }
     // Invoke didReadRequest socket callback.
     this.socket.didReadRequest(decoded, this);
@@ -624,9 +590,8 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     final int writeState = ((int) STATUS.getOpaque(this) & ENCODE_MASK) >>> ENCODE_SHIFT;
     if (writeState == ENCODE_PAYLOAD) {
       return this.socket.requestWrite();
-    } else {
-      return false;
     }
+    return false;
   }
 
   @SuppressWarnings("checkstyle:RequireThis") // false positive
@@ -656,19 +621,18 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       final int oldStatus = status;
       final int newStatus = (oldStatus & ~ENCODE_MASK) | (ENCODE_MESSAGE << ENCODE_SHIFT);
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        status = newStatus;
-        // Initiate the response.
-        this.willWriteResponse();
-        // Initiate the response message.
-        this.willWriteResponseMessage();
-        // Re-check status to pick up any callback changes.
-        status = (int) STATUS.getAcquire(this);
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      status = newStatus;
+      // Initiate the response.
+      this.willWriteResponse();
+      // Initiate the response message.
+      this.willWriteResponseMessage();
+      // Re-check status to pick up any callback changes.
+      status = (int) STATUS.getAcquire(this);
+      break;
     } while (true);
 
     return status;
@@ -694,11 +658,10 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     } catch (HttpException cause) {
       encode = Encode.error(cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        encode = Encode.error(cause);
-      } else {
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      encode = Encode.error(cause);
     }
     // Store the response message encode continuation.
     ENCODE.setOpaque(this, encode);
@@ -714,21 +677,20 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~ENCODE_MASK) | (ENCODE_PAYLOAD << ENCODE_SHIFT);
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Reset the response encode state.
-          ENCODE.setOpaque(this, null);
-          // Complete the response message.
-          this.didWriteResponseMessage(encoded);
-          // Initiate the response payload.
-          this.willWriteResponsePayload(response);
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Reset the response encode state.
+        ENCODE.setOpaque(this, null);
+        // Complete the response message.
+        this.didWriteResponseMessage(encoded);
+        // Initiate the response payload.
+        this.willWriteResponsePayload(response);
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else if (encode.isError()) {
       // Failed to encode the response message;
@@ -737,27 +699,26 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~ENCODE_MASK) | (ENCODE_ERROR << ENCODE_SHIFT);
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Store the response message encode error.
-          encoded = Result.error(encode.getError());
-          ENCODED.setOpaque(this, encoded);
-          // Close the socket for writing and reading.
-          this.socket.doneWriting();
-          this.socket.doneReading();
-          // Complete the response message with the encode error.
-          this.didWriteResponseMessage(encoded);
-          // Dequeue the response handler from the responder queue.
-          this.socket.dequeueResponder(this);
-          // Complete the response without encoding the response payload.
-          this.didWriteResponse(encoded);
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Store the response message encode error.
+        encoded = Result.error(encode.getError());
+        ENCODED.setOpaque(this, encoded);
+        // Close the socket for writing and reading.
+        this.socket.doneWriting();
+        this.socket.doneReading();
+        // Complete the response message with the encode error.
+        this.didWriteResponseMessage(encoded);
+        // Dequeue the response handler from the responder queue.
+        this.socket.dequeueResponder(this);
+        // Complete the response without encoding the response payload.
+        this.didWriteResponse(encoded);
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else {
       throw new AssertionError("unreachable");
@@ -782,11 +743,10 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
     } catch (HttpException cause) {
       encode = Encode.error(cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        encode = Encode.error(cause);
-      } else {
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      encode = Encode.error(cause);
     }
     // Store the response payload encode continuation.
     ENCODE.setOpaque(this, encode);
@@ -806,33 +766,32 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~ENCODE_MASK) | (ENCODE_DONE << ENCODE_SHIFT);
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Reset the response encode state.
-          ENCODE.setOpaque(this, null);
-          // Complete the response payload.
-          this.didWriteResponsePayload(encoded);
-          // Dequeue the response handler from the responder queue.
-          this.socket.dequeueResponder(this);
-          // Check if the request requires closing the connection.
-          if ((status & REQUEST_CLOSE) != 0) {
-            // Close the socket for writing.
-            this.socket.doneWriting();
-          } else if (response.isClosing()) {
-            // The response requires closing the connection;
-            // close the socket for writing and reading.
-            this.socket.doneWriting();
-            this.socket.doneReading();
-          }
-          // Complete the response.
-          this.didWriteResponse(encoded);
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Reset the response encode state.
+        ENCODE.setOpaque(this, null);
+        // Complete the response payload.
+        this.didWriteResponsePayload(encoded);
+        // Dequeue the response handler from the responder queue.
+        this.socket.dequeueResponder(this);
+        // Check if the request requires closing the connection.
+        if ((status & REQUEST_CLOSE) != 0) {
+          // Close the socket for writing.
+          this.socket.doneWriting();
+        } else if (response.isClosing()) {
+          // The response requires closing the connection;
+          // close the socket for writing and reading.
+          this.socket.doneWriting();
+          this.socket.doneReading();
+        }
+        // Complete the response.
+        this.didWriteResponse(encoded);
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else if (encode.isError()) {
       // Failed to encode the response payload;
@@ -841,27 +800,26 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
         final int oldStatus = status;
         final int newStatus = (oldStatus & ~ENCODE_MASK) | (ENCODE_ERROR << ENCODE_SHIFT);
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          status = newStatus;
-          // Store the response payload encode error.
-          encoded = Result.error(encode.getError());
-          ENCODED.setOpaque(this, encoded);
-          // Close the socket for writing and reading.
-          this.socket.doneWriting();
-          this.socket.doneReading();
-          // Complete the response payload with the encode error.
-          this.didWriteResponsePayload(encoded);
-          // Dequeue the response handler from the responder queue.
-          this.socket.dequeueResponder(this);
-          // Complete the response.
-          this.didWriteResponse(encoded);
-          // Re-check status to pick up any callback changes.
-          status = (int) STATUS.getAcquire(this);
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        status = newStatus;
+        // Store the response payload encode error.
+        encoded = Result.error(encode.getError());
+        ENCODED.setOpaque(this, encoded);
+        // Close the socket for writing and reading.
+        this.socket.doneWriting();
+        this.socket.doneReading();
+        // Complete the response payload with the encode error.
+        this.didWriteResponsePayload(encoded);
+        // Dequeue the response handler from the responder queue.
+        this.socket.dequeueResponder(this);
+        // Complete the response.
+        this.didWriteResponse(encoded);
+        // Re-check status to pick up any callback changes.
+        status = (int) STATUS.getAcquire(this);
+        break;
       } while (true);
     } else {
       throw new AssertionError("unreachable");
@@ -879,20 +837,16 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke willWriteResponse responder callback.
       this.responder.willWriteResponse();
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("willWriteResponse callback failed", this.responder, cause);
-      // Handle the internal server error.
+      // Handle internal server error.
       this.socket.handleServerError(cause, this);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("willWriteResponse callback failed", this.responder, cause);
-        // Handle the internal server error.
-        this.socket.handleServerError(cause, this);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("willWriteResponse callback failed", this.responder, cause);
+      // Handle internal server error.
+      this.socket.handleServerError(cause, this);
     }
   }
 
@@ -905,20 +859,16 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke willWriteResponseMessage responder callback.
       this.responder.willWriteResponseMessage();
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("willWriteResponseMessage callback failed", this.responder, cause);
-      // Handle the internal server error.
+      // Handle internal server error.
       this.socket.handleServerError(cause, this);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("willWriteResponseMessage callback failed", this.responder, cause);
-        // Handle the internal server error.
-        this.socket.handleServerError(cause, this);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("willWriteResponseMessage callback failed", this.responder, cause);
+      // Handle internal server error.
+      this.socket.handleServerError(cause, this);
     }
   }
 
@@ -933,16 +883,12 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke didWriteResponseMessage responder callback.
       this.responder.didWriteResponseMessage(encoded);
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("didWriteResponseMessage callback failed", this.responder, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("didWriteResponseMessage callback failed", this.responder, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("didWriteResponseMessage callback failed", this.responder, cause);
     }
     // Invoke didWriteResponseMessage socket callback.
     this.socket.didWriteResponseMessage(encoded, this);
@@ -957,16 +903,12 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke willWriteResponsePayload responder callback.
       this.responder.willWriteResponsePayload(response);
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("willWriteResponsePayload callback failed", this.responder, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("willWriteResponsePayload callback failed", this.responder, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("willWriteResponsePayload callback failed", this.responder, cause);
     }
   }
 
@@ -981,16 +923,12 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke didWriteResponsePayload responder callback.
       this.responder.didWriteResponsePayload(encoded);
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("didWriteResponsePayload callback failed", this.responder, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("didWriteResponsePayload callback failed", this.responder, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("didWriteResponsePayload callback failed", this.responder, cause);
     }
     // Invoke didWriteResponsePayload socket callback.
     this.socket.didWriteResponsePayload(encoded, this);
@@ -1005,16 +943,12 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       // Invoke didWriteResponse responder callback.
       this.responder.didWriteResponse(encoded);
     } catch (HttpException cause) {
-      // Report the exception.
       this.socket.log.warningStatus("didWriteResponse callback failed", this.responder, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.socket.log.errorStatus("didWriteResponse callback failed", this.responder, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.socket.log.errorStatus("didWriteResponse callback failed", this.responder, cause);
     }
     // Invoke didWriteResponse socket callback.
     this.socket.didWriteResponse(encoded, this);
@@ -1081,9 +1015,8 @@ final class HttpServerResponder implements HttpResponderContext, InputFuture, Ou
       final TupleRepr detail = TupleRepr.of();
       detail.put("type", Repr.of("empty"));
       return detail;
-    } else {
-      return null;
     }
+    return null;
   }
 
   static final int READ_REQUEST = 1 << 0;

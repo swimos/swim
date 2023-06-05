@@ -50,7 +50,7 @@ public class HttpClientTests {
 
       @Override
       public Decode<? extends HttpPayload<?>> decodeResponsePayload(InputBuffer input, HttpResponse<?> response) throws HttpException {
-        return response.decodePayload(input, this.request(), Text.transcoder());
+        return response.decodePayload(input, this.request(), Text.stringCodec());
       }
 
       @Override

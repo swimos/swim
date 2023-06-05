@@ -88,7 +88,7 @@ public final class AcceptHeader extends HttpHeader {
     return AcceptHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<MediaRange> parseValue(String value) throws HttpException {
+  static FingerTrieList<MediaRange> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     FingerTrieList<MediaRange> mediaRanges = FingerTrieList.empty();
@@ -136,7 +136,7 @@ public final class AcceptHeader extends HttpHeader {
     return mediaRanges;
   }
 
-  private static String writeValue(Iterator<MediaRange> mediaRanges) {
+  static String writeValue(Iterator<MediaRange> mediaRanges) {
     final StringOutput output = new StringOutput();
     MediaRange mediaRange = null;
     do {

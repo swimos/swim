@@ -65,13 +65,12 @@ public final class UriQueryBuilder {
     Objects.requireNonNull(params);
     if (params instanceof UriQuery) {
       return this.addQuery((UriQuery) params);
-    } else {
-      boolean modified = false;
-      for (Map.Entry<? extends String, ? extends String> param : params.entrySet()) {
-        modified = this.addParam(param.getKey(), param.getValue()) || modified;
-      }
-      return modified;
     }
+    boolean modified = false;
+    for (Map.Entry<? extends String, ? extends String> param : params.entrySet()) {
+      modified = this.addParam(param.getKey(), param.getValue()) || modified;
+    }
+    return modified;
   }
 
   public boolean addParam(@Nullable String key, String value) {
@@ -104,12 +103,11 @@ public final class UriQueryBuilder {
       size += 1;
       do {
         final UriQuery tail = query.tail();
-        if (!tail.isEmpty()) {
-          query = tail;
-          size += 1;
-        } else {
+        if (tail.isEmpty()) {
           break;
         }
+        query = tail;
+        size += 1;
       } while (true);
       this.last = query;
       this.size = size;

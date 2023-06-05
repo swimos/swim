@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.expr.Term;
+import swim.term.Term;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -80,7 +80,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     if (this.shape.size == 0 || !(value instanceof Repr)) {
       return false;
     } else if (this.shape.size < 0) {
-      return this.containsValueHashed((Repr) value);
+      return this.containsValueLinked((Repr) value);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.containsValuePacked((Repr) value);
     } else {
@@ -104,7 +104,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     return false;
   }
 
-  private boolean containsValueHashed(Repr value) {
+  private boolean containsValueLinked(Repr value) {
     AttrEntry entry = (AttrEntry) this.head;
     while (entry != null) {
       if (value.equals(entry.value)) {
@@ -120,7 +120,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     if (this.shape.size == 0 || !(key instanceof String)) {
       return null;
     } else if (this.shape.size < 0) {
-      return this.getHashed((String) key);
+      return this.getLinked((String) key);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.getPacked((String) key);
     } else {
@@ -132,17 +132,18 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     final AttrsShape[] fields = this.shape.fields();
     for (int i = 0; i < fields.length; i += 1) {
       final AttrsShape field = fields[i];
-      if (key.equals(field.key)) {
-        switch (field.size - 1) {
-          case 0:
-            return (Repr) this.slots;
-          case 1:
-            return (Repr) this.head;
-          case 2:
-            return (Repr) this.foot;
-          default:
-            throw new AssertionError(Integer.toString(field.size - 1));
-        }
+      if (!key.equals(field.key)) {
+        continue;
+      }
+      switch (field.size - 1) {
+        case 0:
+          return (Repr) this.slots;
+        case 1:
+          return (Repr) this.head;
+        case 2:
+          return (Repr) this.foot;
+        default:
+          throw new AssertionError(Integer.toString(field.size - 1));
       }
     }
     return null;
@@ -150,13 +151,13 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
 
   private @Nullable Repr getPacked(String key) {
     final int index = this.shape.lookup(key);
-    if (index >= 0) {
-      return ((Repr[]) Assume.nonNull(this.slots))[index];
+    if (index < 0) {
+      return null;
     }
-    return null;
+    return ((Repr[]) Assume.nonNull(this.slots))[index];
   }
 
-  private @Nullable Repr getHashed(String key) {
+  private @Nullable Repr getLinked(String key) {
     final AttrEntry entry = this.getEntry(key.hashCode(), key);
     if (entry != null) {
       return entry.value;
@@ -189,7 +190,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
       throw new UnsupportedOperationException("immutable");
     }
     if (this.shape.size < 0) {
-      return this.putHashed(key, value, false);
+      return this.putLinked(key, value, false);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.putPacked(key, value, false);
     } else {
@@ -205,7 +206,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
       throw new UnsupportedOperationException("immutable");
     }
     if (this.shape.size < 0) {
-      return this.putHashed(key, value, true);
+      return this.putLinked(key, value, true);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.putPacked(key, value, true);
     } else {
@@ -217,32 +218,33 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     final AttrsShape[] fields = this.shape.fields();
     for (int i = 0; i < fields.length; i += 1) {
       final AttrsShape field = fields[i];
-      if (key.equals(field.key)) {
-        final Repr oldValue;
-        switch (field.size - 1) {
-          case 0:
-            oldValue = (Repr) this.slots;
-            if (!ifAbsent) {
-              this.slots = value;
-            }
-            break;
-          case 1:
-            oldValue = (Repr) this.head;
-            if (!ifAbsent) {
-              this.head = value;
-            }
-            break;
-          case 2:
-            oldValue = (Repr) this.foot;
-            if (!ifAbsent) {
-              this.foot = value;
-            }
-            break;
-          default:
-            throw new AssertionError(Integer.toString(field.size - 1));
-        }
-        return oldValue;
+      if (!key.equals(field.key)) {
+        continue;
       }
+      final Repr oldValue;
+      switch (field.size - 1) {
+        case 0:
+          oldValue = (Repr) this.slots;
+          if (!ifAbsent) {
+            this.slots = value;
+          }
+          break;
+        case 1:
+          oldValue = (Repr) this.head;
+          if (!ifAbsent) {
+            this.head = value;
+          }
+          break;
+        case 2:
+          oldValue = (Repr) this.foot;
+          if (!ifAbsent) {
+            this.foot = value;
+          }
+          break;
+        default:
+          throw new AssertionError(Integer.toString(field.size - 1));
+      }
+      return oldValue;
     }
 
     final AttrsShape newShape = this.shape.getChild(key);
@@ -305,28 +307,29 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
       }
       this.shape = newShape;
       this.size = newShape.size;
-    } else {
-      this.slots = new AttrEntry[AttrsShape.expand((shape.size + 1) * 10 / 7)];
-      this.head = null;
-      this.foot = null;
-      this.buildHashTable(shape.fields(), slots, -1);
-      final AttrEntry entry = new AttrEntry(key, value);
-      this.putEntry(key.hashCode(), entry);
-      this.appendEntry(entry);
-      this.shape = AttrsShape.dictionary();
-      this.size = shape.size + 1;
+      return null;
     }
+
+    this.slots = new AttrEntry[AttrsShape.expand((shape.size + 1) * 10 / 7)];
+    this.head = null;
+    this.foot = null;
+    this.buildHashtable(shape.fields(), slots, -1);
+    final AttrEntry entry = new AttrEntry(key, value);
+    this.putEntry(key.hashCode(), entry);
+    this.appendEntry(entry);
+    this.shape = AttrsShape.dictionary();
+    this.size = shape.size + 1;
     return null;
   }
 
-  private @Nullable Repr putHashed(String key, Repr value, boolean ifAbsent) {
+  private @Nullable Repr putLinked(String key, Repr value, boolean ifAbsent) {
     final int hash = key.hashCode();
     AttrEntry entry = this.getEntry(hash, key);
     if (entry != null) {
       final Repr oldValue = entry.value;
       if (!ifAbsent && value != oldValue) {
         if ((this.flags & ALIASED_FLAG) != 0) {
-          this.dealiasHashTable(this.size, null);
+          this.dealiasHashtable(this.size, null);
           entry = Assume.nonNull(this.getEntry(hash, key));
         }
         entry.value = value;
@@ -335,9 +338,9 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     }
 
     if ((this.flags & ALIASED_FLAG) != 0) {
-      this.dealiasHashTable(this.size + 1, null);
+      this.dealiasHashtable(this.size + 1, null);
     } else {
-      this.resizeHashTable(this.size + 1);
+      this.resizeHashtable(this.size + 1);
     }
     entry = new AttrEntry(key, value);
     this.putEntry(hash, entry);
@@ -358,7 +361,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     Objects.requireNonNull(key, "key");
     Objects.requireNonNull(value, "value");
     if (this.shape.size < 0) {
-      return this.updatedHashed(key, value);
+      return this.updatedLinked(key, value);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.updatedPacked(key, value);
     } else {
@@ -370,17 +373,18 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     final AttrsShape[] fields = this.shape.fields();
     for (int i = 0; i < fields.length; i += 1) {
       final AttrsShape field = fields[i];
-      if (key.equals(field.key)) {
-        switch (field.size - 1) {
-          case 0:
-            return new Attrs(0, this.size, this.shape, value, this.head, this.foot);
-          case 1:
-            return new Attrs(0, this.size, this.shape, this.slots, value, this.foot);
-          case 2:
-            return new Attrs(0, this.size, this.shape, this.slots, this.head, value);
-          default:
-            throw new AssertionError(Integer.toString(field.size - 1));
-        }
+      if (!key.equals(field.key)) {
+        continue;
+      }
+      switch (field.size - 1) {
+        case 0:
+          return new Attrs(0, this.size, this.shape, value, this.head, this.foot);
+        case 1:
+          return new Attrs(0, this.size, this.shape, this.slots, value, this.foot);
+        case 2:
+          return new Attrs(0, this.size, this.shape, this.slots, this.head, value);
+        default:
+          throw new AssertionError(Integer.toString(field.size - 1));
       }
     }
 
@@ -411,12 +415,11 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     if (index >= 0) {
       if (value == slots[index]) {
         return this;
-      } else {
-        final Repr[] newSlots = new Repr[AttrsShape.expand(shape.size)];
-        System.arraycopy(slots, 0, newSlots, 0, shape.size);
-        slots[index] = value;
-        return new Attrs(0, this.size, shape, newSlots, null, null);
       }
+      final Repr[] newSlots = new Repr[AttrsShape.expand(shape.size)];
+      System.arraycopy(slots, 0, newSlots, 0, shape.size);
+      slots[index] = value;
+      return new Attrs(0, this.size, shape, newSlots, null, null);
     }
 
     if (shape.size < MAX_PACKED_SIZE) {
@@ -425,37 +428,36 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
       System.arraycopy(slots, 0, newSlots, 0, shape.size);
       newSlots[newShape.size - 1] = value;
       return new Attrs(0, newShape.size, newShape, newSlots, null, null);
-    } else {
-      final Attrs newAttrs = new Attrs(0, shape.size + 1, AttrsShape.dictionary(),
-                                      new AttrEntry[AttrsShape.expand((shape.size + 1) * 10 / 7)],
-                                      null, null);
-      newAttrs.buildHashTable(shape.fields(), slots, -1);
-      final AttrEntry entry = new AttrEntry(key, value);
-      newAttrs.putEntry(key.hashCode(), entry);
-      newAttrs.appendEntry(entry);
-      return newAttrs;
     }
+
+    final Attrs newAttrs = new Attrs(0, shape.size + 1, AttrsShape.dictionary(),
+                                    new AttrEntry[AttrsShape.expand((shape.size + 1) * 10 / 7)],
+                                    null, null);
+    newAttrs.buildHashtable(shape.fields(), slots, -1);
+    final AttrEntry entry = new AttrEntry(key, value);
+    newAttrs.putEntry(key.hashCode(), entry);
+    newAttrs.appendEntry(entry);
+    return newAttrs;
   }
 
-  private Attrs updatedHashed(String key, Repr value) {
+  private Attrs updatedLinked(String key, Repr value) {
     final int hash = key.hashCode();
     AttrEntry entry = this.getEntry(hash, key);
     if (entry != null) {
       if (value == entry.value) {
         return this;
-      } else {
-        final Attrs newAttrs = new Attrs(0, this.size, this.shape,
-                                         this.slots, this.head, this.foot);
-        newAttrs.dealiasHashTable(newAttrs.size, null);
-        entry = Assume.nonNull(newAttrs.getEntry(hash, key));
-        entry.value = value;
-        return newAttrs;
       }
+      final Attrs newAttrs = new Attrs(0, this.size, this.shape,
+                                       this.slots, this.head, this.foot);
+      newAttrs.dealiasHashtable(newAttrs.size, null);
+      entry = Assume.nonNull(newAttrs.getEntry(hash, key));
+      entry.value = value;
+      return newAttrs;
     }
 
     final Attrs newAttrs = new Attrs(0, this.size, this.shape,
                                      this.slots, this.head, this.foot);
-    newAttrs.dealiasHashTable(newAttrs.size + 1, null);
+    newAttrs.dealiasHashtable(newAttrs.size + 1, null);
     entry = new AttrEntry(key, value);
     newAttrs.putEntry(hash, entry);
     newAttrs.appendEntry(entry);
@@ -465,10 +467,9 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
   public Attrs let(String key, Repr value) {
     if ((this.flags & IMMUTABLE_FLAG) != 0) {
       return this.updated(key, value);
-    } else {
-      this.put(key, value);
-      return this;
     }
+    this.put(key, value);
+    return this;
   }
 
   @Override
@@ -479,7 +480,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     if (this.shape.size == 0 || !(key instanceof String)) {
       return null;
     } else if (this.shape.size < 0) {
-      return this.removeHashed((String) key);
+      return this.removeLinked((String) key);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.removePacked((String) key);
     } else {
@@ -488,43 +489,41 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
   }
 
   private @Nullable Repr removeInline(String key) {
-    Repr oldValue = null;
-    final AttrsShape shape = this.shape;
-
     // Capture current inline value slots.
+    final AttrsShape shape = this.shape;
     final Repr slot0 = shape.size > 0 ? (Repr) this.slots : null;
     final Repr slot1 = shape.size > 1 ? (Repr) this.head : null;
     final Repr slot2 = shape.size > 2 ? (Repr) this.foot : null;
 
-    final AttrsShape[] fields = shape.fields();
-    final int fieldCount = fields.length;
-
     // Search fields for matching key.
+    final AttrsShape[] fields = shape.fields();
     int index = -1;
-    for (int i = 0; i < fieldCount; i += 1) {
+    Repr oldValue = null;
+    for (int i = 0; i < fields.length; i += 1) {
       final AttrsShape field = fields[i];
-      if (key.equals(field.key)) {
-        // Capture the previous value associated with the matched key
-        // and clear the inline value slot.
-        index = field.size - 1;
-        switch (index) {
-          case 0:
-            oldValue = (Repr) this.slots;
-            this.slots = null;
-            break;
-          case 1:
-            oldValue = (Repr) this.head;
-            this.head = null;
-            break;
-          case 2:
-            oldValue = (Repr) this.foot;
-            this.foot = null;
-            break;
-          default:
-            throw new AssertionError(Integer.toString(index));
-        }
-        break;
+      if (!key.equals(field.key)) {
+        continue;
       }
+      // Capture the previous value associated with the matched key
+      // and clear the inline value slot.
+      index = field.size - 1;
+      switch (index) {
+        case 0:
+          oldValue = (Repr) this.slots;
+          this.slots = null;
+          break;
+        case 1:
+          oldValue = (Repr) this.head;
+          this.head = null;
+          break;
+        case 2:
+          oldValue = (Repr) this.foot;
+          this.foot = null;
+          break;
+        default:
+          throw new AssertionError(Integer.toString(index));
+      }
+      break;
     }
     if (index < 0) {
       // No matching key was found.
@@ -537,41 +536,42 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
       // The inline value slot for the removed key has already been nulled out.
       this.shape = Assume.nonNull(shape.parent);
       this.size = shape.size - 1;
-    } else {
-      // Build a hash table with the remaining fields.
-      this.slots = new AttrEntry[AttrsShape.expand((shape.size - 1) * 10 / 7)];
-      this.head = null;
-      this.foot = null;
-      // Loop over all previous fields.
-      for (int i = 0; i < fieldCount; i += 1) {
-        // Skip the removed field.
-        if (i != index) {
-          final AttrsShape field = fields[i];
-          // Lookup the value of the remaining field.
-          final Repr value;
-          switch (field.size - 1) {
-            case 0:
-              value = Assume.nonNull(slot0);
-              break;
-            case 1:
-              value = Assume.nonNull(slot1);
-              break;
-            case 2:
-              value = Assume.nonNull(slot2);
-              break;
-            default:
-              throw new AssertionError(Integer.toString(field.size - 1));
-          }
-          // Insert the remaining field into the hash table.
-          final AttrEntry entry = new AttrEntry(Assume.nonNull(field.key), value);
-          this.putEntry(Assume.nonNull(field.key).hashCode(), entry);
-          this.appendEntry(entry);
-        }
-      }
-      this.shape = AttrsShape.dictionary();
-      this.size = shape.size - 1;
+      return oldValue;
     }
 
+    // Build a hashtable with the remaining fields.
+    this.slots = new AttrEntry[AttrsShape.expand((shape.size - 1) * 10 / 7)];
+    this.head = null;
+    this.foot = null;
+    // Loop over all previous fields.
+    for (int i = 0; i < fields.length; i += 1) {
+      if (i == index) {
+        // Skip the removed field.
+        continue;
+      }
+      final AttrsShape field = fields[i];
+      // Lookup the value of the remaining field.
+      final Repr value;
+      switch (field.size - 1) {
+        case 0:
+          value = Assume.nonNull(slot0);
+          break;
+        case 1:
+          value = Assume.nonNull(slot1);
+          break;
+        case 2:
+          value = Assume.nonNull(slot2);
+          break;
+        default:
+          throw new AssertionError(Integer.toString(field.size - 1));
+      }
+      // Insert the remaining field into the hashtable.
+      final AttrEntry entry = new AttrEntry(Assume.nonNull(field.key), value);
+      this.putEntry(Assume.nonNull(field.key).hashCode(), entry);
+      this.appendEntry(entry);
+    }
+    this.shape = AttrsShape.dictionary();
+    this.size = shape.size - 1;
     return oldValue;
   }
 
@@ -583,9 +583,9 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
       return null;
     }
 
+    // Update the object shape to reflect the removed field.
     final Repr[] slots = (Repr[]) Assume.nonNull(this.slots);
     final Repr oldValue = slots[index];
-    // Update the object shape to reflect the removed field.
     if (index == shape.size - 1) {
       // The leaf field of the shape was removed; revert to the parent shape.
       if (Assume.nonNull(shape.parent).size == MAX_INLINE_SIZE) {
@@ -606,38 +606,37 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
       }
       this.shape = Assume.nonNull(shape.parent);
       this.size = shape.size - 1;
-    } else {
-      // Build a hash table with the remaining fields.
-      this.slots = new AttrEntry[AttrsShape.expand((shape.size - 1) * 10 / 7)];
-      this.head = null;
-      this.foot = null;
-      this.buildHashTable(shape.fields(), slots, index);
-      this.shape = AttrsShape.dictionary();
-      this.size = shape.size - 1;
+      return oldValue;
     }
+
+    // Build a hashtable with the remaining fields.
+    this.slots = new AttrEntry[AttrsShape.expand((shape.size - 1) * 10 / 7)];
+    this.head = null;
+    this.foot = null;
+    this.buildHashtable(shape.fields(), slots, index);
+    this.shape = AttrsShape.dictionary();
+    this.size = shape.size - 1;
     return oldValue;
   }
 
-  private @Nullable Repr removeHashed(String key) {
+  private @Nullable Repr removeLinked(String key) {
     if ((this.flags & ALIASED_FLAG) != 0) {
       final AttrEntry entry = this.getEntry(key.hashCode(), key);
-      if (entry != null) {
-        this.dealiasHashTable(this.size - 1, key);
-        this.size -= 1;
-        return entry.value;
-      } else {
+      if (entry == null) {
         return null;
       }
-    } else {
-      final AttrEntry entry = this.removeEntry(key.hashCode(), key);
-      if (entry != null) {
-        this.detachEntry(entry);
-        this.size -= 1;
-        return entry.value;
-      } else {
-        return null;
-      }
+      this.dealiasHashtable(this.size - 1, key);
+      this.size -= 1;
+      return entry.value;
     }
+
+    final AttrEntry entry = this.removeEntry(key.hashCode(), key);
+    if (entry == null) {
+      return null;
+    }
+    this.detachEntry(entry);
+    this.size -= 1;
+    return entry.value;
   }
 
   @Override
@@ -645,7 +644,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     if (this.shape.size == 0 || !(key instanceof String)) {
       return this;
     } else if (this.shape.size < 0) {
-      return this.removedHashed((String) key);
+      return this.removedLinked((String) key);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return this.removedPacked((String) key);
     } else {
@@ -654,38 +653,36 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
   }
 
   private Attrs removedInline(String key) {
-    final AttrsShape shape = this.shape;
-
     // Capture current inline value slots.
+    final AttrsShape shape = this.shape;
     Repr slot0 = shape.size > 0 ? (Repr) this.slots : null;
     Repr slot1 = shape.size > 1 ? (Repr) this.head : null;
     Repr slot2 = shape.size > 2 ? (Repr) this.foot : null;
 
-    final AttrsShape[] fields = shape.fields();
-    final int fieldCount = fields.length;
-
     // Search fields for matching key.
+    final AttrsShape[] fields = shape.fields();
     int index = -1;
-    for (int i = 0; i < fieldCount; i += 1) {
+    for (int i = 0; i < fields.length; i += 1) {
       final AttrsShape field = fields[i];
-      if (key.equals(field.key)) {
-        // Clear the captured inline value slot.
-        index = field.size - 1;
-        switch (index) {
-          case 0:
-            slot0 = null;
-            break;
-          case 1:
-            slot1 = null;
-            break;
-          case 2:
-            slot2 = null;
-            break;
-          default:
-            throw new AssertionError(Integer.toString(index));
-        }
-        break;
+      if (!key.equals(field.key)) {
+        continue;
       }
+      // Clear the found inline value slot.
+      index = field.size - 1;
+      switch (index) {
+        case 0:
+          slot0 = null;
+          break;
+        case 1:
+          slot1 = null;
+          break;
+        case 2:
+          slot2 = null;
+          break;
+        default:
+          throw new AssertionError(Integer.toString(index));
+      }
+      break;
     }
     if (index < 0) {
       // No matching key was found.
@@ -695,41 +692,42 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     // Update the object shape to reflect the removed field.
     if (index == shape.size - 1) {
       // The leaf field of the shape was removed; revert to the parent shape.
-      // The captured inline value slot for the removed key has already been nulled out.
+      // The found inline value slot for the removed key has already been nulled out.
       return new Attrs(0, shape.size - 1, Assume.nonNull(shape.parent), slot0, slot1, slot2);
-    } else {
-      // Build a hash table with the remaining fields.
-      final Attrs newAttrs = new Attrs(0, shape.size - 1, AttrsShape.dictionary(),
-                                      new AttrEntry[AttrsShape.expand((shape.size - 1) * 10 / 7)],
-                                      null, null);
-      // Loop over all previous fields.
-      for (int i = 0; i < fieldCount; i += 1) {
-        // Skip the removed field.
-        if (i != index) {
-          final AttrsShape field = fields[i];
-          // Lookup the value of the remaining field.
-          final Repr value;
-          switch (field.size - 1) {
-            case 0:
-              value = Assume.nonNull(slot0);
-              break;
-            case 1:
-              value = Assume.nonNull(slot1);
-              break;
-            case 2:
-              value = Assume.nonNull(slot2);
-              break;
-            default:
-              throw new AssertionError(Integer.toString(field.size - 1));
-          }
-          // Insert the remaining field into the hash table.
-          final AttrEntry entry = new AttrEntry(Assume.nonNull(field.key), value);
-          newAttrs.putEntry(Assume.nonNull(field.key).hashCode(), entry);
-          newAttrs.appendEntry(entry);
-        }
-      }
-      return newAttrs;
     }
+
+    // Build a hashtable with the remaining fields.
+    final Attrs newAttrs = new Attrs(0, shape.size - 1, AttrsShape.dictionary(),
+                                    new AttrEntry[AttrsShape.expand((shape.size - 1) * 10 / 7)],
+                                    null, null);
+    // Loop over all previous fields.
+    for (int i = 0; i < fields.length; i += 1) {
+      if (i == index) {
+        // Skip the removed field.
+        continue;
+      }
+      // Lookup the value of the remaining field.
+      final AttrsShape field = fields[i];
+      final Repr value;
+      switch (field.size - 1) {
+        case 0:
+          value = Assume.nonNull(slot0);
+          break;
+        case 1:
+          value = Assume.nonNull(slot1);
+          break;
+        case 2:
+          value = Assume.nonNull(slot2);
+          break;
+        default:
+          throw new AssertionError(Integer.toString(field.size - 1));
+      }
+      // Insert the remaining field into the hashtable.
+      final AttrEntry entry = new AttrEntry(Assume.nonNull(field.key), value);
+      newAttrs.putEntry(Assume.nonNull(field.key).hashCode(), entry);
+      newAttrs.appendEntry(entry);
+    }
+    return newAttrs;
   }
 
   private Attrs removedPacked(String key) {
@@ -740,39 +738,37 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
       return this;
     }
 
-    final Repr[] slots = (Repr[]) Assume.nonNull(this.slots);
     // Update the object shape to reflect the removed field.
+    final Repr[] slots = (Repr[]) Assume.nonNull(this.slots);
     if (index == shape.size - 1) {
       // The leaf field of the shape was removed; revert to the parent shape.
       if (Assume.nonNull(shape.parent).size == MAX_INLINE_SIZE) {
         // Inline the remaining value slots.
         return new Attrs(0, shape.size - 1, Assume.nonNull(shape.parent), slots[0], slots[1], slots[2]);
-      } else {
-        // Clone the remaining value slots, excluding the last (removed) value.
-        final Repr[] newSlots = new Repr[AttrsShape.expand(shape.size - 1)];
-        System.arraycopy(slots, 0, newSlots, 0, shape.size - 1);
-        return new Attrs(0, shape.size - 1, Assume.nonNull(shape.parent), newSlots, null, null);
       }
-    } else {
-      // Build a hash table with the remaining fields.
-      final Attrs newAttrs = new Attrs(0, shape.size - 1, AttrsShape.dictionary(),
-                                       new AttrEntry[AttrsShape.expand((shape.size - 1) * 10 / 7)],
-                                       null, null);
-      newAttrs.buildHashTable(shape.fields(), slots, index);
-      return newAttrs;
+      // Clone the remaining value slots, excluding the last (removed) value.
+      final Repr[] newSlots = new Repr[AttrsShape.expand(shape.size - 1)];
+      System.arraycopy(slots, 0, newSlots, 0, shape.size - 1);
+      return new Attrs(0, shape.size - 1, Assume.nonNull(shape.parent), newSlots, null, null);
     }
+
+    // Build a hashtable with the remaining fields.
+    final Attrs newAttrs = new Attrs(0, shape.size - 1, AttrsShape.dictionary(),
+                                     new AttrEntry[AttrsShape.expand((shape.size - 1) * 10 / 7)],
+                                     null, null);
+    newAttrs.buildHashtable(shape.fields(), slots, index);
+    return newAttrs;
   }
 
-  private Attrs removedHashed(String key) {
+  private Attrs removedLinked(String key) {
     final AttrEntry entry = this.getEntry(key.hashCode(), key);
-    if (entry != null) {
-      final Attrs newAttrs = new Attrs(0, this.size - 1, this.shape,
-                                       this.slots, this.head, this.foot);
-      newAttrs.dealiasHashTable(this.size - 1, key);
-      return newAttrs;
-    } else {
+    if (entry == null) {
       return this;
     }
+    final Attrs newAttrs = new Attrs(0, this.size - 1, this.shape,
+                                     this.slots, this.head, this.foot);
+    newAttrs.dealiasHashtable(this.size - 1, key);
+    return newAttrs;
   }
 
   @Override
@@ -786,6 +782,25 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     this.foot = null;
     this.size = 0;
     this.flags |= ALIASED_FLAG;
+  }
+
+  public int indexOf(@Nullable String key) {
+    if (this.shape.size == 0 || key == null) {
+      return -1;
+    } else if (this.shape.size < 0) {
+      AttrEntry entry = (AttrEntry) this.head;
+      int index = 0;
+      while (entry != null) {
+        if (key.equals(entry.key)) {
+          return index;
+        }
+        entry = entry.next;
+        index += 1;
+      }
+      return -1;
+    } else {
+      return this.shape.lookup(key);
+    }
   }
 
   private @Nullable AttrEntry getEntry(int hash, String key) {
@@ -804,77 +819,69 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     final AttrEntry[] slots = (AttrEntry[]) Assume.nonNull(this.slots);
     final int index = Math.abs(hash % slots.length);
     AttrEntry bucket = slots[index];
-    if (bucket != null) {
-      if (entry.key.equals(bucket.key)) {
-        entry.nextCollision = bucket.nextCollision;
-        slots[index] = bucket;
-      } else {
-        AttrEntry prev = bucket;
-        do {
-          bucket = prev.nextCollision;
-          if (bucket != null) {
-            if (entry.key.equals(bucket.key)) {
-              entry.nextCollision = bucket.nextCollision;
-              prev.nextCollision = entry;
-              break;
-            } else {
-              prev = bucket;
-            }
-          } else {
-            prev.nextCollision = entry;
-            break;
-          }
-        } while (true);
-      }
-    } else {
+    if (bucket == null) {
       slots[index] = entry;
+      return;
+    } else if (entry.key.equals(bucket.key)) {
+      entry.nextCollision = bucket.nextCollision;
+      slots[index] = bucket;
+      return;
     }
+    AttrEntry prev = bucket;
+    do {
+      bucket = prev.nextCollision;
+      if (bucket == null) {
+        prev.nextCollision = entry;
+        return;
+      } else if (entry.key.equals(bucket.key)) {
+        entry.nextCollision = bucket.nextCollision;
+        prev.nextCollision = entry;
+        return;
+      }
+      prev = bucket;
+    } while (true);
   }
 
   private @Nullable AttrEntry removeEntry(int hash, String key) {
     final AttrEntry[] slots = (AttrEntry[]) Assume.nonNull(this.slots);
     final int index = Math.abs(hash % slots.length);
     AttrEntry bucket = slots[index];
-    if (bucket != null) {
-      if (key.equals(bucket.key)) {
-        slots[index] = bucket.nextCollision;
+    if (bucket == null) {
+      return null;
+    } else if (key.equals(bucket.key)) {
+      slots[index] = bucket.nextCollision;
+      bucket.nextCollision = null;
+      return bucket;
+    }
+    AttrEntry prev = bucket;
+    do {
+      bucket = prev.nextCollision;
+      if (bucket == null) {
+        return null;
+      } else if (key.equals(bucket.key)) {
+        prev.nextCollision = bucket.nextCollision;
         bucket.nextCollision = null;
         return bucket;
-      } else {
-        AttrEntry prev = bucket;
-        do {
-          bucket = prev.nextCollision;
-          if (bucket != null) {
-            if (key.equals(bucket.key)) {
-              prev.nextCollision = bucket.nextCollision;
-              bucket.nextCollision = null;
-              return bucket;
-            } else {
-              prev = bucket;
-            }
-          } else {
-            break;
-          }
-        } while (true);
       }
-    }
-    return null;
+      prev = bucket;
+    } while (true);
   }
 
-  private void buildHashTable(AttrsShape[] fields, Repr[] slots, int excludeIndex) {
+  private void buildHashtable(AttrsShape[] fields, Repr[] slots, int excludeIndex) {
     for (int i = 0; i < fields.length; i += 1) {
-      if (i != excludeIndex) {
-        final AttrsShape field = fields[i];
-        final String key = Assume.nonNull(field.key);
-        final Repr value = slots[field.size - 1];
-        final AttrEntry entry = new AttrEntry(key, value);
-        this.putEntry(key.hashCode(), entry);
-        this.appendEntry(entry);
+      if (i == excludeIndex) {
+        continue;
       }
+      final AttrsShape field = fields[i];
+      final String key = Assume.nonNull(field.key);
+      final Repr value = slots[field.size - 1];
+      final AttrEntry entry = new AttrEntry(key, value);
+      this.putEntry(key.hashCode(), entry);
+      this.appendEntry(entry);
     }
   }
 
-  private void resizeHashTable(int newSize) {
+  private void resizeHashtable(int newSize) {
     final int newCapacity = AttrsShape.expand(newSize * 10 / 7);
     if (newCapacity <= ((AttrEntry[]) Assume.nonNull(this.slots)).length) {
       return;
@@ -898,7 +905,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     }
   }
 
-  private void dealiasHashTable(int newSize, @Nullable String excludeKey) {
+  private void dealiasHashtable(int newSize, @Nullable String excludeKey) {
     final int newCapacity = AttrsShape.expand(newSize * 10 / 7);
     AttrEntry head = (AttrEntry) this.head;
     this.slots = new AttrEntry[newCapacity];
@@ -976,7 +983,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     if ((this.flags & IMMUTABLE_FLAG) == 0) {
       this.flags |= IMMUTABLE_FLAG;
       if (this.shape.size < 0) {
-        this.commitHashed();
+        this.commitLinked();
       } else if (this.shape.size > MAX_INLINE_SIZE) {
         this.commitPacked();
       } else if (this.shape.size > 0) {
@@ -1005,7 +1012,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     }
   }
 
-  private void commitHashed() {
+  private void commitLinked() {
     AttrEntry entry = (AttrEntry) this.head;
     while (entry != null) {
       entry.value.commit();
@@ -1016,7 +1023,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
   @Override
   public void forEach(BiConsumer<? super String, ? super Repr> action) {
     if (this.shape.size < 0) {
-      this.forEachHashed(action);
+      this.forEachLinked(action);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       this.forEachPacked(action);
     } else if (this.shape.size > 0) {
@@ -1058,7 +1065,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     }
   }
 
-  private void forEachHashed(BiConsumer<? super String, ? super Repr> action) {
+  private void forEachLinked(BiConsumer<? super String, ? super Repr> action) {
     AttrEntry entry = (AttrEntry) this.head;
     while (entry != null) {
       final AttrEntry next = entry.next;
@@ -1070,7 +1077,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
   @Override
   public void forEach(Consumer<? super Map.Entry<String, Repr>> action) {
     if (this.shape.size < 0) {
-      this.forEachHashed(action);
+      this.forEachLinked(action);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       this.forEachPacked(action);
     } else if (this.shape.size > 0) {
@@ -1112,7 +1119,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     }
   }
 
-  private void forEachHashed(Consumer<? super Map.Entry<String, Repr>> action) {
+  private void forEachLinked(Consumer<? super Map.Entry<String, Repr>> action) {
     AttrEntry entry = (AttrEntry) this.head;
     while (entry != null) {
       final AttrEntry next = entry.next;
@@ -1124,7 +1131,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
   @Override
   public Iterator<Map.Entry<String, Repr>> iterator() {
     if (this.shape.size < 0) {
-      return new AttrsHashedEntryIterator((AttrEntry) this.head);
+      return new AttrsLinkedEntryIterator((AttrEntry) this.head);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return new AttrsPackedEntryIterator(this);
     } else if (this.shape.size > 0) {
@@ -1136,7 +1143,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
 
   public Iterator<String> keyIterator() {
     if (this.shape.size < 0) {
-      return new AttrsHashedKeyIterator((AttrEntry) this.head);
+      return new AttrsLinkedKeyIterator((AttrEntry) this.head);
     } else {
       return new AttrsPackedKeyIterator(this);
     }
@@ -1144,7 +1151,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
 
   public Iterator<Repr> valueIterator() {
     if (this.shape.size < 0) {
-      return new AttrsHashedValueIterator((AttrEntry) this.head);
+      return new AttrsLinkedValueIterator((AttrEntry) this.head);
     } else if (this.shape.size > MAX_INLINE_SIZE) {
       return new AttrsPackedValueIterator(this);
     } else {
@@ -1171,18 +1178,13 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Map<?, ?>) {
-      final Map<?, ?> that = (Map<?, ?>) other;
-      if (this.size() == that.size()) {
-        final Iterator<? extends Map.Entry<?, ?>> those = that.entrySet().iterator();
-        while (those.hasNext()) {
-          final Map.Entry<?, ?> entry = those.next();
-          if (!Objects.equals(entry.getValue(), this.get(entry.getKey()))) {
-            return false;
-          }
+    } else if (other instanceof Map<?, ?> that && this.size() == that.size()) {
+      for (Map.Entry<?, ?> entry : that.entrySet()) {
+        if (!Objects.equals(entry.getValue(), this.get(entry.getKey()))) {
+          return false;
         }
-        return true;
       }
+      return true;
     }
     return false;
   }
@@ -1213,8 +1215,8 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
 
   void writeWithAttrs(Notation notation) {
     for (Map.Entry<String, Repr> entry : this) {
-      notation.beginInvoke("withAttr");
-      notation.appendArgument(entry.getKey());
+      notation.beginInvoke("withAttr")
+              .appendArgument(entry.getKey());
       if (entry.getValue() != UnitRepr.unit()) {
         notation.appendArgument(entry.getValue());
       }
@@ -1227,17 +1229,15 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
     return this.toSource();
   }
 
-  static final int MAX_INLINE_SIZE = 3;
+  public static final int MAX_INLINE_SIZE = 3;
 
-  static final int MAX_PACKED_SIZE = 8;
+  public static final int MAX_PACKED_SIZE = 8;
 
   static final int IMMUTABLE_FLAG = 1 << 0;
 
   static final int ALIASED_FLAG = 1 << 1;
 
-  private static final Attrs EMPTY = new Attrs(IMMUTABLE_FLAG, 0,
-                                               AttrsShape.empty(),
-                                               null, null, null);
+  static final Attrs EMPTY = new Attrs(IMMUTABLE_FLAG, 0, AttrsShape.empty(), null, null, null);
 
   public static Attrs empty() {
     return EMPTY;
@@ -1262,7 +1262,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
                          String key1, Repr value1,
                          String key2, Repr value2) {
     final AttrsShape shape = AttrsShape.empty().getChild(key0).getChild(key1)
-                                                 .getChild(key2);
+                                               .getChild(key2);
     return new Attrs(0, 3, shape, value0, value1, value2);
   }
 
@@ -1277,14 +1277,20 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
   }
 
   public static Attrs of(Object... keyValuePairs) {
-    Objects.requireNonNull(keyValuePairs);
-    final int n = keyValuePairs.length;
-    if (n % 2 != 0) {
+    if (keyValuePairs.length % 2 != 0) {
       throw new IllegalArgumentException("odd number of key-value pairs");
     }
     final Attrs attrs = Attrs.of();
-    for (int i = 0; i < n; i += 2) {
-      attrs.put((String) keyValuePairs[i], (Repr) keyValuePairs[i + 1]);
+    for (int i = 0; i < keyValuePairs.length; i += 2) {
+      final String key = (String) keyValuePairs[i];
+      if (key == null) {
+        throw new NullPointerException("key " + (i >>> 1));
+      }
+      final Repr value = (Repr) keyValuePairs[i + 1];
+      if (value == null) {
+        throw new NullPointerException("value " + (i >>> 1));
+      }
+      attrs.put(key, value);
     }
     return attrs;
   }
@@ -1326,8 +1332,7 @@ final class AttrEntry implements Map.Entry<String, Repr> {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Map.Entry<?, ?>) {
-      final Map.Entry<?, ?> that = (Map.Entry<?, ?>) other;
+    } else if (other instanceof Map.Entry<?, ?> that) {
       return this.key.equals(that.getKey()) && this.value.equals(that.getValue());
     }
     return false;
@@ -1364,8 +1369,7 @@ final class AttrsInlineEntryIterator implements Iterator<Map.Entry<String, Repr>
     final int index = this.index;
     if (index >= this.fields.length) {
       throw new NoSuchElementException();
-    }
-    if (this.attrs.shape != this.shape) {
+    } else if (this.attrs.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -1415,8 +1419,7 @@ final class AttrsPackedEntryIterator implements Iterator<Map.Entry<String, Repr>
     final int index = this.index;
     if (index >= this.fields.length) {
       throw new NoSuchElementException();
-    }
-    if (this.attrs.shape != this.shape) {
+    } else if (this.attrs.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -1427,11 +1430,11 @@ final class AttrsPackedEntryIterator implements Iterator<Map.Entry<String, Repr>
 
 }
 
-final class AttrsHashedEntryIterator implements Iterator<Map.Entry<String, Repr>> {
+final class AttrsLinkedEntryIterator implements Iterator<Map.Entry<String, Repr>> {
 
   @Nullable AttrEntry entry;
 
-  AttrsHashedEntryIterator(@Nullable AttrEntry entry) {
+  AttrsLinkedEntryIterator(@Nullable AttrEntry entry) {
     this.entry = entry;
   }
 
@@ -1443,12 +1446,11 @@ final class AttrsHashedEntryIterator implements Iterator<Map.Entry<String, Repr>
   @Override
   public Map.Entry<String, Repr> next() {
     final AttrEntry entry = this.entry;
-    if (entry != null) {
-      this.entry = entry.next;
-      return entry;
-    } else {
+    if (entry == null) {
       throw new NoSuchElementException();
     }
+    this.entry = entry.next;
+    return entry;
   }
 
 }
@@ -1497,8 +1499,7 @@ final class AttrsPackedKeyIterator implements Iterator<String> {
     final int index = this.index;
     if (index >= this.fields.length) {
       throw new NoSuchElementException();
-    }
-    if (this.attrs.shape != this.shape) {
+    } else if (this.attrs.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -1507,11 +1508,11 @@ final class AttrsPackedKeyIterator implements Iterator<String> {
 
 }
 
-final class AttrsHashedKeyIterator implements Iterator<String> {
+final class AttrsLinkedKeyIterator implements Iterator<String> {
 
   @Nullable AttrEntry entry;
 
-  AttrsHashedKeyIterator(@Nullable AttrEntry entry) {
+  AttrsLinkedKeyIterator(@Nullable AttrEntry entry) {
     this.entry = entry;
   }
 
@@ -1523,12 +1524,11 @@ final class AttrsHashedKeyIterator implements Iterator<String> {
   @Override
   public String next() {
     final AttrEntry entry = this.entry;
-    if (entry != null) {
-      this.entry = entry.next;
-      return entry.key;
-    } else {
+    if (entry == null) {
       throw new NoSuchElementException();
     }
+    this.entry = entry.next;
+    return entry.key;
   }
 
 }
@@ -1575,8 +1575,7 @@ final class AttrsInlineValueIterator implements Iterator<Repr> {
     final int index = this.index;
     if (index >= this.shape.size) {
       throw new NoSuchElementException();
-    }
-    if (this.attrs.shape != this.shape) {
+    } else if (this.attrs.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -1616,8 +1615,7 @@ final class AttrsPackedValueIterator implements Iterator<Repr> {
     final int index = this.index;
     if (index >= this.shape.size) {
       throw new NoSuchElementException();
-    }
-    if (this.attrs.shape != this.shape) {
+    } else if (this.attrs.shape != this.shape) {
       throw new ConcurrentModificationException();
     }
     this.index = index + 1;
@@ -1626,11 +1624,11 @@ final class AttrsPackedValueIterator implements Iterator<Repr> {
 
 }
 
-final class AttrsHashedValueIterator implements Iterator<Repr> {
+final class AttrsLinkedValueIterator implements Iterator<Repr> {
 
   @Nullable AttrEntry entry;
 
-  AttrsHashedValueIterator(@Nullable AttrEntry entry) {
+  AttrsLinkedValueIterator(@Nullable AttrEntry entry) {
     this.entry = entry;
   }
 
@@ -1642,12 +1640,11 @@ final class AttrsHashedValueIterator implements Iterator<Repr> {
   @Override
   public Repr next() {
     final AttrEntry entry = this.entry;
-    if (entry != null) {
-      this.entry = entry.next;
-      return entry.value;
-    } else {
+    if (entry == null) {
       throw new NoSuchElementException();
     }
+    this.entry = entry.next;
+    return entry.value;
   }
 
 }

@@ -117,7 +117,7 @@ public final class SecWebSocketKeyHeader extends HttpHeader {
     return SecWebSocketKeyHeader.of(NAME, key);
   }
 
-  private static byte[] parseValue(String value) throws HttpException {
+  static byte[] parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     final Parse<byte[]> parseKey = Base64.standard().parseByteArray(input);
     if (parseKey.isDone()) {
@@ -129,7 +129,7 @@ public final class SecWebSocketKeyHeader extends HttpHeader {
     }
   }
 
-  private static String writeValue(byte[] key) {
+  static String writeValue(byte[] key) {
     final StringOutput output = new StringOutput();
     Base64.standard().writeByteArray(output, key).assertDone();
     return output.get();

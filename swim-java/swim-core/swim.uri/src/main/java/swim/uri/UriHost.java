@@ -20,8 +20,6 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Objects;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -34,6 +32,8 @@ import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8DecodedOutput;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
 import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
@@ -92,53 +92,50 @@ public abstract class UriHost implements Comparable<UriHost>, ToSource, ToString
     return Murmur3.seed(this.toString());
   }
 
-  @IntoForm
+  @Marshal
   @Override
   public abstract String toString();
 
-  private static final UriHost UNDEFINED = new UriHostUndefined();
+  static final UriHost UNDEFINED = new UriHostUndefined();
 
   public static UriHost undefined() {
     return UNDEFINED;
   }
 
   public static UriHost name(@Nullable String address) {
-    if (address != null) {
-      return new UriHostName(address);
-    } else {
+    if (address == null) {
       return UriHost.undefined();
     }
+    return new UriHostName(address);
   }
 
   public static UriHost ipv4(@Nullable String address) {
-    if (address != null) {
-      return new UriHostIPv4(address);
-    } else {
+    if (address == null) {
       return UriHost.undefined();
     }
+    return new UriHostIPv4(address);
   }
 
   public static UriHost ipv6(@Nullable String address) {
-    if (address != null) {
-      return new UriHostIPv6(address);
-    } else {
+    if (address == null) {
       return UriHost.undefined();
     }
+    return new UriHostIPv6(address);
   }
 
   public static UriHost inetAddress(@Nullable InetAddress address) {
-    if (address instanceof Inet4Address) {
+    if (address == null) {
+      return UriHost.undefined();
+    } else if (address instanceof Inet4Address) {
       return UriHost.ipv4(address.getHostAddress());
     } else if (address instanceof Inet6Address) {
       return UriHost.ipv6(address.getHostAddress());
-    } else if (address != null) {
-      return UriHost.name(address.getHostName());
     } else {
-      return UriHost.undefined();
+      return UriHost.name(address.getHostName());
     }
   }
 
-  @FromForm
+  @Unmarshal
   public static @Nullable UriHost from(String value) {
     return UriHost.parse(value).getOr(null);
   }
@@ -161,10 +158,10 @@ public abstract class UriHost implements Comparable<UriHost>, ToSource, ToString
     return parseHost;
   }
 
-  private static final ThreadLocal<CacheMap<String, Parse<UriHost>>> CACHE =
+  static final ThreadLocal<CacheMap<String, Parse<UriHost>>> CACHE =
       new ThreadLocal<CacheMap<String, Parse<UriHost>>>();
 
-  private static CacheMap<String, Parse<UriHost>> cache() {
+  static CacheMap<String, Parse<UriHost>> cache() {
     CacheMap<String, Parse<UriHost>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;

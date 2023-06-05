@@ -104,10 +104,12 @@ public final class HttpStatus implements ToSource, ToString {
         break;
       }
       codes = (HttpStatus[]) CODES.compareAndExchangeRelease(oldCodes, newCodes);
-      if (codes == oldCodes) {
-        codes = newCodes;
-        break;
+      if (codes != oldCodes) {
+        // CAS failed; try again.
+        continue;
       }
+      codes = newCodes;
+      break;
     } while (true);
 
     StringTrieMap<HttpStatus> phrases = (StringTrieMap<HttpStatus>) PHRASES.getOpaque();
@@ -115,10 +117,12 @@ public final class HttpStatus implements ToSource, ToString {
       final StringTrieMap<HttpStatus> oldPhrases = phrases;
       final StringTrieMap<HttpStatus> newPhrases = oldPhrases.updated(this.phrase, this);
       phrases = (StringTrieMap<HttpStatus>) PHRASES.compareAndExchangeRelease(oldPhrases, newPhrases);
-      if (phrases == oldPhrases) {
-        phrases = newPhrases;
-        break;
+      if (phrases != oldPhrases) {
+        // CAS failed; try again.
+        continue;
       }
+      phrases = newPhrases;
+      break;
     } while (true);
 
     return this;
@@ -128,8 +132,7 @@ public final class HttpStatus implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpStatus) {
-      final HttpStatus that = (HttpStatus) other;
+    } else if (other instanceof HttpStatus that) {
       return this.code == that.code && this.phrase.equals(that.phrase);
     }
     return false;
@@ -203,9 +206,8 @@ public final class HttpStatus implements ToSource, ToString {
     final int index = HttpStatus.lookup(codes, code);
     if (index >= 0) {
       return codes[index];
-    } else {
-      return new HttpStatus(code, "");
     }
+    return new HttpStatus(code, "");
   }
 
   public static Parse<HttpStatus> parse(Input input) {

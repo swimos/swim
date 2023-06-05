@@ -83,7 +83,7 @@ public final class ContentLengthHeader extends HttpHeader {
     return ContentLengthHeader.of(NAME, length);
   }
 
-  private static long parseValue(String value) throws HttpException {
+  static long parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     long length = 0L;

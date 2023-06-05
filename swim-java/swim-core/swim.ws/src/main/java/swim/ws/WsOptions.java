@@ -273,8 +273,7 @@ public class WsOptions implements ToSource {
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WsOptions) {
-      final WsOptions that = (WsOptions) other;
+    } else if (other instanceof WsOptions that) {
       return that.canEqual(this)
           && this.maxFrameSize == that.maxFrameSize
           && this.maxMessageSize == that.maxMessageSize

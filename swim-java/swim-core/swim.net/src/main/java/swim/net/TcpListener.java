@@ -202,23 +202,22 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
         // Try to request listener open, synchronizing with concurrent status updates.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
         // Check if we succeeded at requesting listener open.
-        if (status == oldStatus) {
-          // This operation caused the opening of the listener.
-          status = newStatus;
-          opened = true;
-          // Store the address to which the listener should bind.
-          this.localAddress = localAddress;
-          // Focus the log now that localAddress is known.
-          this.setLog(this.log);
-          this.log.trace("request open");
-          // Schedule the acceptor task to perform the open operation.
-          this.acceptor.schedule();
-          // Continue opening sequence.
-          continue;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        // This operation caused the opening of the listener.
+        status = newStatus;
+        opened = true;
+        // Store the address to which the listener should bind.
+        this.localAddress = localAddress;
+        // Focus the log now that localAddress is known.
+        this.setLog(this.log);
+        this.log.trace("request open");
+        // Schedule the acceptor task to perform the open operation.
+        this.acceptor.schedule();
+        // Continue opening sequence.
+        continue;
       } else if ((status & STATE_MASK) == INITIAL_STATE || (status & STATE_MASK) == OPENING_STATE) {
         // The listener is concurrently opening;
         // loop until the concurrent operation is complete.
@@ -236,20 +235,19 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
                 // Defer thread interrupt.
                 interrupted = true;
               }
-            } else {
-              // The concurrent operation has completed.
-              break;
+              continue;
             }
+            // The concurrent operation has completed.
+            break;
           }
         } while (true);
         // Re-check listener status.
         status = (int) STATUS.getOpaque(this);
         // Continue opening sequence.
         continue;
-      } else {
-        // The listener has already been opened, or requested to open.
-        break;
       }
+      // The listener has already been opened, or requested to open.
+      break;
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during listener open.
@@ -268,54 +266,45 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
       // Try to initiate listener opening, synchronizing with concurrent status updates.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
       // Check if we succeeded at transitioning into the opening state.
-      if (status == oldStatus) {
-        // The listener has transitioned into the opening state.
-        status = newStatus;
-        try {
-          // Invoke lifecycle callback.
-          this.willListen();
-        } catch (IOException cause) {
-          // Report the exception.
-          this.log.warningStatus("willListen callback failed", this.listener, cause);
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            // Report the non-fatal exception.
-            this.log.errorStatus("willListen callback failed", this.listener, cause);
-          } else {
-            // Rethrow the fatal exception.
-            throw cause;
-          }
-        }
-        // Continue opening the listener.
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The listener has transitioned into the opening state.
+      status = newStatus;
+      try {
+        // Invoke lifecycle callback.
+        this.willListen();
+      } catch (IOException cause) {
+        this.log.warningStatus("willListen callback failed", this.listener, cause);
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.log.errorStatus("willListen callback failed", this.listener, cause);
+      }
+      // Continue opening the listener.
+      break;
     } while (true);
 
     // Bind the network channel.
     try {
       this.channel.bind(this.localAddress, this.tcpOptions.backlog());
     } catch (IOException cause) {
+      this.log.warningStatus("failed to bind server socket", this.listener, cause);
       // Initiate listener close.
       status = this.acceptorRequestClose(status);
-      // Report the exception.
-      this.log.warningStatus("failed to bind server socket", this.listener, cause);
       // Continue closing the listener.
       return status;
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Initiate listener close.
-        status = this.acceptorRequestClose(status);
-        // Report the non-fatal exception.
-        this.log.errorStatus("failed to bind server socket", this.listener, cause);
-        // Continue closing the listener.
-        return status;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("failed to bind server socket", this.listener, cause);
+      // Initiate listener close.
+      status = this.acceptorRequestClose(status);
+      // Continue closing the listener.
+      return status;
     }
 
     // Loop while the listener has not entered the opened state.
@@ -326,38 +315,33 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
       VarHandle.releaseFence();
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
       // Check if we succeeded at transitioning into the opened state.
-      if (status == oldStatus) {
-        // The listener has transitioned into the opened state.
-        status = newStatus;
-        try {
-          // Invoke lifecycle callback.
-          this.didListen();
-        } catch (IOException cause) {
-          // Report the exception.
-          this.log.warningStatus("didListen callback failed", this.listener, cause);
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            // Report the non-fatal exception.
-            this.log.errorStatus("didListen callback failed", this.listener, cause);
-          } else {
-            // Rethrow the fatal exception.
-            throw cause;
-          }
-        }
-        // Schedule any pending accept request.
-        if ((oldStatus & ACCEPT_REQUEST) != 0) {
-          this.getTransportContext().requestAccept();
-        }
-        // Notify waiting threads of listener open.
-        synchronized (this) {
-          this.notifyAll();
-        }
-        // Done opening the listener.
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The listener has transitioned into the opened state.
+      status = newStatus;
+      try {
+        // Invoke lifecycle callback.
+        this.didListen();
+      } catch (IOException cause) {
+        this.log.warningStatus("didListen callback failed", this.listener, cause);
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.log.errorStatus("didListen callback failed", this.listener, cause);
+      }
+      // Schedule any pending accept request.
+      if ((oldStatus & ACCEPT_REQUEST) != 0) {
+        this.getTransportContext().requestAccept();
+      }
+      // Notify waiting threads of listener open.
+      synchronized (this) {
+        this.notifyAll();
+      }
+      // Done opening the listener.
+      break;
     } while (true);
 
     // Check if the channel has closed.
@@ -390,34 +374,32 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
     // Loop while the listener does not have a pending accept request.
     do {
       // Check that the listener does not have a pending accept request.
-      if ((status & ACCEPT_REQUEST) == 0) {
-        // The listener does not have a pending accept request;
-        // signal that the listener would like to perform a accept.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | ACCEPT_REQUEST;
-        // Try to set the accept request flag, synchronizing with concurrent status updates.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        // Check if we succeeded at setting the accept request flag.
-        if (status == oldStatus) {
-          // The accept request flag has been set.
-          status = newStatus;
-          this.log.trace("request accept");
-          final TransportContext context = this.context;
-          // Only schedule accepts when the listener is in the opened state.
-          if (context != null && (status & STATE_MASK) == OPENED_STATE) {
-            // Schedule the accept request with the I/O dispatcher.
-            context.requestAccept();
-          }
-          // Non-opened accept requests will be scheduled once opened.
-          return true;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & ACCEPT_REQUEST) != 0) {
         // An accept request is already pending.
         return false;
       }
+      // The listener does not have a pending accept request;
+      // signal that the listener would like to perform a accept.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | ACCEPT_REQUEST;
+      // Try to set the accept request flag, synchronizing with concurrent status updates.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      // Check if we succeeded at setting the accept request flag.
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The accept request flag has been set.
+      status = newStatus;
+      this.log.trace("request accept");
+      final TransportContext context = this.context;
+      // Only schedule accepts when the listener is in the opened state.
+      if (context != null && (status & STATE_MASK) == OPENED_STATE) {
+        // Schedule the accept request with the I/O dispatcher.
+        context.requestAccept();
+      }
+      // Non-opened accept requests will be scheduled once opened.
+      return true;
     } while (true);
   }
 
@@ -428,33 +410,31 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
     // Loop while the listener has a pending accept request.
     do {
       // Check that the listener has a pending accept request.
-      if ((status & ACCEPT_REQUEST) != 0) {
-        // The listener has a pending accept request; signal that the listener
-        // is no longer interested in performing a accept.
-        final int oldStatus = status;
-        final int newStatus = oldStatus & ~ACCEPT_REQUEST;
-        // Try to clear the accept request flag, synchronizing with concurrent status updates.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        // Check if we succeeded at clearing the accept request flag.
-        if (status == oldStatus) {
-          // The accept request flag has been cleared.
-          status = newStatus;
-          this.log.trace("cancel accept");
-          final TransportContext context = this.context;
-          // Only cancel accepts when the listener is in the opened state.
-          if (context != null && (status & STATE_MASK) == OPENED_STATE) {
-            // Cancel the accept request with the I/O dispatcher.
-            context.cancelAccept();
-          }
-          return true;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & ACCEPT_REQUEST) == 0) {
         // No accept request is currently pending.
         return false;
       }
+      // The listener has a pending accept request; signal that the listener
+      // is no longer interested in performing a accept.
+      final int oldStatus = status;
+      final int newStatus = oldStatus & ~ACCEPT_REQUEST;
+      // Try to clear the accept request flag, synchronizing with concurrent status updates.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      // Check if we succeeded at clearing the accept request flag.
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The accept request flag has been cleared.
+      status = newStatus;
+      this.log.trace("cancel accept");
+      final TransportContext context = this.context;
+      // Only cancel accepts when the listener is in the opened state.
+      if (context != null && (status & STATE_MASK) == OPENED_STATE) {
+        // Cancel the accept request with the I/O dispatcher.
+        context.cancelAccept();
+      }
+      return true;
     } while (true);
   }
 
@@ -465,31 +445,29 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
     // Loop while the listener has not been signaled to accept a new connection.
     do {
       // Check that the listener has not been closed, or requested to close.
-      if ((status & STATE_MASK) != CLOSED_STATE && (status & STATE_MASK) != CLOSING_STATE
-          && (status & CLOSE_REQUEST) == 0) {
-        // The listener has not been closed, or requested to close;
-        // signal that the network channel is ready to accept a new connection.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | ACCEPT_READY;
-        // Try to set the accept ready flag, synchronizing with concurrent status updates.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        // Check if we succeeded at setting the accept ready flag.
-        if (status == oldStatus) {
-          // The accept ready flag has been set; schedule the acceptor task
-          // to perform the operation.
-          status = newStatus;
-          this.log.trace("ready to accept");
-          this.acceptor.schedule();
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & STATE_MASK) == CLOSED_STATE || (status & STATE_MASK) == CLOSING_STATE
+          || (status & CLOSE_REQUEST) != 0) {
         // The listener has been closed, or requested to close;
         // ignore the accept ready signal.
         break;
       }
+      // The listener has not been closed, or requested to close;
+      // signal that the network channel is ready to accept a new connection.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | ACCEPT_READY;
+      // Try to set the accept ready flag, synchronizing with concurrent status updates.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      // Check if we succeeded at setting the accept ready flag.
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The accept ready flag has been set; schedule the acceptor task
+      // to perform the operation.
+      status = newStatus;
+      this.log.trace("ready to accept");
+      this.acceptor.schedule();
+      break;
     } while (true);
   }
 
@@ -502,30 +480,25 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
       // Try to clear the accept ready flag, synchronizing with concurrent status updates.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
       // Check if we succeeded at clearing the accept ready flag.
-      if (status == oldStatus) {
-        // The accept ready flag has been cleared.
-        status = newStatus;
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The accept ready flag has been cleared.
+      status = newStatus;
+      break;
     } while (true);
 
     try {
       // Invoke I/O callback.
       this.doAccept();
     } catch (IOException cause) {
-      // Report the exception.
       this.log.warningStatus("doAccept failed", this.listener, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("doAccept failed", this.listener, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("doAccept failed", this.listener, cause);
     }
 
     // Check if the channel has closed.
@@ -592,27 +565,25 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
     // Loop while the listener has not been closed or requested to close.
     do {
       // Check that the listener has not already been closed, or requested to close.
-      if ((status & STATE_MASK) != CLOSED_STATE && (status & STATE_MASK) != CLOSING_STATE
-          && (status & CLOSE_REQUEST) == 0) {
-        // The listener has not been closed, or requested to close.
-        final int oldStatus = status;
-        final int newStatus = oldStatus | CLOSE_REQUEST;
-        // Try to request listener close, synchronizing with concurrent status updates.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        // Check if we succeeded at requesting listener close.
-        if (status == oldStatus) {
-          // The listener has been requested to close.
-          status = newStatus;
-          this.log.trace("request close");
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & STATE_MASK) == CLOSED_STATE || (status & STATE_MASK) == CLOSING_STATE
+          || (status & CLOSE_REQUEST) != 0) {
         // The listener has already been closed, or requested to close.
         break;
       }
+      // The listener has not been closed, or requested to close.
+      final int oldStatus = status;
+      final int newStatus = oldStatus | CLOSE_REQUEST;
+      // Try to request listener close, synchronizing with concurrent status updates.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      // Check if we succeeded at requesting listener close.
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The listener has been requested to close.
+      status = newStatus;
+      this.log.trace("request close");
+      break;
     } while (true);
     return status;
   }
@@ -624,30 +595,28 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
     // Loop while the listener has not been closed, or requested to close.
     do {
       // Check if the listener has not yet been closed, or requested to close.
-      if ((status & STATE_MASK) != CLOSED_STATE && (status & STATE_MASK) != CLOSING_STATE
-          && (status & CLOSE_REQUEST) == 0) {
-        // The listener has not yet been requested to close; clear any pending open request.
-        final int oldStatus = status;
-        final int newStatus = (oldStatus & ~OPEN_REQUEST) | CLOSE_REQUEST;
-        // Try to request listener close, synchronizing with concurrent status updates.
-        status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        // Check if we succeeded at requesting listener close.
-        if (status == oldStatus) {
-          // The listener has transitioned into the closing state.
-          status = newStatus;
-          this.log.trace("request close");
-          // Schedule the acceptor task to perform the close operation.
-          this.acceptor.schedule();
-          // The listener will concurrently close.
-          break;
-        } else {
-          // CAS failed; try again.
-          continue;
-        }
-      } else {
+      if ((status & STATE_MASK) == CLOSED_STATE || (status & STATE_MASK) == CLOSING_STATE
+          || (status & CLOSE_REQUEST) != 0) {
         // The listener has already been closed, or requested to close.
         break;
       }
+      // The listener has not yet been requested to close; clear any pending open request.
+      final int oldStatus = status;
+      final int newStatus = (oldStatus & ~OPEN_REQUEST) | CLOSE_REQUEST;
+      // Try to request listener close, synchronizing with concurrent status updates.
+      status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
+      // Check if we succeeded at requesting listener close.
+      if (status != oldStatus) {
+        // CAS failed; try again.
+        continue;
+      }
+      // The listener has transitioned into the closing state.
+      status = newStatus;
+      this.log.trace("request close");
+      // Schedule the acceptor task to perform the close operation.
+      this.acceptor.schedule();
+      // The listener will concurrently close.
+      break;
     } while (true);
   }
 
@@ -660,49 +629,41 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
       // Try to transition to the closing state, synchronizing with concurrent status updates.
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
       // Check if we succeeded at transitioning into the closing state.
-      if (status == oldStatus) {
-        // The listener has transitioned into the closing state.
-        status = newStatus;
-        try {
-          // Invoke lifecycle callback.
-          this.willClose();
-        } catch (IOException cause) {
-          // Report the exception.
-          this.log.warningStatus("willClose callback failed", this.listener, cause);
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            // Report the non-fatal exception.
-            this.log.errorStatus("willClose callback failed", this.listener, cause);
-          } else {
-            // Rethrow the fatal exception.
-            throw cause;
-          }
-        }
-        // Continue closing the listener.
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The listener has transitioned into the closing state.
+      status = newStatus;
+      try {
+        // Invoke lifecycle callback.
+        this.willClose();
+      } catch (IOException cause) {
+        this.log.warningStatus("willClose callback failed", this.listener, cause);
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.log.errorStatus("willClose callback failed", this.listener, cause);
+      }
+      // Continue closing the listener.
+      break;
     } while (true);
 
-    // Cancel I/O scheduling for the this listener.
+    // Cancel I/O scheduling for the listener.
     try {
       this.getTransportContext().cancel();
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("failed to cancel transport", this.listener, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("failed to cancel transport", this.listener, cause);
     }
+
     // Close the network channel.
     try {
       this.channel.close();
     } catch (IOException cause) {
-      // Report the exception.
       this.log.warningStatus("failed to close channel", this.listener, cause);
     }
 
@@ -714,34 +675,29 @@ public class TcpListener implements Transport, NetListenerContext, LogEntity, Lo
       VarHandle.releaseFence();
       status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
       // Check if we succeeded at transitioning into the closed state.
-      if (status == oldStatus) {
-        // The listener has transitioned into the closed state.
-        status = newStatus;
-        try {
-          // Invoke lifecycle callback.
-          this.didClose();
-        } catch (IOException cause) {
-          // Report the exception.
-          this.log.warningStatus("willClose callback failed", this.listener, cause);
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            // Report the non-fatal exception.
-            this.log.errorStatus("willClose callback failed", this.listener, cause);
-          } else {
-            // Rethrow the fatal exception.
-            throw cause;
-          }
-        }
-        // Notify waiting threads of listener close.
-        synchronized (this) {
-          this.notifyAll();
-        }
-        // Done closing the listener.
-        break;
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      // The listener has transitioned into the closed state.
+      status = newStatus;
+      try {
+        // Invoke lifecycle callback.
+        this.didClose();
+      } catch (IOException cause) {
+        this.log.warningStatus("willClose callback failed", this.listener, cause);
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.log.errorStatus("willClose callback failed", this.listener, cause);
+      }
+      // Notify waiting threads of listener close.
+      synchronized (this) {
+        this.notifyAll();
+      }
+      // Done closing the listener.
+      break;
     } while (true);
 
     return status;

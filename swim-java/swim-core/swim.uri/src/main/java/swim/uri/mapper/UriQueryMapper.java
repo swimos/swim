@@ -29,22 +29,20 @@ public abstract class UriQueryMapper<T> extends UriPathMapper<T> {
 
   @Override
   UriMapper<T> getSuffix(UriPath path, UriQuery query, UriFragment fragment) {
-    if (path.isEmpty()) {
-      return this.getSuffix(query, fragment);
-    } else {
+    if (!path.isEmpty()) {
       return UriMapper.empty();
     }
+    return this.getSuffix(query, fragment);
   }
 
   abstract @Nullable T get(UriQuery query, UriFragment fragment);
 
   @Override
   @Nullable T get(UriPath path, UriQuery query, UriFragment fragment) {
-    if (path.isEmpty()) {
-      return this.get(query, fragment);
-    } else {
+    if (!path.isEmpty()) {
       return null;
     }
+    return this.get(query, fragment);
   }
 
   abstract UriQueryMapper<T> merged(UriQueryMapper<T> that);
@@ -53,20 +51,18 @@ public abstract class UriQueryMapper<T> extends UriPathMapper<T> {
   UriPathMapper<T> merged(UriPathMapper<T> that) {
     if (that instanceof UriQueryMapper<?>) {
       return this.merged((UriQueryMapper<T>) that);
-    } else {
-      return that;
     }
+    return that;
   }
 
   abstract UriQueryMapper<T> removed(UriQuery query, UriFragment fragment);
 
   @Override
   UriPathMapper<T> removed(UriPath path, UriQuery query, UriFragment fragment) {
-    if (path.isEmpty()) {
-      return this.removed(query, fragment);
-    } else {
+    if (!path.isEmpty()) {
       return this;
     }
+    return this.removed(query, fragment);
   }
 
   abstract UriQueryMapper<T> unmerged(UriQueryMapper<T> that);
@@ -75,9 +71,8 @@ public abstract class UriQueryMapper<T> extends UriPathMapper<T> {
   UriPathMapper<T> unmerged(UriPathMapper<T> that) {
     if (that instanceof UriQueryMapper<?>) {
       return this.unmerged((UriQueryMapper<T>) that);
-    } else {
-      return this;
     }
+    return this;
   }
 
   public static <T> UriQueryMapper<T> compile(Uri pattern, UriQuery query, UriFragment fragment, T value) {

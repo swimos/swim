@@ -31,23 +31,19 @@ import swim.util.ToSource;
 public final class AttrsShape implements ToMarkup, ToSource {
 
   final int size;
-  final int rank;
   final @Nullable String key;
   AttrsShape @Nullable [] fields;
-  Object @Nullable [] table; // [...(key: String | null, field: ObejctShape | null)*]
+  Object @Nullable [] table; // [...(key: String | null, field: AttrsShape | null)*]
   final @Nullable AttrsShape parent;
   HashTrieMap<String, SoftReference<AttrsShape>> children;
   @Nullable String purgeKey;
   long purgeTime;
 
-  AttrsShape(int size, int rank, @Nullable String key,
-             AttrsShape @Nullable [] fields,
-             Object @Nullable [] table,
-             @Nullable AttrsShape parent,
+  AttrsShape(int size, @Nullable String key, AttrsShape @Nullable [] fields,
+             Object @Nullable [] table, @Nullable AttrsShape parent,
              HashTrieMap<String, SoftReference<AttrsShape>> children,
              @Nullable String purgeKey) {
     this.size = size;
-    this.rank = rank;
     this.key = key;
     this.fields = fields;
     this.table = table;
@@ -59,10 +55,6 @@ public final class AttrsShape implements ToMarkup, ToSource {
 
   public int size() {
     return this.size;
-  }
-
-  public int rank() {
-    return this.rank;
   }
 
   AttrsShape[] fields() {
@@ -87,7 +79,7 @@ public final class AttrsShape implements ToMarkup, ToSource {
   Object[] table() {
     Object[] table = this.table;
     if (table == null) {
-      table = new Object[AttrsShape.expand(this.rank * 10 / 7) << 1];
+      table = new Object[AttrsShape.expand(this.size * 10 / 7) << 1];
       AttrsShape.buildTable(table, this);
       this.table = table;
     }
@@ -98,47 +90,46 @@ public final class AttrsShape implements ToMarkup, ToSource {
     if (field.parent != null) {
       AttrsShape.buildTable(table, field.parent);
     }
-    final String key = field.key;
-    if (field.size > 0 && key != null) {
-      final int hash = key.hashCode();
-      final int n = table.length >>> 1;
-      int x = Math.abs(hash % n);
-      do {
-        final int i = x << 1;
-        if (table[i] == null) {
-          table[i] = key;
-          table[i + 1] = field;
-          break;
-        } else {
-          x = (x + 1) % n;
-        }
-      } while (x != hash);
+    if (field.size <= 0 || field.key == null) {
+      return;
     }
+    final int hash = field.key.hashCode();
+    final int n = table.length >>> 1;
+    int x = Math.abs(hash % n);
+    do {
+      final int i = x << 1;
+      if (table[i] == null) {
+        table[i] = field.key;
+        table[i + 1] = field;
+        break;
+      }
+      x = (x + 1) % n;
+    } while (x != hash);
   }
 
   int lookup(String key) {
-    if (this.size > 0) {
-      final Object[] table = this.table();
-      final int hash = key.hashCode();
-      final int n = table.length >>> 1;
-      int x = Math.abs(hash % n);
-      do {
-        final int i = x << 1;
-        final String k = (String) table[i];
-        if (k == null) {
-          break;
-        } else if (key.equals(k)) {
-          return ((AttrsShape) table[i + 1]).size - 1;
-        } else {
-          x = (x + 1) % n;
-        }
-      } while (x != hash);
+    if (this.size <= 0) {
+      return -1;
     }
+    final Object[] table = this.table();
+    final int hash = key.hashCode();
+    final int n = table.length >>> 1;
+    int x = Math.abs(hash % n);
+    do {
+      final int i = x << 1;
+      final String k = (String) table[i];
+      if (k == null) {
+        break;
+      } else if (key.equals(k)) {
+        return ((AttrsShape) table[i + 1]).size - 1;
+      }
+      x = (x + 1) % n;
+    } while (x != hash);
     return -1;
   }
 
   @SuppressWarnings("ReferenceEquality")
-  AttrsShape getChild(@Nullable String key) {
+  AttrsShape getChild(String key) {
     final int size = this.size;
     // Check if this is the dictionary shape.
     if (size < 0) {
@@ -157,22 +148,22 @@ public final class AttrsShape implements ToMarkup, ToSource {
         // Child shape already exists.
         child = oldChild;
         break;
-      } else {
-        if (child == null) {
-          // Create the new child shape.
-          child = new AttrsShape(size + 1, key != null ? this.rank + 1 : this.rank, key, null, null, this, HashTrieMap.empty(), null);
-          childRef = new SoftReference<AttrsShape>(child);
-        }
-        // Try to add the new child shape to the children map.
-        final HashTrieMap<String, SoftReference<AttrsShape>> oldChildren = children;
-        final HashTrieMap<String, SoftReference<AttrsShape>> newChildren = oldChildren.updated(key, childRef);
-        children = (HashTrieMap<String, SoftReference<AttrsShape>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
-        if (children == oldChildren) {
-          // Successfully inserted the new child shape.
-          children = newChildren;
-          break;
-        }
+      } else if (child == null) {
+        // Create the new child shape.
+        child = new AttrsShape(size + 1, key, null, null, this, HashTrieMap.empty(), null);
+        childRef = new SoftReference<AttrsShape>(child);
       }
+      // Try to add the new child shape to the children map.
+      final HashTrieMap<String, SoftReference<AttrsShape>> oldChildren = children;
+      final HashTrieMap<String, SoftReference<AttrsShape>> newChildren = oldChildren.updated(key, childRef);
+      children = (HashTrieMap<String, SoftReference<AttrsShape>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
+      if (children != oldChildren) {
+        // CAS failed; try again.
+        continue;
+      }
+      // Successfully inserted the new child shape.
+      children = newChildren;
+      break;
     } while (true);
 
     // Periodically help purge child shape references cleared by the GC.
@@ -201,8 +192,7 @@ public final class AttrsShape implements ToMarkup, ToSource {
   public void writeMarkup(Appendable output) {
     final Notation notation = Notation.from(output);
     notation.beginObject("AttrsShape")
-            .appendField("size", this.size)
-            .appendField("rank", this.rank);
+            .appendField("size", this.size);
     if (this.size > 0) {
       notation.appendKey("fields")
               .beginValue()
@@ -287,9 +277,9 @@ public final class AttrsShape implements ToMarkup, ToSource {
    */
   static final VarHandle PURGE_TIME;
 
-  private static final AttrsShape EMPTY;
+  static final AttrsShape EMPTY;
 
-  private static final AttrsShape DICTIONARY;
+  static final AttrsShape DICTIONARY;
 
   static {
     // Initialize var handles.
@@ -302,8 +292,8 @@ public final class AttrsShape implements ToMarkup, ToSource {
       throw new ExceptionInInitializerError(cause);
     }
 
-    EMPTY = new AttrsShape(0, 0, null, null, null, null, HashTrieMap.empty(), null);
-    DICTIONARY = new AttrsShape(-1, -1, null, null, null, null, HashTrieMap.empty(), null);
+    EMPTY = new AttrsShape(0, null, null, null, null, HashTrieMap.empty(), null);
+    DICTIONARY = new AttrsShape(-1, null, null, null, null, HashTrieMap.empty(), null);
   }
 
   static int expand(int n) {

@@ -34,8 +34,7 @@ public final class HashedValue<T> {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HashedValue<?>) {
-      final HashedValue<?> that = (HashedValue<?>) other;
+    } else if (other instanceof HashedValue<?> that) {
       return this.value == that.value;
     }
     return false;

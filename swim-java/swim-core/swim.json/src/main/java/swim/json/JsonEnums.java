@@ -14,18 +14,21 @@
 
 package swim.json;
 
+import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Output;
-import swim.codec.Write;
-import swim.codec.WriteException;
 import swim.collections.HashTrieMap;
-import swim.expr.Term;
-import swim.expr.TermException;
+import swim.decl.Initializer;
+import swim.decl.TypeName;
+import swim.json.decl.JsonInitializer;
+import swim.json.decl.JsonTypeName;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -46,14 +49,14 @@ public final class JsonEnums implements JsonProvider, ToSource {
   }
 
   @Override
-  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
-    final Class<?> javaClass;
-    if (javaType instanceof Class<?>) {
-      javaClass = (Class<?>) javaType;
-    } else if (javaType instanceof ParameterizedType) {
-      final Type rawType = ((ParameterizedType) javaType).getRawType();
+  public @Nullable JsonFormat<?> resolveJsonFormat(Type type) throws JsonProviderException {
+    final Class<?> classType;
+    if (type instanceof Class<?>) {
+      classType = (Class<?>) type;
+    } else if (type instanceof ParameterizedType) {
+      final Type rawType = ((ParameterizedType) type).getRawType();
       if (rawType instanceof Class<?>) {
-        javaClass = (Class<?>) rawType;
+        classType = (Class<?>) rawType;
       } else {
         return null;
       }
@@ -61,8 +64,8 @@ public final class JsonEnums implements JsonProvider, ToSource {
       return null;
     }
 
-    if (Enum.class.isAssignableFrom(javaClass)) {
-      return JsonEnums.enumForm(Assume.conforms(javaClass));
+    if (Enum.class.isAssignableFrom(classType)) {
+      return JsonEnums.enumFormat(Assume.conforms(classType));
     }
 
     return null;
@@ -83,58 +86,114 @@ public final class JsonEnums implements JsonProvider, ToSource {
     return this.toSource();
   }
 
-  private static final JsonEnums PROVIDER = new JsonEnums(GENERIC_PRIORITY);
+  static final JsonEnums PROVIDER = new JsonEnums(GENERIC_PRIORITY);
 
   public static JsonEnums provider(int priority) {
     if (priority == GENERIC_PRIORITY) {
       return PROVIDER;
-    } else {
-      return new JsonEnums(priority);
     }
+    return new JsonEnums(priority);
   }
 
   public static JsonEnums provider() {
     return PROVIDER;
   }
 
-  public static <E extends Enum<E>> JsonStringForm<?, E> enumForm(Class<E> enumClass) throws JsonFormException {
-    HashTrieMap<String, E> constants = HashTrieMap.empty();
-    HashTrieMap<E, String> identifiers = HashTrieMap.empty();
-    final E[] enumConstants = enumClass.getEnumConstants();
+  public static <T extends Enum<T>> JsonFormat<T> enumFormat(Class<T> enumClass) throws JsonProviderException {
+    final HashTrieMap<Class<?>, Annotation> classAnnotationMap = Json.resolveAnnotations(enumClass);
+    String typeName = null;
+    HashTrieMap<String, T> constants = HashTrieMap.empty();
+    HashTrieMap<T, String> identifiers = HashTrieMap.empty();
+    T initializer = null;
+
+    Annotation typeNameAnnotation;
+    if ((typeNameAnnotation = classAnnotationMap.get(JsonTypeName.class)) != null) {
+      typeName = ((JsonTypeName) typeNameAnnotation).value();
+    } else if ((typeNameAnnotation = classAnnotationMap.get(TypeName.class)) != null) {
+      typeName = ((TypeName) typeNameAnnotation).value();
+    }
+    if (typeName == null) {
+      typeName = "enum";
+    } else if (typeName.length() == 0) {
+      typeName = null;
+    }
+
+    final T[] enumConstants = enumClass.getEnumConstants();
     for (int i = 0; i < enumConstants.length; i += 1) {
-      final E constant = enumConstants[i];
+      final T constant = enumConstants[i];
       String identifier = constant.name();
+
+      final Field field;
       try {
-        final Field field = enumClass.getDeclaredField(identifier);
-        final JsonTag tagAnnotation = field.getAnnotation(JsonTag.class);
-        if (tagAnnotation != null) {
-          final String tag = tagAnnotation.value();
-          if (tag != null && tag.length() != 0) {
-            identifier = tag;
-          }
-        }
+        field = enumClass.getDeclaredField(identifier);
       } catch (NoSuchFieldException cause) {
-        throw new JsonFormException("missing enum constant field: " + identifier, cause);
+        throw new JsonProviderException("missing enum constant field: " + identifier, cause);
       }
+
+      final HashTrieMap<Class<?>, Annotation> fieldAnnotationMap = Json.resolveAnnotations(field);
+      Annotation fieldNameAnnotation;
+      if ((fieldNameAnnotation = fieldAnnotationMap.get(JsonTypeName.class)) != null) {
+        identifier = ((JsonTypeName) fieldNameAnnotation).value();
+      } else if ((fieldNameAnnotation = fieldAnnotationMap.get(TypeName.class)) != null) {
+        identifier = ((TypeName) fieldNameAnnotation).value();
+      }
+
       constants = constants.updated(identifier, constant);
       identifiers = identifiers.updated(constant, identifier);
     }
-    return new JsonEnumForm<E>(enumClass, constants, identifiers);
+
+    final Field[] fields = enumClass.getDeclaredFields();
+    for (int i = 0; i < fields.length; i += 1) {
+      final Field field = fields[i];
+      if ((field.getModifiers() & Modifier.STATIC) == 0) {
+        continue;
+      }
+      final HashTrieMap<Class<?>, Annotation> fieldAnnotationMap = Json.resolveAnnotations(field);
+
+      Annotation initializerAnnotation;
+      if ((initializerAnnotation = fieldAnnotationMap.get(JsonInitializer.class)) != null
+          || (initializerAnnotation = fieldAnnotationMap.get(Initializer.class)) != null) {
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        try {
+          lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), lookup);
+        } catch (IllegalAccessException | SecurityException cause) {
+          // Proceed with the original lookup object.
+        }
+        final VarHandle fieldHandle;
+        try {
+          fieldHandle = lookup.unreflectVarHandle(field);
+        } catch (IllegalAccessException cause) {
+          throw new JsonProviderException("inaccessible initializer field " + field, cause);
+        }
+        initializer = (T) fieldHandle.get();
+      }
+    }
+
+    return new JsonEnumFormat<T>(enumClass, typeName, constants, identifiers, initializer);
   }
 
 }
 
-final class JsonEnumForm<E extends Enum<E>> implements JsonStringForm<StringBuilder, E>, ToSource {
+final class JsonEnumFormat<T extends Enum<T>> implements JsonFormat<T>, JsonStringParser<StringBuilder, T>, JsonStringWriter<T>, ToSource {
 
-  final Class<E> enumClass;
-  final HashTrieMap<String, E> constants;
-  final HashTrieMap<E, String> identifiers;
+  final Class<T> enumClass;
+  final @Nullable String typeName;
+  final HashTrieMap<String, T> constants;
+  final HashTrieMap<T, String> identifiers;
+  final @Nullable T initializer;
 
-  JsonEnumForm(Class<E> enumClass, HashTrieMap<String, E> constants,
-               HashTrieMap<E, String> identifiers) {
+  JsonEnumFormat(Class<T> enumClass, @Nullable String typeName, HashTrieMap<String, T> constants,
+                 HashTrieMap<T, String> identifiers, @Nullable T initializer) {
     this.enumClass = enumClass;
+    this.typeName = typeName;
     this.constants = constants;
     this.identifiers = identifiers;
+    this.initializer = initializer;
+  }
+
+  @Override
+  public @Nullable String typeName() {
+    return this.typeName;
   }
 
   @Override
@@ -148,38 +207,24 @@ final class JsonEnumForm<E extends Enum<E>> implements JsonStringForm<StringBuil
   }
 
   @Override
-  public @Nullable E buildString(StringBuilder builder) {
+  public @Nullable T buildString(StringBuilder builder) {
     return this.constants.get(builder.toString());
   }
 
   @Override
-  public Write<?> write(Output<?> output, @Nullable E value, JsonWriter writer) {
-    if (value != null) {
-      final String identifier = this.identifiers.get(value);
-      if (identifier != null) {
-        return writer.writeString(output, identifier);
-      } else {
-        return Write.error(new WriteException("unsupported value: " + value));
-      }
-    } else {
-      return writer.writeNull(output);
-    }
+  public @Nullable String intoString(@Nullable T value) {
+    return this.identifiers.get(value);
   }
 
   @Override
-  public Term intoTerm(@Nullable E value) throws TermException {
-    return Term.from(value);
-  }
-
-  @Override
-  public @Nullable E fromTerm(Term term) {
-    return term.objectValue(this.enumClass);
+  public @Nullable T initializer() {
+    return this.initializer;
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("JsonEnums", "enumForm")
+    notation.beginInvoke("JsonEnums", "enumFormat")
             .appendArgument(this.enumClass)
             .endInvoke();
   }

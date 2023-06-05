@@ -14,22 +14,24 @@
 
 package swim.waml;
 
+import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Output;
-import swim.codec.Write;
-import swim.codec.WriteException;
 import swim.collections.HashTrieMap;
-import swim.expr.Term;
-import swim.expr.TermException;
+import swim.decl.Initializer;
+import swim.decl.TypeName;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.ToSource;
+import swim.waml.decl.WamlInitializer;
+import swim.waml.decl.WamlTypeName;
 
 @Public
 @Since("5.0")
@@ -47,14 +49,14 @@ public final class WamlEnums implements WamlProvider, ToSource {
   }
 
   @Override
-  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
-    final Class<?> javaClass;
-    if (javaType instanceof Class<?>) {
-      javaClass = (Class<?>) javaType;
-    } else if (javaType instanceof ParameterizedType) {
-      final Type rawType = ((ParameterizedType) javaType).getRawType();
+  public @Nullable WamlFormat<?> resolveWamlFormat(Type type) throws WamlProviderException {
+    final Class<?> classType;
+    if (type instanceof Class<?>) {
+      classType = (Class<?>) type;
+    } else if (type instanceof ParameterizedType) {
+      final Type rawType = ((ParameterizedType) type).getRawType();
       if (rawType instanceof Class<?>) {
-        javaClass = (Class<?>) rawType;
+        classType = (Class<?>) rawType;
       } else {
         return null;
       }
@@ -62,8 +64,8 @@ public final class WamlEnums implements WamlProvider, ToSource {
       return null;
     }
 
-    if (Enum.class.isAssignableFrom(javaClass)) {
-      return WamlEnums.enumForm(Assume.conforms(javaClass));
+    if (Enum.class.isAssignableFrom(classType)) {
+      return WamlEnums.enumFormat(Assume.conforms(classType));
     }
 
     return null;
@@ -84,62 +86,118 @@ public final class WamlEnums implements WamlProvider, ToSource {
     return this.toSource();
   }
 
-  private static final WamlEnums PROVIDER = new WamlEnums(GENERIC_PRIORITY);
+  static final WamlEnums PROVIDER = new WamlEnums(GENERIC_PRIORITY);
 
   public static WamlEnums provider(int priority) {
     if (priority == GENERIC_PRIORITY) {
       return PROVIDER;
-    } else {
-      return new WamlEnums(priority);
     }
+    return new WamlEnums(priority);
   }
 
   public static WamlEnums provider() {
     return PROVIDER;
   }
 
-  public static <E extends Enum<E>> WamlStringForm<?, E> enumForm(Class<E> enumClass) throws WamlFormException {
-    HashTrieMap<String, E> constants = HashTrieMap.empty();
-    HashTrieMap<E, String> identifiers = HashTrieMap.empty();
-    final E[] enumConstants = enumClass.getEnumConstants();
+  public static <T extends Enum<T>> WamlFormat<T> enumFormat(Class<T> enumClass) throws WamlProviderException {
+    final HashTrieMap<Class<?>, Annotation> classAnnotationMap = Waml.resolveAnnotations(enumClass);
+    String typeName = null;
+    HashTrieMap<String, T> constants = HashTrieMap.empty();
+    HashTrieMap<T, String> identifiers = HashTrieMap.empty();
+    T initializer = null;
+
+    Annotation typeNameAnnotation;
+    if ((typeNameAnnotation = classAnnotationMap.get(WamlTypeName.class)) != null) {
+      typeName = ((WamlTypeName) typeNameAnnotation).value();
+    } else if ((typeNameAnnotation = classAnnotationMap.get(TypeName.class)) != null) {
+      typeName = ((TypeName) typeNameAnnotation).value();
+    }
+    if (typeName == null) {
+      typeName = "enum";
+    } else if (typeName.length() == 0) {
+      typeName = null;
+    }
+
+    final T[] enumConstants = enumClass.getEnumConstants();
     for (int i = 0; i < enumConstants.length; i += 1) {
-      final E constant = enumConstants[i];
+      final T constant = enumConstants[i];
       String identifier = constant.name();
+
+      final Field field;
       try {
-        final Field field = enumClass.getDeclaredField(identifier);
-        final WamlTag tagAnnotation = field.getAnnotation(WamlTag.class);
-        if (tagAnnotation != null) {
-          final String tag = tagAnnotation.value();
-          if (tag != null && tag.length() != 0) {
-            identifier = tag;
-          }
-        }
+        field = enumClass.getDeclaredField(identifier);
       } catch (NoSuchFieldException cause) {
-        throw new WamlFormException("missing enum constant field: " + identifier, cause);
+        throw new WamlProviderException("missing enum constant field: " + identifier, cause);
       }
+
+      final HashTrieMap<Class<?>, Annotation> fieldAnnotationMap = Waml.resolveAnnotations(field);
+      Annotation fieldNameAnnotation;
+      if ((fieldNameAnnotation = fieldAnnotationMap.get(WamlTypeName.class)) != null) {
+        identifier = ((WamlTypeName) fieldNameAnnotation).value();
+      } else if ((fieldNameAnnotation = fieldAnnotationMap.get(TypeName.class)) != null) {
+        identifier = ((TypeName) fieldNameAnnotation).value();
+      }
+
       constants = constants.updated(identifier, constant);
       identifiers = identifiers.updated(constant, identifier);
     }
-    return new WamlEnumForm<E>(enumClass, constants, identifiers);
+
+    final Field[] fields = enumClass.getDeclaredFields();
+    for (int i = 0; i < fields.length; i += 1) {
+      final Field field = fields[i];
+      if ((field.getModifiers() & Modifier.STATIC) == 0) {
+        continue;
+      }
+      final HashTrieMap<Class<?>, Annotation> fieldAnnotationMap = Waml.resolveAnnotations(field);
+
+      Annotation initializerAnnotation;
+      if ((initializerAnnotation = fieldAnnotationMap.get(WamlInitializer.class)) != null
+          || (initializerAnnotation = fieldAnnotationMap.get(Initializer.class)) != null) {
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        try {
+          lookup = MethodHandles.privateLookupIn(field.getDeclaringClass(), lookup);
+        } catch (IllegalAccessException | SecurityException cause) {
+          // Proceed with the original lookup object.
+        }
+        final VarHandle fieldHandle;
+        try {
+          fieldHandle = lookup.unreflectVarHandle(field);
+        } catch (IllegalAccessException cause) {
+          throw new WamlProviderException("inaccessible initializer field " + field, cause);
+        }
+        initializer = (T) fieldHandle.get();
+      }
+    }
+
+    return new WamlEnumFormat<T>(enumClass, typeName, constants, identifiers, initializer);
   }
 
 }
 
-final class WamlEnumForm<E extends Enum<E>> implements WamlStringForm<StringBuilder, E>, ToSource {
+final class WamlEnumFormat<T extends Enum<T>> implements WamlFormat<T>, WamlStringParser<StringBuilder, T>, WamlStringWriter<T>, ToSource {
 
-  final Class<E> enumClass;
-  final HashTrieMap<String, E> constants;
-  final HashTrieMap<E, String> identifiers;
+  final Class<T> enumClass;
+  final @Nullable String typeName;
+  final HashTrieMap<String, T> constants;
+  final HashTrieMap<T, String> identifiers;
+  final @Nullable T initializer;
 
-  WamlEnumForm(Class<E> enumClass, HashTrieMap<String, E> constants,
-               HashTrieMap<E, String> identifiers) {
+  WamlEnumFormat(Class<T> enumClass, @Nullable String typeName, HashTrieMap<String, T> constants,
+                 HashTrieMap<T, String> identifiers, @Nullable T initializer) {
     this.enumClass = enumClass;
+    this.typeName = typeName;
     this.constants = constants;
     this.identifiers = identifiers;
+    this.initializer = initializer;
   }
 
   @Override
-  public StringBuilder stringBuilder() {
+  public @Nullable String typeName() {
+    return this.typeName;
+  }
+
+  @Override
+  public StringBuilder stringBuilder(@Nullable Object attrs) {
     return new StringBuilder();
   }
 
@@ -149,38 +207,24 @@ final class WamlEnumForm<E extends Enum<E>> implements WamlStringForm<StringBuil
   }
 
   @Override
-  public @Nullable E buildString(StringBuilder builder) {
+  public @Nullable T buildString(@Nullable Object attrs, StringBuilder builder) {
     return this.constants.get(builder.toString());
   }
 
   @Override
-  public Write<?> write(Output<?> output, @Nullable E value, WamlWriter writer) {
-    if (value != null) {
-      final String identifier = this.identifiers.get(value);
-      if (identifier != null) {
-        return writer.writeString(output, this, identifier, Collections.emptyIterator());
-      } else {
-        return Write.error(new WriteException("unsupported value: " + value));
-      }
-    } else {
-      return writer.writeUnit(output, this, Collections.emptyIterator());
-    }
+  public @Nullable String intoString(@Nullable T value) {
+    return this.identifiers.get(value);
   }
 
   @Override
-  public Term intoTerm(@Nullable E value) throws TermException {
-    return Term.from(value);
-  }
-
-  @Override
-  public @Nullable E fromTerm(Term term) {
-    return term.objectValue(this.enumClass);
+  public @Nullable T initializer(@Nullable Object attrs) {
+    return this.initializer;
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("WamlEnums", "enumForm")
+    notation.beginInvoke("WamlEnums", "enumFormat")
             .appendArgument(this.enumClass)
             .endInvoke();
   }

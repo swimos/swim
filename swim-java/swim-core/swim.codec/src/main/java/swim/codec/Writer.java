@@ -14,14 +14,20 @@
 
 package swim.codec;
 
+import swim.annotations.Contravariant;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A writer of values to non-blocking chunked output writers.
+ *
+ * @param <T> the type of values to write
+ */
 @Public
 @Since("5.0")
 @FunctionalInterface
-public interface Writer<T> extends Encoder<T> {
+public interface Writer<@Contravariant T> extends Encoder<T> {
 
   @Override
   default Encode<?> encode(OutputBuffer<?> output, @Nullable T value) {

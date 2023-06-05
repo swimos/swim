@@ -326,7 +326,7 @@ public final class BinaryInputBuffer extends InputBuffer {
                                  this.offset, this.last);
   }
 
-  private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
+  static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
 
   public static BinaryInputBuffer empty() {
     return new BinaryInputBuffer(EMPTY_BUFFER, null, 0L, false);

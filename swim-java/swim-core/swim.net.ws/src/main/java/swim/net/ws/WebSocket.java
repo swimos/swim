@@ -17,18 +17,15 @@ package swim.net.ws;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Binary;
-import swim.codec.Text;
-import swim.codec.Transcoder;
 import swim.util.Result;
-import swim.ws.WsCodec;
 import swim.ws.WsContinuation;
 import swim.ws.WsException;
 import swim.ws.WsFrame;
+import swim.ws.WsSubprotocol;
 
 @Public
 @Since("5.0")
-public interface WebSocket extends WsCodec<Object> {
+public interface WebSocket {
 
   @Nullable WebSocketContext webSocketContext();
 
@@ -47,14 +44,8 @@ public interface WebSocket extends WsCodec<Object> {
     // hook
   }
 
-  @Override
-  default Transcoder<? extends Object> getTextPayloadTranscoder() throws WsException {
-    return Text.transcoder();
-  }
-
-  @Override
-  default Transcoder<? extends Object> getBinaryPayloadTranscoder() throws WsException {
-    return Binary.byteBufferTranscoder();
+  default WsSubprotocol<?> subprotocol() {
+    return WsSubprotocol.generic();
   }
 
   default void willReadFrame() throws WsException {

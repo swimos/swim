@@ -92,8 +92,7 @@ public final class HttpProduct implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpProduct) {
-      final HttpProduct that = (HttpProduct) other;
+    } else if (other instanceof HttpProduct that) {
       return this.name.equals(that.name)
           && Objects.equals(this.version, that.version)
           && this.comments.equals(that.comments);

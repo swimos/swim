@@ -110,10 +110,12 @@ public final class HttpTransferCoding implements ToSource, ToString {
       final StringTrieMap<HttpTransferCoding> oldNames = names;
       final StringTrieMap<HttpTransferCoding> newNames = oldNames.updated(this.name, this);
       names = (StringTrieMap<HttpTransferCoding>) NAMES.compareAndExchangeRelease(oldNames, newNames);
-      if (names == oldNames) {
-        names = newNames;
-        break;
+      if (names != oldNames) {
+        // CAS failed; try again.
+        continue;
       }
+      names = newNames;
+      break;
     } while (true);
     return this;
   }
@@ -122,8 +124,7 @@ public final class HttpTransferCoding implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpTransferCoding) {
-      final HttpTransferCoding that = (HttpTransferCoding) other;
+    } else if (other instanceof HttpTransferCoding that) {
       return this.name.equals(that.name) && this.params.equals(that.params);
     }
     return false;
@@ -433,14 +434,14 @@ final class ParseHttpTransferCoding extends Parse<HttpTransferCoding> {
 final class WriteHttpTransferCoding extends Write<Object> {
 
   final String name;
-  final Iterator<? extends Map.Entry<String, String>> params;
+  final Iterator<Map.Entry<String, String>> params;
   final @Nullable String key;
   final @Nullable String value;
   final int index;
   final int escape;
   final int step;
 
-  WriteHttpTransferCoding(String name, Iterator<? extends Map.Entry<String, String>> params,
+  WriteHttpTransferCoding(String name, Iterator<Map.Entry<String, String>> params,
                           @Nullable String key, @Nullable String value,
                           int index, int escape, int step) {
     this.name = name;
@@ -460,7 +461,7 @@ final class WriteHttpTransferCoding extends Write<Object> {
   }
 
   static Write<Object> write(Output<?> output, String name,
-                             Iterator<? extends Map.Entry<String, String>> params,
+                             Iterator<Map.Entry<String, String>> params,
                              @Nullable String key, @Nullable String value,
                              int index, int escape, int step) {
     int c = 0;

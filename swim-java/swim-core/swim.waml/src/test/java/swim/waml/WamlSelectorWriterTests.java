@@ -17,7 +17,7 @@ package swim.waml;
 import org.junit.jupiter.api.Test;
 import swim.expr.ContextExpr;
 import swim.expr.GlobalExpr;
-import swim.expr.selector.InvokeExpr;
+import swim.expr.InvokeExpr;
 import swim.repr.Repr;
 import swim.repr.TermRepr;
 
@@ -149,12 +149,12 @@ public class WamlSelectorWriterTests {
   }
 
   public static void assertWrites(String expected, Repr value, WamlWriterOptions options) {
-    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(options)));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.valueFormat().write(value, options));
   }
 
   public static void assertWrites(String expected, Repr value) {
-    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(WamlWriterOptions.readable())));
-    WamlAssertions.assertWrites(expected, () -> WamlReprs.reprForm().write(value, Waml.writer(WamlWriterOptions.compact())));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.valueFormat().write(value, WamlWriterOptions.readable()));
+    WamlAssertions.assertWrites(expected, () -> WamlReprs.valueFormat().write(value, WamlWriterOptions.compact()));
   }
 
 }

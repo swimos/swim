@@ -20,10 +20,10 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * A resolver of {@code WamlForm} instances from Java types.
+ * A resolver of {@code WamlFormat} instances from Java types.
  *
- * @see WamlForm
- * @see WamlCodec
+ * @see WamlFormat
+ * @see WamlMetaCodec
  */
 @Public
 @Since("5.0")
@@ -31,9 +31,9 @@ public interface WamlProvider {
 
   /**
    * Returns the precedence of this provider relative to all other providers
-   * registered with a {@link WamlCodec} instance. Higher priority providers
+   * registered with a {@link WamlMetaCodec} instance. Higher priority providers
    * are consulted before lower priority providers when resolving Java types
-   * to {@code TermForm} instances.
+   * to {@code WamlFormat} instances.
    *
    * @return the priority of this provider; the greater the numeric value,
    *         the higher the priority
@@ -43,18 +43,18 @@ public interface WamlProvider {
   }
 
   /**
-   * Returns a {@code WamlForm} that transcodes WAML
-   * to instances of the given {@code javaType}.
+   * Returns a {@code WamlFormat} that transcodes WAML
+   * to instances of the given {@code type}.
    *
-   * @param javaType the type of {@code WamlForm} to resolve
-   * @return a {@code WamlForm<T>} whose type parameter {@code T} conforms
-   *         to the given {@code javaType}, or {@code null} if this provider
-   *         can't resolve the given {@code javaType}
-   * @throws WamlFormException if this provider could have resolved the given
-   *         {@code javaType}, but was unable to do so because of a potentially
-   *         inadvertent error
+   * @param type the type of {@code WamlFormat} to resolve
+   * @return a {@code WamlFormat<T>} whose type parameter {@code T} conforms
+   *         to the given {@code type}, or {@code null} if this provider
+   *         can't resolve the given {@code type}
+   * @throws WamlProviderException if this provider could have resolved
+   *         the given {@code type}, but was unable to do so because of
+   *         a potentially inadvertent error
    */
-  @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException;
+  @Nullable WamlFormat<?> resolveWamlFormat(Type type) throws WamlProviderException;
 
   static final int BUILTIN_PRIORITY = 100;
 

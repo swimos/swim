@@ -90,7 +90,7 @@ public final class CookieHeader extends HttpHeader {
     return CookieHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<HttpCookie> parseValue(String value) throws HttpException {
+  static FingerTrieList<HttpCookie> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     FingerTrieList<HttpCookie> cookies = FingerTrieList.empty();
     do {
@@ -127,7 +127,7 @@ public final class CookieHeader extends HttpHeader {
     return cookies;
   }
 
-  private static String writeValue(Iterator<HttpCookie> cookies) {
+  static String writeValue(Iterator<HttpCookie> cookies) {
     final StringOutput output = new StringOutput();
     HttpCookie cookie = null;
     do {

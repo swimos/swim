@@ -63,9 +63,8 @@ public final class UnitRepr implements Repr, ToSource {
       return this;
     } else if (attrs == Attrs.empty()) {
       return UnitRepr.unit();
-    } else {
-      return new UnitRepr(attrs);
     }
+    return new UnitRepr(attrs);
   }
 
   @Override
@@ -80,19 +79,19 @@ public final class UnitRepr implements Repr, ToSource {
 
   /**
    * Always returns {@code false} because {@code UnitRepr}
-   * is not a distinct value.
+   * is not a definite value.
    */
   @Override
-  public boolean isDistinct() {
+  public boolean isDefinite() {
     return false;
   }
 
   /**
    * Always returns {@code false} because {@code UnitRepr}
-   * is not a definite value.
+   * is not a distinct value.
    */
   @Override
-  public boolean isDefinite() {
+  public boolean isDistinct() {
     return false;
   }
 
@@ -130,8 +129,7 @@ public final class UnitRepr implements Repr, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UnitRepr) {
-      final UnitRepr that = (UnitRepr) other;
+    } else if (other instanceof UnitRepr that) {
       return this.attrs.equals(that.attrs);
     }
     return false;
@@ -158,7 +156,7 @@ public final class UnitRepr implements Repr, ToSource {
     return this.toSource();
   }
 
-  private static final UnitRepr UNIT = new UnitRepr(Attrs.empty());
+  static final UnitRepr UNIT = new UnitRepr(Attrs.empty());
 
   public static UnitRepr unit() {
     return UNIT;

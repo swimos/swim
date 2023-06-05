@@ -18,7 +18,7 @@ import java.math.BigInteger;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.expr.Term;
+import swim.term.Term;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -66,9 +66,8 @@ public final class StringRepr implements Repr, Comparable<StringRepr>, ToSource 
       return this;
     } else if (attrs == Attrs.empty()) {
       return StringRepr.of(this.value);
-    } else {
-      return new StringRepr(attrs, this.value);
     }
+    return new StringRepr(attrs, this.value);
   }
 
   @Override
@@ -85,9 +84,8 @@ public final class StringRepr implements Repr, Comparable<StringRepr>, ToSource 
   public Term plus(Term that) {
     if (that.isValidString()) {
       return StringRepr.of(this.value + that.stringValue());
-    } else {
-      return Repr.super.plus(that);
     }
+    return Repr.super.plus(that);
   }
 
   @Override
@@ -259,9 +257,8 @@ public final class StringRepr implements Repr, Comparable<StringRepr>, ToSource 
   public char charValue() {
     if (this.value.length() == 1) {
       return this.value.charAt(0);
-    } else {
-      throw new UnsupportedOperationException();
     }
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -279,9 +276,8 @@ public final class StringRepr implements Repr, Comparable<StringRepr>, ToSource 
       return true;
     } else if ("false".equals(this.value)) {
       return false;
-    } else {
-      throw new UnsupportedOperationException();
     }
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -290,9 +286,8 @@ public final class StringRepr implements Repr, Comparable<StringRepr>, ToSource 
       return true;
     } else if ("false".equals(this.value)) {
       return false;
-    } else {
-      return orElse;
     }
+    return orElse;
   }
 
   @Override
@@ -314,8 +309,7 @@ public final class StringRepr implements Repr, Comparable<StringRepr>, ToSource 
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof StringRepr) {
-      final StringRepr that = (StringRepr) other;
+    } else if (other instanceof StringRepr that) {
       return this.attrs.equals(that.attrs)
           && this.value.equals(that.value);
     }
@@ -349,7 +343,7 @@ public final class StringRepr implements Repr, Comparable<StringRepr>, ToSource 
     return this.toSource();
   }
 
-  private static final StringRepr EMPTY = new StringRepr(Attrs.empty(), "");
+  static final StringRepr EMPTY = new StringRepr(Attrs.empty(), "");
 
   public static StringRepr empty() {
     return EMPTY;
@@ -358,9 +352,8 @@ public final class StringRepr implements Repr, Comparable<StringRepr>, ToSource 
   public static StringRepr of(String value) {
     if (value.length() == 0) {
       return EMPTY;
-    } else {
-      return new StringRepr(Attrs.empty(), value);
     }
+    return new StringRepr(Attrs.empty(), value);
   }
 
 }

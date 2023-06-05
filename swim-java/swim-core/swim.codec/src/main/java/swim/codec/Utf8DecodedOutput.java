@@ -16,6 +16,7 @@ package swim.codec;
 
 import java.util.NoSuchElementException;
 import swim.annotations.CheckReturnValue;
+import swim.annotations.Covariant;
 import swim.annotations.NonNull;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -28,7 +29,7 @@ import swim.annotations.Since;
  */
 @Public
 @Since("5.0")
-public final class Utf8DecodedOutput<T> extends Output<T> {
+public final class Utf8DecodedOutput<@Covariant T> extends Output<T> {
 
   final Output<T> output;
   final UtfErrorMode errorMode;
@@ -304,14 +305,14 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
                                     this.have, this.error);
   }
 
-  private static String invalid(int c1) {
+  static String invalid(int c1) {
     final StringOutput output = new StringOutput();
     output.append("invalid UTF-8 code unit: ");
     Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
     return output.get();
   }
 
-  private static String invalid(int c1, int c2) {
+  static String invalid(int c1, int c2) {
     final StringOutput output = new StringOutput();
     output.append("invalid UTF-8 code unit sequence: ");
     Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
@@ -320,7 +321,7 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
     return output.get();
   }
 
-  private static String invalid(int c1, int c2, int c3) {
+  static String invalid(int c1, int c2, int c3) {
     final StringOutput output = new StringOutput();
     output.append("invalid UTF-8 code unit sequence: ");
     Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();
@@ -331,7 +332,7 @@ public final class Utf8DecodedOutput<T> extends Output<T> {
     return output.get();
   }
 
-  private static String invalid(int c1, int c2, int c3, int c4) {
+  static String invalid(int c1, int c2, int c3, int c4) {
     final StringOutput output = new StringOutput();
     output.append("invalid UTF-8 code unit sequence: ");
     Base16.uppercase().writeIntLiteral(output, c1, 2).assertDone();

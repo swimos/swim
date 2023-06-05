@@ -14,112 +14,424 @@
 
 package swim.json;
 
+import java.util.Objects;
+import java.util.function.Function;
+import swim.annotations.Covariant;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
+import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parse;
-import swim.expr.ExprParser;
-import swim.expr.Term;
-import swim.expr.TermForm;
-import swim.json.parser.ParseJsonArray;
-import swim.json.parser.ParseJsonExpr;
-import swim.json.parser.ParseJsonIdentifier;
-import swim.json.parser.ParseJsonLiteral;
-import swim.json.parser.ParseJsonNull;
-import swim.json.parser.ParseJsonNumber;
-import swim.json.parser.ParseJsonObject;
-import swim.json.parser.ParseJsonString;
-import swim.json.parser.ParseJsonUndefined;
-import swim.json.parser.ParseJsonValue;
+import swim.codec.StringInput;
+import swim.expr.CondExpr;
+import swim.term.Term;
+import swim.term.TermParser;
+import swim.term.TermParserOptions;
+import swim.util.Assume;
 import swim.util.Notation;
+import swim.util.Result;
+import swim.util.ToSource;
 
 /**
- * Factory for constructing JSON parsers.
+ * A parser of values from JSON.
+ *
+ * @param <T> the type of values to parse from JSON
  */
 @Public
 @Since("5.0")
-public class JsonParser extends ExprParser {
+public interface JsonParser<@Covariant T> extends TermParser<T> {
 
-  protected final JsonParserOptions options;
+  @Nullable String typeName();
 
-  protected JsonParser(JsonParserOptions options) {
-    this.options = options;
+  /**
+   * Returns a {@code JsonIdentifierParser} for parsing values of type {@code T}
+   * from JSON identifier literals.
+   *
+   * @return a {@code JsonIdentifierParser} that parses values of type {@code T}
+   *         from JSON identifier literals
+   * @throws JsonException if parsing values of type {@code T}
+   *         from JSON identifier literals is not supported
+   */
+  default JsonIdentifierParser<T> identifierParser() throws JsonException {
+    throw new JsonException("identifier not supported");
   }
 
-  public JsonParserOptions options() {
-    return this.options;
+  /**
+   * Returns a {@code JsonNumberParser} for parsing values of type {@code T}
+   * from JSON number literals.
+   *
+   * @return a {@code JsonNumberParser} that parses values of type {@code T}
+   *         from JSON number literals
+   * @throws JsonException if parsing values of type {@code T}
+   *         from JSON number literals is not supported
+   */
+  default JsonNumberParser<T> numberParser() throws JsonException {
+    throw new JsonException("number not supported");
+  }
+
+  /**
+   * Returns a {@code JsonStringParser} for parsing values of type {@code T}
+   * from JSON string literals.
+   *
+   * @return a {@code JsonStringParser} that parses values of type {@code T}
+   *         from JSON string literals
+   * @throws JsonException if parsing values of type {@code T}
+   *         from JSON string literals is not supported
+   */
+  default JsonStringParser<?, T> stringParser() throws JsonException {
+    throw new JsonException("string not supported");
+  }
+
+  /**
+   * Returns a {@code JsonArrayParser} for parsing values of type {@code T}
+   * from JSON array literals.
+   *
+   * @return a {@code JsonArrayParser} that parses values of type {@code T}
+   *         from JSON array literals
+   * @throws JsonException if parsing values of type {@code T}
+   *         from JSON array literals is not supported
+   */
+  default JsonArrayParser<?, ?, T> arrayParser() throws JsonException {
+    throw new JsonException("array not supported");
+  }
+
+  /**
+   * Returns a {@code JsonObjectParser} for parsing values of type {@code T}
+   * from JSON object literals.
+   *
+   * @return a {@code JsonObjectParser} that parses values of type {@code T}
+   *         from JSON object literals
+   * @throws JsonException if parsing values of type {@code T}
+   *         from JSON object literals is not supported
+   */
+  default JsonObjectParser<?, ?, T> objectParser() throws JsonException {
+    throw new JsonException("object not supported");
+  }
+
+  /**
+   * Returns a default representation of type {@code T}.
+   *
+   * @return a default value of type {@code T}
+   * @throws JsonException if no default value exists for type {@code T}
+   */
+  @Nullable T initializer() throws JsonException;
+
+  @Override
+  default Parse<T> parse(Input input, TermParserOptions options) {
+    return this.parse(input, JsonParserOptions.standard().withOptions(options));
+  }
+
+  Parse<T> parse(Input input, JsonParserOptions options);
+
+  @Override
+  default Parse<T> parse(Input input) {
+    return this.parse(input, JsonParserOptions.standard());
+  }
+
+  default Parse<T> parse(JsonParserOptions options) {
+    return this.parse(StringInput.empty(), options);
   }
 
   @Override
-  public Parse<Term> parseLiteralExpr(Input input, TermForm<?> form) {
-    if (form instanceof JsonForm<?>) {
-      return ParseJsonLiteral.parse(input, this, (JsonForm<?>) form, null, 1);
-    } else {
-      return super.parseLiteralExpr(input, form);
+  default Parse<T> parse() {
+    return this.parse(StringInput.empty(), JsonParserOptions.standard());
+  }
+
+  default Parse<T> parse(String string, JsonParserOptions options) {
+    Objects.requireNonNull(string, "string");
+    Objects.requireNonNull(options, "options");
+    final StringInput input = new StringInput(string);
+    while (input.isCont() && Term.isWhitespace(input.head())) {
+      input.step();
+    }
+    final Parse<T> parseJson = this.parse(input, options);
+    if (parseJson.isDone()) {
+      while (input.isCont() && Term.isWhitespace(input.head())) {
+        input.step();
+      }
+    }
+    return parseJson.complete(input);
+  }
+
+  @Override
+  default Parse<T> parse(String string) {
+    return this.parse(string, JsonParserOptions.standard());
+  }
+
+  @Override
+  default Parse<Object> parseExpr(Input input, TermParserOptions options) {
+    options = JsonParserOptions.standard().withOptions(options);
+    if (((JsonParserOptions) options).exprsEnabled()) {
+      return CondExpr.parse(input, this, options);
+    }
+    return Assume.covariant(this.parseValue(input, options));
+  }
+
+  @Override
+  default Parse<T> parseValue(Input input, TermParserOptions options) {
+    return ParseJsonValue.parse(input, this, JsonParserOptions.standard().withOptions(options));
+  }
+
+  default <U> JsonParser<U> map(Function<? super T, ? extends U> mapper) {
+    return new JsonParserMapper<T, U>(this, mapper);
+  }
+
+  static <T> JsonParser<T> dummy() {
+    return Assume.conforms(JsonDummyParser.INSTANCE);
+  }
+
+  static <T> JsonParser<T> unsupported(Class<?> classType) {
+    return new JsonUnsupportedParser<T>(classType);
+  }
+
+}
+
+final class JsonParserMapper<S, T> implements JsonParser<T>, ToSource {
+
+  final JsonParser<S> parser;
+  final Function<? super S, ? extends T> mapper;
+
+  JsonParserMapper(JsonParser<S> parser, Function<? super S, ? extends T> mapper) {
+    this.parser = parser;
+    this.mapper = mapper;
+  }
+
+  @Override
+  public @Nullable String typeName() {
+    return this.parser.typeName();
+  }
+
+  @Override
+  public JsonIdentifierParser<T> identifierParser() throws JsonException {
+    return this.parser.identifierParser().map(this.mapper);
+  }
+
+  @Override
+  public JsonNumberParser<T> numberParser() throws JsonException {
+    return this.parser.numberParser().map(this.mapper);
+  }
+
+  @Override
+  public JsonStringParser<?, T> stringParser() throws JsonException {
+    return this.parser.stringParser().map(this.mapper);
+  }
+
+  @Override
+  public JsonArrayParser<?, ?, T> arrayParser() throws JsonException {
+    return this.parser.arrayParser().map(this.mapper);
+  }
+
+  @Override
+  public JsonObjectParser<?, ?, T> objectParser() throws JsonException {
+    return this.parser.objectParser().map(this.mapper);
+  }
+
+  @Override
+  public @Nullable T initializer() throws JsonException {
+    try {
+      return this.mapper.apply(this.parser.initializer());
+    } catch (Throwable cause) {
+      Result.throwFatal(cause);
+      throw new JsonException(cause);
     }
   }
 
-  public <T> Parse<T> parseExpr(Input input, JsonForm<? extends T> form) {
-    if (this.options().exprsEnabled()) {
-      return ParseJsonExpr.parse(input, this, form, null);
-    } else {
-      return this.parseValue(input, form);
-    }
+  @Override
+  public Parse<T> parse(Input input, JsonParserOptions options) {
+    return this.parser.parse(input, options).map(this.mapper);
   }
 
-  public <T> Parse<T> parseUndefined(Input input, JsonUndefinedForm<? extends T> form) {
-    return ParseJsonUndefined.parse(input, form, 0);
+  @Override
+  public Parse<T> parseValue(Input input, TermParserOptions options) {
+    return this.parser.parseValue(input, options).map(this.mapper);
   }
 
-  public <T> Parse<T> parseNull(Input input, JsonNullForm<? extends T> form) {
-    return ParseJsonNull.parse(input, form, 0);
-  }
-
-  public <T> Parse<T> parseNumber(Input input, JsonNumberForm<? extends T> form) {
-    return ParseJsonNumber.parse(input, form, null, 1, 0L, 0, 1);
-  }
-
-  public <T> Parse<T> parseIdentifier(Input input, JsonIdentifierForm<? extends T> form) {
-    return ParseJsonIdentifier.parse(input, this, form, null, 1);
-  }
-
-  public <T> Parse<T> parseString(Input input, JsonStringForm<?, ? extends T> form) {
-    return ParseJsonString.parse(input, form, null, 0, 1);
-  }
-
-  public <B, T> Parse<T> parseArray(Input input, JsonArrayForm<?, B, ? extends T> form,
-                                    @Nullable B builder) {
-    return ParseJsonArray.parse(input, this, form, builder, null, 1);
-  }
-
-  public <T> Parse<T> parseArray(Input input, JsonArrayForm<?, ?, ? extends T> form) {
-    return ParseJsonArray.parse(input, this, form, null, null, 1);
-  }
-
-  public <B, T> Parse<T> parseObject(Input input, JsonObjectForm<?, ?, B, ? extends T> form,
-                                     @Nullable B builder) {
-    return ParseJsonObject.parse(input, this, form, builder, null, null, null, 1);
-  }
-
-  public <T> Parse<T> parseObject(Input input, JsonObjectForm<?, ?, ?, ? extends T> form) {
-    return ParseJsonObject.parse(input, this, form, null, null, null, null, 1);
-  }
-
-  public <T> Parse<T> parseValue(Input input, JsonForm<? extends T> form) {
-    return ParseJsonValue.parse(input, this, form);
+  @Override
+  public <U> JsonParser<U> map(Function<? super T, ? extends U> mapper) {
+    return new JsonParserMapper<S, U>(this.parser, this.mapper.andThen(mapper));
   }
 
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("Json", "parser")
-            .appendArgument(this.options)
+    notation.appendSource(this.parser)
+            .beginInvoke("map")
+            .appendArgument(this.mapper)
             .endInvoke();
   }
 
-  static final JsonParser STANDARD = new JsonParser(JsonParserOptions.standard());
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
 
-  static final JsonParser EXPRESSIONS = new JsonParser(JsonParserOptions.expressions());
+}
+
+final class JsonDummyParser<T> implements JsonParser<T>, ToSource {
+
+  private JsonDummyParser() {
+    // singleton
+  }
+
+  @Override
+  public @Nullable String typeName() {
+    return null;
+  }
+
+  @Override
+  public JsonIdentifierParser<T> identifierParser() {
+    return JsonIdentifierParser.dummy();
+  }
+
+  @Override
+  public JsonNumberParser<T> numberParser() {
+    return JsonNumberParser.dummy();
+  }
+
+  @Override
+  public JsonStringParser<?, T> stringParser() {
+    return JsonStringParser.dummy();
+  }
+
+  @Override
+  public JsonArrayParser<?, ?, T> arrayParser() {
+    return JsonArrayParser.dummy();
+  }
+
+  @Override
+  public JsonObjectParser<?, ?, T> objectParser() {
+    return JsonObjectParser.dummy();
+  }
+
+  @Override
+  public @Nullable T initializer() {
+    return null;
+  }
+
+  @Override
+  public Parse<T> parse(Input input, JsonParserOptions options) {
+    return this.parseValue(input, options);
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.beginInvoke("JsonParser", "dummy").endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+  static final JsonDummyParser<Object> INSTANCE = new JsonDummyParser<Object>();
+
+}
+
+final class JsonUnsupportedParser<T> implements JsonParser<T>, ToSource {
+
+  final Class<?> classType;
+
+  JsonUnsupportedParser(Class<?> classType) {
+    this.classType = classType;
+  }
+
+  @Override
+  public @Nullable String typeName() {
+    return null;
+  }
+
+  @Override
+  public @Nullable T initializer() {
+    return null;
+  }
+
+  @Override
+  public Parse<T> parse(Input input, JsonParserOptions options) {
+    return Parse.diagnostic(input, new JsonException("unable to parse class "
+                                                   + this.classType.getName()));
+  }
+
+  @Override
+  public Parse<T> parseValue(Input input, TermParserOptions options) {
+    return Parse.diagnostic(input, new JsonException("unable to parse class "
+                                                   + this.classType.getName()));
+  }
+
+  @Override
+  public void writeSource(Appendable output) {
+    final Notation notation = Notation.from(output);
+    notation.beginInvoke("JsonParser", "unsupported")
+            .appendArgument(this.classType)
+            .endInvoke();
+  }
+
+  @Override
+  public String toString() {
+    return this.toSource();
+  }
+
+}
+
+final class ParseJsonValue<T> extends Parse<T> {
+
+  final JsonParser<T> parser;
+  final JsonParserOptions options;
+
+  ParseJsonValue(JsonParser<T> parser, JsonParserOptions options) {
+    this.parser = parser;
+    this.options = options;
+  }
+
+  @Override
+  public Parse<T> consume(Input input) {
+    return ParseJsonValue.parse(input, this.parser, this.options);
+  }
+
+  static <T> Parse<T> parse(Input input, JsonParser<T> parser, JsonParserOptions options) {
+    if (input.isCont()) {
+      final int c = input.head();
+      if (Term.isIdentifierStartChar(c)) {
+        try {
+          return parser.identifierParser().parseIdentifier(input, options);
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
+        }
+      } else if (c == '-' || (c >= '0' && c <= '9')) {
+        try {
+          return parser.numberParser().parseNumber(input, options);
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
+        }
+      } else if (c == '"') {
+        try {
+          return parser.stringParser().parseString(input, options);
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
+        }
+      } else if (c == '[') {
+        try {
+          return parser.arrayParser().parseArray(input, options);
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
+        }
+      } else if (c == '{') {
+        try {
+          return parser.objectParser().parseObject(input, options);
+        } catch (JsonException cause) {
+          return Parse.diagnostic(input, cause);
+        }
+      } else {
+        return Parse.error(Diagnostic.expected("value", input));
+      }
+    } else if (input.isDone()) {
+      return Parse.error(Diagnostic.expected("value", input));
+    }
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseJsonValue<T>(parser, options);
+  }
 
 }

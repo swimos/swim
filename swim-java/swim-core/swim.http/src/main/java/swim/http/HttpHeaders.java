@@ -704,8 +704,8 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof Map<?, ?>) {
-      return this.entrySet().equals(((Map<?, ?>) other).entrySet());
+    } else if (other instanceof Map<?, ?> that) {
+      return this.entrySet().equals(that.entrySet());
     }
     return false;
   }
@@ -745,9 +745,9 @@ public final class HttpHeaders implements UpdatableMap<String, String>, Iterable
 
   static final int ALIASED_FLAG = 1 << 1;
 
-  private static final HttpHeader[] EMPTY_ARRAY = new HttpHeader[0];
+  static final HttpHeader[] EMPTY_ARRAY = new HttpHeader[0];
 
-  private static final HttpHeaders EMPTY = new HttpHeaders(IMMUTABLE_FLAG | ALIASED_FLAG, 0, EMPTY_ARRAY);
+  static final HttpHeaders EMPTY = new HttpHeaders(IMMUTABLE_FLAG | ALIASED_FLAG, 0, EMPTY_ARRAY);
 
   public static HttpHeaders empty() {
     return EMPTY;
@@ -1040,7 +1040,7 @@ final class ParseHttpHeaders extends Parse<HttpHeaders> {
                                   @Nullable HttpHeaders headers,
                                   @Nullable StringTrieMap<HttpHeaderType<?, ?>> nameTrie,
                                   @Nullable StringBuilder nameBuilder,
-                                  @Nullable StringBuilder valueBuilder,  int step) {
+                                  @Nullable StringBuilder valueBuilder, int step) {
     int c = 0;
     do {
       if (step == 1) {
@@ -1193,8 +1193,7 @@ final class WriteHttpHeaders extends Write<Object> {
   final int step;
 
   WriteHttpHeaders(Iterator<? extends Map.Entry<String, String>> headers,
-                   @Nullable String name, @Nullable String value,
-                   int index, int step) {
+                   @Nullable String name, @Nullable String value, int index, int step) {
     this.headers = headers;
     this.name = name;
     this.value = value;
@@ -1208,10 +1207,8 @@ final class WriteHttpHeaders extends Write<Object> {
                                   this.index, this.step);
   }
 
-  static Write<Object> write(Output<?> output,
-                             Iterator<? extends Map.Entry<String, String>> headers,
-                             @Nullable String name, @Nullable String value,
-                             int index, int step) {
+  static Write<Object> write(Output<?> output, Iterator<? extends Map.Entry<String, String>> headers,
+                             @Nullable String name, @Nullable String value, int index, int step) {
     int c = 0;
     do {
       if (step == 1) {

@@ -251,26 +251,26 @@ public class WsDeflateDecoderTests {
   @Test
   public void inflateUnmaskedSharedWindow() {
     final WsDeflateDecoder decoder = Ws.deflateClientDecoder(WsOptions.standard());
-    Decode<WsFrame<String>> frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C107F248CDC9C90700").getNonNullUnchecked()).asLast(false), WsTestCodec.stringCodec());
+    Decode<WsFrame<String>> frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C107F248CDC9C90700").getNonNullUnchecked()).asLast(false), WsSubprotocol.text());
     assertEquals(WsTextFrame.of("Hello"), frameDecoder.getUnchecked());
-    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C105F200110000").getNonNullUnchecked()).asLast(false), WsTestCodec.stringCodec());
+    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C105F200110000").getNonNullUnchecked()).asLast(false), WsSubprotocol.text());
     assertEquals(WsTextFrame.of("Hello"), frameDecoder.getUnchecked());
-    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C10402130000").getNonNullUnchecked()).asLast(false), WsTestCodec.stringCodec());
+    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C10402130000").getNonNullUnchecked()).asLast(false), WsSubprotocol.text());
     assertEquals(WsTextFrame.of("Hello"), frameDecoder.getUnchecked());
-    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C10402130000").getNonNullUnchecked()).asLast(false), WsTestCodec.stringCodec());
+    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C10402130000").getNonNullUnchecked()).asLast(false), WsSubprotocol.text());
     assertEquals(WsTextFrame.of("Hello"), frameDecoder.getUnchecked());
   }
 
   @Test
   public void inflateMaskedSharedWindow() {
     final WsDeflateDecoder decoder = Ws.deflateServerDecoder(WsOptions.standard());
-    Decode<WsFrame<String>> frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C18737FA213DC5B2ECF4FEFD21").getNonNullUnchecked()).asLast(false), WsTestCodec.stringCodec());
+    Decode<WsFrame<String>> frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C18737FA213DC5B2ECF4FEFD21").getNonNullUnchecked()).asLast(false), WsSubprotocol.text());
     assertEquals(WsTextFrame.of("Hello"), frameDecoder.getUnchecked());
-    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C18537FA213DC5FA303D37").getNonNullUnchecked()).asLast(false), WsTestCodec.stringCodec());
+    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C18537FA213DC5FA303D37").getNonNullUnchecked()).asLast(false), WsSubprotocol.text());
     assertEquals(WsTextFrame.of("Hello"), frameDecoder.getUnchecked());
-    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C18437FA213D35E9213D").getNonNullUnchecked()).asLast(false), WsTestCodec.stringCodec());
+    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C18437FA213D35E9213D").getNonNullUnchecked()).asLast(false), WsSubprotocol.text());
     assertEquals(WsTextFrame.of("Hello"), frameDecoder.getUnchecked());
-    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C18437FA213D35E9213D").getNonNullUnchecked()).asLast(false), WsTestCodec.stringCodec());
+    frameDecoder = decoder.decodeMessage(new BinaryInputBuffer(Base16.parseByteBuffer("C18437FA213D35E9213D").getNonNullUnchecked()).asLast(false), WsSubprotocol.text());
     assertEquals(WsTextFrame.of("Hello"), frameDecoder.getUnchecked());
   }
 

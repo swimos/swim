@@ -48,9 +48,8 @@ public abstract class UriPathMapper<T> extends UriAuthorityMapper<T> {
   UriAuthorityMapper<T> merged(UriAuthorityMapper<T> that) {
     if (that instanceof UriPathMapper<?>) {
       return this.merged((UriPathMapper<T>) that);
-    } else {
-      return that;
     }
+    return that;
   }
 
   abstract UriPathMapper<T> removed(UriPath path, UriQuery query, UriFragment fragment);
@@ -66,22 +65,19 @@ public abstract class UriPathMapper<T> extends UriAuthorityMapper<T> {
   UriAuthorityMapper<T> unmerged(UriAuthorityMapper<T> that) {
     if (that instanceof UriPathMapper<?>) {
       return this.unmerged((UriPathMapper<T>) that);
-    } else {
-      return this;
     }
+    return this;
   }
 
   public static <T> UriPathMapper<T> compile(Uri pattern, UriPath path, UriQuery query, UriFragment fragment, T value) {
-    if (!path.isEmpty()) {
-      final String segment = path.head();
-      if (!segment.isEmpty() && segment.charAt(0) == ':') {
-        return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty(), UriPathMapper.compile(pattern, path.tail(), query, fragment, value), Assume.conforms(UriMapper.empty()));
-      } else {
-        return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty().updated(segment, UriPathMapper.compile(pattern, path.tail(), query, fragment, value)), Assume.conforms(UriMapper.empty()), Assume.conforms(UriMapper.empty()));
-      }
-    } else {
+    if (path.isEmpty()) {
       return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty(), Assume.conforms(UriMapper.empty()), UriQueryMapper.compile(pattern, query, fragment, value));
     }
+    final String segment = path.head();
+    if (!segment.isEmpty() && segment.charAt(0) == ':') {
+      return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty(), UriPathMapper.compile(pattern, path.tail(), query, fragment, value), Assume.conforms(UriMapper.empty()));
+    }
+    return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty().updated(segment, UriPathMapper.compile(pattern, path.tail(), query, fragment, value)), Assume.conforms(UriMapper.empty()), Assume.conforms(UriMapper.empty()));
   }
 
 }

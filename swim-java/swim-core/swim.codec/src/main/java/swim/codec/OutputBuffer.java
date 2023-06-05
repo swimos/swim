@@ -17,6 +17,7 @@ package swim.codec;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import swim.annotations.Covariant;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
@@ -25,7 +26,7 @@ import swim.annotations.Since;
  */
 @Public
 @Since("5.0")
-public abstract class OutputBuffer<T> extends Output<T> {
+public abstract class OutputBuffer<@Covariant T> extends Output<T> {
 
   protected OutputBuffer() {
     // nop

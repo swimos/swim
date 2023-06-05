@@ -16,8 +16,6 @@ package swim.uri;
 
 import java.io.IOException;
 import java.util.Objects;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -29,6 +27,8 @@ import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Utf8DecodedOutput;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
@@ -58,11 +58,10 @@ public final class UriUser implements ToSource, ToString {
 
   @SuppressWarnings("ReferenceEquality")
   public UriUser withName(@Nullable String name) {
-    if (name != this.name) {
-      return UriUser.namePass(name, this.pass);
-    } else {
+    if (name == this.name) {
       return this;
     }
+    return UriUser.namePass(name, this.pass);
   }
 
   public @Nullable String pass() {
@@ -71,19 +70,17 @@ public final class UriUser implements ToSource, ToString {
 
   @SuppressWarnings("ReferenceEquality")
   public UriUser withPass(@Nullable String pass) {
-    if (pass != this.pass) {
-      return UriUser.namePass(this.name, pass);
-    } else {
+    if (pass == this.pass) {
       return this;
     }
+    return UriUser.namePass(this.name, pass);
   }
 
   @Override
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UriUser) {
-      final UriUser that = (UriUser) other;
+    } else if (other instanceof UriUser that) {
       return Objects.equals(this.name, that.name)
           && Objects.equals(this.pass, that.pass);
     }
@@ -142,38 +139,35 @@ public final class UriUser implements ToSource, ToString {
     }
   }
 
-  @IntoForm
+  @Marshal
   @Override
   public String toString() {
     return this.toString(null);
   }
 
-  private static final UriUser UNDEFINED = new UriUser(null, null);
+  static final UriUser UNDEFINED = new UriUser(null, null);
 
   public static UriUser undefined() {
     return UNDEFINED;
   }
 
   public static UriUser namePass(@Nullable String name, @Nullable String pass) {
-    if (name != null || pass != null) {
-      if (name == null) {
-        name = "";
-      }
-      return new UriUser(name, pass);
-    } else {
+    if (name == null && pass == null) {
       return UriUser.undefined();
+    } else if (name == null) {
+      name = "";
     }
+    return new UriUser(name, pass);
   }
 
   public static UriUser name(@Nullable String name) {
-    if (name != null) {
-      return new UriUser(name, null);
-    } else {
+    if (name == null) {
       return UriUser.undefined();
     }
+    return new UriUser(name, null);
   }
 
-  @FromForm
+  @Unmarshal
   public static @Nullable UriUser from(String value) {
     return UriUser.parse(value).getOr(null);
   }

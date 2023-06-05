@@ -15,73 +15,32 @@
 package swim.codec;
 
 import java.lang.reflect.Type;
-import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * A transcoder of values from/to non-blocking chunked input/output buffers.
+ *
+ * @param <T> the type of values to decode/encode
+ */
 @Public
 @Since("5.0")
-public interface Codec {
+public interface Codec<T> extends Decoder<T>, Encoder<T> {
 
+  /**
+   * Returns the media type of this codec's encoded data format.
+   *
+   * @return a media type that identifies the data format
+   *         decoded/encoded by this codec
+   */
   MediaType mediaType();
 
-  <T> Transcoder<T> getTranscoder(Type javaType) throws TranscoderException;
-
-  default <T> Decode<T> decode(Type javaType, InputBuffer input) {
-    final Transcoder<T> transcoder;
-    try {
-      transcoder = this.getTranscoder(javaType);
-    } catch (TranscoderException cause) {
-      return Decode.error(cause);
-    }
-    return transcoder.decode(input);
+  static <T> Codec<T> get(MediaType mediaType, Type type) throws CodecException {
+    return MetaCodec.registry().getCodec(mediaType, type);
   }
 
-  default <T> Decode<T> decode(Type javaType) {
-    final Transcoder<T> transcoder;
-    try {
-      transcoder = this.getTranscoder(javaType);
-    } catch (TranscoderException cause) {
-      return Decode.error(cause);
-    }
-    return transcoder.decode();
-  }
-
-  default <T> Encode<?> encode(Type javaType, OutputBuffer<?> output, @Nullable T value) {
-    final Transcoder<T> transcoder;
-    try {
-      transcoder = this.getTranscoder(javaType);
-    } catch (TranscoderException cause) {
-      return Encode.error(cause);
-    }
-    return transcoder.encode(output, value);
-  }
-
-  default <T> Encode<?> encode(Type javaType, @Nullable T value) {
-    final Transcoder<T> transcoder;
-    try {
-      transcoder = this.getTranscoder(javaType);
-    } catch (TranscoderException cause) {
-      return Encode.error(cause);
-    }
-    return transcoder.encode(value);
-  }
-
-  default <T> long sizeOf(Type javaType, @Nullable T value) throws TranscoderException, EncodeException {
-    final Transcoder<T> transcoder = this.getTranscoder(javaType);
-    return transcoder.sizeOf(value);
-  }
-
-  static CodecRegistry registry() {
-    return CodecRegistry.REGISTRY;
-  }
-
-  static Codec get(MediaType mediaType) throws CodecException {
-    return Codec.registry().getCodec(mediaType);
-  }
-
-  static Codec get(String mediaType) throws CodecException {
-    return Codec.registry().getCodec(mediaType);
+  static <T> Codec<T> get(String mediaType, Type type) throws CodecException {
+    return MetaCodec.registry().getCodec(mediaType, type);
   }
 
 }

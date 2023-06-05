@@ -15,14 +15,20 @@
 package swim.codec;
 
 import java.nio.ByteBuffer;
+import swim.annotations.Contravariant;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 
+/**
+ * An encoder of values to non-blocking chunked output buffers.
+ *
+ * @param <T> the type of values to encode
+ */
 @Public
 @Since("5.0")
 @FunctionalInterface
-public interface Encoder<T> {
+public interface Encoder<@Contravariant T> {
 
   Encode<?> encode(OutputBuffer<?> output, @Nullable T value);
 

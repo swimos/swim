@@ -17,7 +17,7 @@ package swim.json;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.expr.TermException;
+import swim.term.TermException;
 
 /**
  * Thrown when a json error occurs.

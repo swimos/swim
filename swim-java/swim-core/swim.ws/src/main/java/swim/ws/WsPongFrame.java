@@ -20,8 +20,8 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Binary;
+import swim.codec.Codec;
 import swim.codec.Text;
-import swim.codec.Transcoder;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.ToSource;
@@ -31,11 +31,11 @@ import swim.util.ToSource;
 public final class WsPongFrame<T> extends WsControlFrame<T> implements ToSource {
 
   final @Nullable T payload;
-  final Transcoder<T> transcoder;
+  final Codec<T> codec;
 
-  WsPongFrame(@Nullable T payload, Transcoder<T> transcoder) {
+  WsPongFrame(@Nullable T payload, Codec<T> codec) {
     this.payload = payload;
-    this.transcoder = transcoder;
+    this.codec = codec;
   }
 
   @Override
@@ -50,24 +50,22 @@ public final class WsPongFrame<T> extends WsControlFrame<T> implements ToSource 
 
   @Override
   public T getNonNull() {
-    if (this.payload != null) {
-      return this.payload;
-    } else {
+    if (this.payload == null) {
       throw new NullPointerException("null websocket payload");
     }
+    return this.payload;
   }
 
   @Override
-  public Transcoder<T> transcoder() {
-    return this.transcoder;
+  public Codec<T> codec() {
+    return this.codec;
   }
 
   @Override
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof WsPongFrame<?>) {
-      final WsPongFrame<?> that = (WsPongFrame<?>) other;
+    } else if (other instanceof WsPongFrame<?> that) {
       return Objects.equals(this.payload, that.payload);
     }
     return false;
@@ -85,7 +83,7 @@ public final class WsPongFrame<T> extends WsControlFrame<T> implements ToSource 
     final Notation notation = Notation.from(output);
     notation.beginInvoke("WsPongFrame", "of")
             .appendArgument(this.payload)
-            .appendArgument(this.transcoder)
+            .appendArgument(this.codec)
             .endInvoke();
   }
 
@@ -95,26 +93,26 @@ public final class WsPongFrame<T> extends WsControlFrame<T> implements ToSource 
   }
 
   public static <T> WsPongFrame<T> empty() {
-    return new WsPongFrame<T>(null, Binary.blankTranscoder());
+    return new WsPongFrame<T>(null, Binary.blankCodec());
   }
 
-  public static <T> WsPongFrame<T> of(@Nullable T payload, Transcoder<T> transcoder) {
-    return new WsPongFrame<T>(payload, transcoder);
+  public static <T> WsPongFrame<T> of(@Nullable T payload, Codec<T> codec) {
+    return new WsPongFrame<T>(payload, codec);
   }
 
   public static WsPongFrame<String> of(@Nullable String payload) {
-    return new WsPongFrame<String>(payload, Text.transcoder());
+    return new WsPongFrame<String>(payload, Text.stringCodec());
   }
 
   public static WsPongFrame<byte[]> of(byte @Nullable [] payload) {
-    return new WsPongFrame<byte[]>(payload, Binary.byteArrayTranscoder());
+    return new WsPongFrame<byte[]>(payload, Binary.byteArrayCodec());
   }
 
   public static WsPongFrame<ByteBuffer> of(@Nullable ByteBuffer payload) {
     if (payload != null) {
       payload = payload.duplicate();
     }
-    return new WsPongFrame<ByteBuffer>(payload, Binary.byteBufferTranscoder());
+    return new WsPongFrame<ByteBuffer>(payload, Binary.byteBufferCodec());
   }
 
 }

@@ -56,7 +56,7 @@ public final class WsHeaderTypes implements HttpHeaderProvider, ToSource {
     return this.toSource();
   }
 
-  private static final WsHeaderTypes PROVIDER = new WsHeaderTypes();
+  static final WsHeaderTypes PROVIDER = new WsHeaderTypes();
 
   public static WsHeaderTypes provider() {
     return PROVIDER;

@@ -38,11 +38,11 @@ public class ReprRegistry implements ReprForm<Object>, ToSource {
 
   ReprProvider[] providers;
 
-  HashTrieMap<Type, ReprForm<?>> mappings;
+  HashTrieMap<Type, ReprForm<?>> reprForms;
 
   public ReprRegistry() {
     this.providers = new ReprProvider[0];
-    this.mappings = HashTrieMap.empty();
+    this.reprForms = HashTrieMap.empty();
     this.loadIntrinsics();
     this.loadExtensions();
   }
@@ -73,15 +73,18 @@ public class ReprRegistry implements ReprForm<Object>, ToSource {
       newProviders[index] = provider;
       System.arraycopy(oldProviders, index, newProviders, index + 1, oldProviders.length - index);
       providers = (ReprProvider[]) PROVIDERS.compareAndExchangeRelease(this, oldProviders, newProviders);
-      if (providers == oldProviders) {
-        break;
+      if (providers != oldProviders) {
+        // CAS failed; try again.
+        continue;
       }
+      providers = newProviders;
+      break;
     } while (true);
   }
 
   protected void loadIntrinsics() {
     // Builtin providers
-    this.addProvider(JavaReprs.provider());
+    this.addProvider(LangReprs.provider());
   }
 
   protected void loadExtensions() {
@@ -127,104 +130,104 @@ public class ReprRegistry implements ReprForm<Object>, ToSource {
   }
 
   @SuppressWarnings("ReferenceEquality")
-  public void registerReprForm(Type javaType, ReprForm<?> reprForm) {
-    HashTrieMap<Type, ReprForm<?>> mappings = (HashTrieMap<Type, ReprForm<?>>) MAPPINGS.getOpaque(this);
+  public void registerReprForm(Type type, ReprForm<?> reprForm) {
+    HashTrieMap<Type, ReprForm<?>> reprForms = (HashTrieMap<Type, ReprForm<?>>) REPR_FORMS.getOpaque(this);
     do {
-      final HashTrieMap<Type, ReprForm<?>> oldMappings = mappings;
-      final HashTrieMap<Type, ReprForm<?>> newMappings = oldMappings.updated(javaType, reprForm);
-      mappings = (HashTrieMap<Type, ReprForm<?>>) MAPPINGS.compareAndExchangeRelease(this, oldMappings, newMappings);
-      if (mappings == oldMappings) {
-        break;
+      final HashTrieMap<Type, ReprForm<?>> oldReprForms = reprForms;
+      final HashTrieMap<Type, ReprForm<?>> newReprForms = oldReprForms.updated(type, reprForm);
+      reprForms = (HashTrieMap<Type, ReprForm<?>>) REPR_FORMS.compareAndExchangeRelease(this, oldReprForms, newReprForms);
+      if (reprForms != oldReprForms) {
+        // CAS failed; try again.
+        continue;
       }
+      reprForms = newReprForms;
+      break;
     } while (true);
   }
 
-  protected ReprForm<?> resolveReprForm(Type javaType) throws ReprFormException {
-    if (javaType == Object.class) {
+  protected ReprForm<?> resolveReprForm(Type type) throws ReprProviderException {
+    if (type == Object.class) {
       return this;
     }
-
-    // Keep track of the highest priority resolve error.
-    ReprFormException error = null;
 
     final ReprProvider[] providers = (ReprProvider[]) PROVIDERS.getOpaque(this);
     for (int i = 0; i < providers.length; i += 1) {
       final ReprProvider provider = providers[i];
-      try {
-        final ReprForm<?> reprForm = provider.resolveReprForm(javaType);
-        if (reprForm != null) {
-          return reprForm;
-        }
-      } catch (ReprFormException cause) {
-        if (error == null) {
-          error = cause;
-        }
+      final ReprForm<?> reprForm = provider.resolveReprForm(type);
+      if (reprForm != null) {
+        return reprForm;
       }
     }
 
-    // Treat the highest priority resolve error as the cause of the exception.
-    throw new ReprFormException("no repr form for " + javaType, error);
+    throw new ReprProviderException("no repr form for " + type);
   }
 
   @SuppressWarnings("ReferenceEquality")
-  public <T> ReprForm<T> getReprForm(Type javaType) throws ReprFormException {
-    if (javaType instanceof WildcardType) {
-      final Type[] upperBounds = ((WildcardType) javaType).getUpperBounds();
+  public <T> ReprForm<T> getReprForm(Type type) throws ReprProviderException {
+    if (type instanceof WildcardType) {
+      final Type[] upperBounds = ((WildcardType) type).getUpperBounds();
       if (upperBounds != null && upperBounds.length != 0) {
-        javaType = upperBounds[0];
+        type = upperBounds[0];
       } else {
-        javaType = Object.class;
+        type = Object.class;
       }
     }
-    if (javaType instanceof TypeVariable) {
-      final Type[] bounds = ((TypeVariable) javaType).getBounds();
+    if (type instanceof TypeVariable) {
+      final Type[] bounds = ((TypeVariable) type).getBounds();
       if (bounds != null && bounds.length != 0) {
-        javaType = bounds[0];
+        type = bounds[0];
       } else {
-        javaType = Object.class;
+        type = Object.class;
       }
     }
 
-    HashTrieMap<Type, ReprForm<?>> mappings = (HashTrieMap<Type, ReprForm<?>>) MAPPINGS.getOpaque(this);
+    HashTrieMap<Type, ReprForm<?>> reprForms = (HashTrieMap<Type, ReprForm<?>>) REPR_FORMS.getOpaque(this);
     ReprForm<T> newReprForm = null;
     do {
-      final ReprForm<T> oldReprForm = Assume.conformsNullable(mappings.get(javaType));
+      final ReprForm<T> oldReprForm = Assume.conformsNullable(reprForms.get(type));
       if (oldReprForm != null) {
         return oldReprForm;
-      } else {
-        if (newReprForm == null) {
-          newReprForm = Assume.conforms(this.resolveReprForm(javaType));
-        }
-        final HashTrieMap<Type, ReprForm<?>> oldMappings = mappings;
-        final HashTrieMap<Type, ReprForm<?>> newMappings = oldMappings.updated(javaType, newReprForm);
-        mappings = (HashTrieMap<Type, ReprForm<?>>) MAPPINGS.compareAndExchangeRelease(this, oldMappings, newMappings);
-        if (mappings == oldMappings) {
-          return newReprForm;
-        }
+      } else if (newReprForm == null) {
+        newReprForm = Assume.conforms(this.resolveReprForm(type));
       }
+      final HashTrieMap<Type, ReprForm<?>> oldReprForms = reprForms;
+      final HashTrieMap<Type, ReprForm<?>> newReprForms = oldReprForms.updated(type, newReprForm);
+      reprForms = (HashTrieMap<Type, ReprForm<?>>) REPR_FORMS.compareAndExchangeRelease(this, oldReprForms, newReprForms);
+      if (reprForms != oldReprForms) {
+        // CAS failed; try again.
+        continue;
+      }
+      reprForms = newReprForms;
+      return newReprForm;
     } while (true);
   }
 
-  public <T> ReprForm<T> getReprForm(@Nullable T value) throws ReprFormException {
+  public <T> ReprForm<T> getReprForm(@Nullable T value) throws ReprProviderException {
     if (value == null) {
-      return Assume.conforms(JavaReprs.nullForm());
-    } else {
-      return this.getReprForm(value.getClass());
+      return Assume.conforms(LangReprs.nullForm());
     }
+    return this.getReprForm(value.getClass());
   }
 
   @Override
   public Repr intoRepr(@Nullable Object value) throws ReprException {
+    if (value instanceof Repr) {
+      return (Repr) value;
+    }
     return this.getReprForm(value).intoRepr(value);
   }
 
   @Override
-  public @Nullable Object fromRepr(Repr repr) {
+  public @Nullable Object fromRepr(Repr repr) throws ReprException {
     if (repr.isValidObject()) {
       return repr.objectValue();
-    } else {
-      return repr;
     }
+    return repr;
+  }
+
+  @Override
+  public @Nullable Object initializer() throws ReprException {
+    return null;
   }
 
   @Override
@@ -244,9 +247,9 @@ public class ReprRegistry implements ReprForm<Object>, ToSource {
   static final VarHandle PROVIDERS;
 
   /**
-   * {@code VarHandle} for atomically accessing the {@link #mappings} field.
+   * {@code VarHandle} for atomically accessing the {@link #reprForms} field.
    */
-  static final VarHandle MAPPINGS;
+  static final VarHandle REPR_FORMS;
 
   static final ReprRegistry REGISTRY;
 
@@ -255,7 +258,7 @@ public class ReprRegistry implements ReprForm<Object>, ToSource {
     final MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
       PROVIDERS = lookup.findVarHandle(ReprRegistry.class, "providers", ReprProvider.class.arrayType());
-      MAPPINGS = lookup.findVarHandle(ReprRegistry.class, "mappings", HashTrieMap.class);
+      REPR_FORMS = lookup.findVarHandle(ReprRegistry.class, "reprForms", HashTrieMap.class);
     } catch (ReflectiveOperationException cause) {
       throw new ExceptionInInitializerError(cause);
     }

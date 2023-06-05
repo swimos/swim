@@ -66,9 +66,8 @@ public final class BigIntegerRepr implements NumberRepr, ToSource {
       return this;
     } else if (attrs == Attrs.empty()) {
       return BigIntegerRepr.of(this.value);
-    } else {
-      return new BigIntegerRepr(attrs, this.value);
     }
+    return new BigIntegerRepr(attrs, this.value);
   }
 
   @Override
@@ -219,9 +218,8 @@ public final class BigIntegerRepr implements NumberRepr, ToSource {
       return IntRepr.of(value.intValue());
     } else if (bitLength <= 63) {
       return LongRepr.of(value.longValue());
-    } else {
-      return BigIntegerRepr.of(value);
     }
+    return BigIntegerRepr.of(value);
   }
 
   @Override
@@ -296,28 +294,25 @@ public final class BigIntegerRepr implements NumberRepr, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof NumberRepr) {
-      final NumberRepr that = (NumberRepr) other;
-      if (this.attrs().equals(that.attrs())) {
-        if (this.isValidByte() && that.isValidByte()) {
-          return this.byteValue() == that.byteValue();
-        } else if (this.isValidShort() && that.isValidShort()) {
-          return this.shortValue() == that.shortValue();
-        } else if (this.isValidInt() && that.isValidInt()) {
-          return this.intValue() == that.intValue();
-        } else if (this.isValidLong() && that.isValidLong()) {
-          return this.longValue() == that.longValue();
-        } else if (this.isValidFloat() && that.isValidFloat()) {
-          final float x = this.floatValue();
-          final float y = that.floatValue();
-          return x == y || (Float.isNaN(x) && Float.isNaN(y));
-        } else if (this.isValidDouble() && that.isValidDouble()) {
-          final double x = this.doubleValue();
-          final double y = that.doubleValue();
-          return x == y || (Double.isNaN(x) && Double.isNaN(y));
-        } else {
-          return this.stringValue().equals(that.stringValue());
-        }
+    } else if (other instanceof NumberRepr that && this.attrs().equals(that.attrs())) {
+      if (this.isValidByte() && that.isValidByte()) {
+        return this.byteValue() == that.byteValue();
+      } else if (this.isValidShort() && that.isValidShort()) {
+        return this.shortValue() == that.shortValue();
+      } else if (this.isValidInt() && that.isValidInt()) {
+        return this.intValue() == that.intValue();
+      } else if (this.isValidLong() && that.isValidLong()) {
+        return this.longValue() == that.longValue();
+      } else if (this.isValidFloat() && that.isValidFloat()) {
+        final float x = this.floatValue();
+        final float y = that.floatValue();
+        return x == y || (Float.isNaN(x) && Float.isNaN(y));
+      } else if (this.isValidDouble() && that.isValidDouble()) {
+        final double x = this.doubleValue();
+        final double y = that.doubleValue();
+        return x == y || (Double.isNaN(x) && Double.isNaN(y));
+      } else {
+        return this.stringValue().equals(that.stringValue());
       }
     }
     return false;
@@ -353,23 +348,11 @@ public final class BigIntegerRepr implements NumberRepr, ToSource {
     }
   }
 
-  private static final BigIntegerRepr ZERO = new BigIntegerRepr(Attrs.empty(), BigInteger.ZERO);
+  static final BigIntegerRepr ZERO = new BigIntegerRepr(Attrs.empty(), BigInteger.ZERO);
 
-  static BigIntegerRepr zero() {
-    return ZERO;
-  }
+  static final BigIntegerRepr POSITIVE_ONE = new BigIntegerRepr(Attrs.empty(), BigInteger.ONE);
 
-  private static final BigIntegerRepr POSITIVE_ONE = new BigIntegerRepr(Attrs.empty(), BigInteger.ONE);
-
-  static BigIntegerRepr positiveOne() {
-    return POSITIVE_ONE;
-  }
-
-  private static final BigIntegerRepr NEGATIVE_ONE = new BigIntegerRepr(Attrs.empty(), BigInteger.ONE.negate());
-
-  static BigIntegerRepr negativeOne() {
-    return NEGATIVE_ONE;
-  }
+  static final BigIntegerRepr NEGATIVE_ONE = new BigIntegerRepr(Attrs.empty(), BigInteger.ONE.negate());
 
   public static BigIntegerRepr of(BigInteger value) {
     if (value.equals(ZERO.value)) {
@@ -378,9 +361,8 @@ public final class BigIntegerRepr implements NumberRepr, ToSource {
       return POSITIVE_ONE;
     } else if (value.equals(NEGATIVE_ONE.value)) {
       return NEGATIVE_ONE;
-    } else {
-      return new BigIntegerRepr(Attrs.empty(), value);
     }
+    return new BigIntegerRepr(Attrs.empty(), value);
   }
 
 }

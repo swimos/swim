@@ -35,16 +35,14 @@ public final class TupleShape implements ToMarkup, ToSource {
   final int rank;
   final @Nullable String key;
   TupleShape @Nullable [] fields;
-  Object @Nullable [] table; // [...(key: String | null, field: ObejctShape | null)*]
+  Object @Nullable [] table; // [...(key: String | null, field: TupleShape | null)*]
   final @Nullable TupleShape parent;
   HashTrieMap<String, SoftReference<TupleShape>> children;
   @Nullable String purgeKey;
   long purgeTime;
 
-  TupleShape(int size, int rank, @Nullable String key,
-             TupleShape @Nullable [] fields,
-             Object @Nullable [] table,
-             @Nullable TupleShape parent,
+  TupleShape(int size, int rank, @Nullable String key, TupleShape @Nullable [] fields,
+             Object @Nullable [] table, @Nullable TupleShape parent,
              HashTrieMap<String, SoftReference<TupleShape>> children,
              @Nullable String purgeKey) {
     this.size = size;
@@ -99,42 +97,41 @@ public final class TupleShape implements ToMarkup, ToSource {
     if (field.parent != null) {
       TupleShape.buildTable(table, field.parent);
     }
-    final String key = field.key;
-    if (field.size > 0 && key != null) {
-      final int hash = key.hashCode();
-      final int n = table.length >>> 1;
-      int x = Math.abs(hash % n);
-      do {
-        final int i = x << 1;
-        if (table[i] == null) {
-          table[i] = key;
-          table[i + 1] = field;
-          break;
-        } else {
-          x = (x + 1) % n;
-        }
-      } while (x != hash);
+    if (field.size <= 0 || field.key == null) {
+      return;
     }
+    final int hash = field.key.hashCode();
+    final int n = table.length >>> 1;
+    int x = Math.abs(hash % n);
+    do {
+      final int i = x << 1;
+      if (table[i] == null) {
+        table[i] = field.key;
+        table[i + 1] = field;
+        break;
+      }
+      x = (x + 1) % n;
+    } while (x != hash);
   }
 
   int lookup(String key) {
-    if (this.size > 0) {
-      final Object[] table = this.table();
-      final int hash = key.hashCode();
-      final int n = table.length >>> 1;
-      int x = Math.abs(hash % n);
-      do {
-        final int i = x << 1;
-        final String k = (String) table[i];
-        if (k == null) {
-          break;
-        } else if (key.equals(k)) {
-          return ((TupleShape) table[i + 1]).size - 1;
-        } else {
-          x = (x + 1) % n;
-        }
-      } while (x != hash);
+    if (this.size <= 0) {
+      return -1;
     }
+    final Object[] table = this.table();
+    final int hash = key.hashCode();
+    final int n = table.length >>> 1;
+    int x = Math.abs(hash % n);
+    do {
+      final int i = x << 1;
+      final String k = (String) table[i];
+      if (k == null) {
+        break;
+      } else if (key.equals(k)) {
+        return ((TupleShape) table[i + 1]).size - 1;
+      }
+      x = (x + 1) % n;
+    } while (x != hash);
     return -1;
   }
 
@@ -151,22 +148,22 @@ public final class TupleShape implements ToMarkup, ToSource {
         // Child shape already exists.
         child = oldChild;
         break;
-      } else {
-        if (child == null) {
-          // Create the new child shape.
-          child = new TupleShape(this.size + 1, key != null ? this.rank + 1 : this.rank, key, null, null, this, HashTrieMap.empty(), null);
-          childRef = new SoftReference<TupleShape>(child);
-        }
-        // Try to add the new child shape to the children map.
-        final HashTrieMap<String, SoftReference<TupleShape>> oldChildren = children;
-        final HashTrieMap<String, SoftReference<TupleShape>> newChildren = oldChildren.updated(key, childRef);
-        children = (HashTrieMap<String, SoftReference<TupleShape>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
-        if (children == oldChildren) {
-          // Successfully inserted the new child shape.
-          children = newChildren;
-          break;
-        }
+      } else if (child == null) {
+        // Create the new child shape.
+        child = new TupleShape(this.size + 1, key != null ? this.rank + 1 : this.rank, key, null, null, this, HashTrieMap.empty(), null);
+        childRef = new SoftReference<TupleShape>(child);
       }
+      // Try to add the new child shape to the children map.
+      final HashTrieMap<String, SoftReference<TupleShape>> oldChildren = children;
+      final HashTrieMap<String, SoftReference<TupleShape>> newChildren = oldChildren.updated(key, childRef);
+      children = (HashTrieMap<String, SoftReference<TupleShape>>) CHILDREN.compareAndExchangeRelease(this, oldChildren, newChildren);
+      if (children != oldChildren) {
+        // CAS failed; try again.
+        continue;
+      }
+      // Successfully inserted the new child shape.
+      children = newChildren;
+      break;
     } while (true);
 
     // Periodically help purge child shape references cleared by the GC.
@@ -276,7 +273,7 @@ public final class TupleShape implements ToMarkup, ToSource {
    */
   static final VarHandle PURGE_TIME;
 
-  private static final TupleShape EMPTY;
+  static final TupleShape EMPTY;
 
   static {
     // Initialize var handles.

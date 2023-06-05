@@ -67,9 +67,8 @@ public final class DoubleRepr implements NumberRepr, ToSource {
       return this;
     } else if (attrs == Attrs.empty()) {
       return DoubleRepr.of(this.value);
-    } else {
-      return new DoubleRepr(attrs, this.value);
     }
+    return new DoubleRepr(attrs, this.value);
   }
 
   @Override
@@ -289,28 +288,25 @@ public final class DoubleRepr implements NumberRepr, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof NumberRepr) {
-      final NumberRepr that = (NumberRepr) other;
-      if (this.attrs().equals(that.attrs())) {
-        if (this.isValidByte() && that.isValidByte()) {
-          return this.byteValue() == that.byteValue();
-        } else if (this.isValidShort() && that.isValidShort()) {
-          return this.shortValue() == that.shortValue();
-        } else if (this.isValidInt() && that.isValidInt()) {
-          return this.intValue() == that.intValue();
-        } else if (this.isValidLong() && that.isValidLong()) {
-          return this.longValue() == that.longValue();
-        } else if (this.isValidFloat() && that.isValidFloat()) {
-          final float x = this.floatValue();
-          final float y = that.floatValue();
-          return x == y || (Float.isNaN(x) && Float.isNaN(y));
-        } else if (this.isValidDouble() && that.isValidDouble()) {
-          final double x = this.doubleValue();
-          final double y = that.doubleValue();
-          return x == y || (Double.isNaN(x) && Double.isNaN(y));
-        } else {
-          return this.stringValue().equals(that.stringValue());
-        }
+    } else if (other instanceof NumberRepr that && this.attrs().equals(that.attrs())) {
+      if (this.isValidByte() && that.isValidByte()) {
+        return this.byteValue() == that.byteValue();
+      } else if (this.isValidShort() && that.isValidShort()) {
+        return this.shortValue() == that.shortValue();
+      } else if (this.isValidInt() && that.isValidInt()) {
+        return this.intValue() == that.intValue();
+      } else if (this.isValidLong() && that.isValidLong()) {
+        return this.longValue() == that.longValue();
+      } else if (this.isValidFloat() && that.isValidFloat()) {
+        final float x = this.floatValue();
+        final float y = that.floatValue();
+        return x == y || (Float.isNaN(x) && Float.isNaN(y));
+      } else if (this.isValidDouble() && that.isValidDouble()) {
+        final double x = this.doubleValue();
+        final double y = that.doubleValue();
+        return x == y || (Double.isNaN(x) && Double.isNaN(y));
+      } else {
+        return this.stringValue().equals(that.stringValue());
       }
     }
     return false;
@@ -351,35 +347,16 @@ public final class DoubleRepr implements NumberRepr, ToSource {
     return this.toSource();
   }
 
-  private static final DoubleRepr POSITIVE_ZERO = new DoubleRepr(Attrs.empty(), 0.0);
+  static final DoubleRepr POSITIVE_ZERO = new DoubleRepr(Attrs.empty(), 0.0);
 
-  static DoubleRepr positiveZero() {
-    return POSITIVE_ZERO;
-  }
+  static final DoubleRepr NEGATIVE_ZERO = new DoubleRepr(Attrs.empty(), -0.0);
 
-  private static final DoubleRepr NEGATIVE_ZERO = new DoubleRepr(Attrs.empty(), -0.0);
+  static final DoubleRepr POSITIVE_ONE = new DoubleRepr(Attrs.empty(), 1.0);
 
-  static DoubleRepr negativeZero() {
-    return NEGATIVE_ZERO;
-  }
+  static final DoubleRepr NEGATIVE_ONE = new DoubleRepr(Attrs.empty(), -1.0);
 
-  private static final DoubleRepr POSITIVE_ONE = new DoubleRepr(Attrs.empty(), 1.0);
-
-  static DoubleRepr positiveOne() {
-    return POSITIVE_ONE;
-  }
-
-  private static final DoubleRepr NEGATIVE_ONE = new DoubleRepr(Attrs.empty(), -1.0);
-
-  static DoubleRepr negativeOne() {
-    return NEGATIVE_ONE;
-  }
-
-  private static final DoubleRepr NAN = new DoubleRepr(Attrs.empty(), Double.NaN);
-
-  static DoubleRepr nan() {
-    return NAN;
-  }
+  @SuppressWarnings("checkstyle:ConstantName")
+  static final DoubleRepr NaN = new DoubleRepr(Attrs.empty(), Double.NaN);
 
   public static DoubleRepr of(double value) {
     if (value == 0.0) {
@@ -393,10 +370,9 @@ public final class DoubleRepr implements NumberRepr, ToSource {
     } else if (value == -1.0) {
       return NEGATIVE_ONE;
     } else if (Double.isNaN(value)) {
-      return NAN;
-    } else {
-      return new DoubleRepr(Attrs.empty(), value);
+      return NaN;
     }
+    return new DoubleRepr(Attrs.empty(), value);
   }
 
 }

@@ -17,7 +17,7 @@ package swim.ws;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.codec.Transcoder;
+import swim.codec.Codec;
 
 @Public
 @Since("5.0")
@@ -39,6 +39,6 @@ public abstract class WsControlFrame<T> extends WsFrame<Object> {
   public abstract T getNonNull();
 
   @Override
-  public abstract Transcoder<T> transcoder();
+  public abstract Codec<T> codec();
 
 }

@@ -16,12 +16,10 @@ package swim.waml;
 
 import java.lang.reflect.Type;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -32,11 +30,10 @@ import swim.codec.Output;
 import swim.codec.OutputException;
 import swim.codec.Parse;
 import swim.codec.Write;
-import swim.codec.WriteException;
+import swim.decl.FilterMode;
+import swim.expr.ChildExpr;
+import swim.expr.CondExpr;
 import swim.expr.ContextExpr;
-import swim.expr.ExprParser;
-import swim.expr.Term;
-import swim.expr.selector.ChildExpr;
 import swim.repr.ArrayRepr;
 import swim.repr.Attrs;
 import swim.repr.BlobRepr;
@@ -50,10 +47,11 @@ import swim.repr.TermRepr;
 import swim.repr.TupleRepr;
 import swim.repr.UndefinedRepr;
 import swim.repr.UnitRepr;
+import swim.term.Term;
+import swim.util.Assume;
 import swim.util.CacheMap;
-import swim.util.CacheSet;
+import swim.util.Iterators;
 import swim.util.LruCacheMap;
-import swim.util.LruCacheSet;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -73,31 +71,31 @@ public final class WamlReprs implements WamlProvider, ToSource {
   }
 
   @Override
-  public @Nullable WamlForm<?> resolveWamlForm(Type javaType) throws WamlFormException {
-    if (javaType instanceof Class<?>) {
-      final Class<?> javaClass = (Class<?>) javaType;
-      if (UndefinedRepr.class.isAssignableFrom(javaClass)) {
-        return WamlReprs.undefinedForm();
-      } else if (UnitRepr.class.isAssignableFrom(javaClass)) {
-        return WamlReprs.unitForm();
-      } else if (BooleanRepr.class.isAssignableFrom(javaClass)) {
-        return WamlReprs.booleanForm();
-      } else if (NumberRepr.class.isAssignableFrom(javaClass)) {
-        return WamlReprs.numberForm();
-      } else if (StringRepr.class.isAssignableFrom(javaClass)) {
-        return WamlReprs.stringForm();
-      } else if (BlobRepr.class.isAssignableFrom(javaClass)) {
-        return WamlReprs.blobForm();
-      } else if (TermRepr.class.isAssignableFrom(javaClass)) {
-        return WamlReprs.termForm();
-      } else if (ArrayRepr.class.isAssignableFrom(javaClass)) {
-        return WamlReprs.arrayForm();
-      } else if (ObjectRepr.class.isAssignableFrom(javaClass)) {
-        return WamlReprs.objectForm();
-      } else if (TupleRepr.class.isAssignableFrom(javaClass)) {
-        return WamlReprs.tupleForm();
-      } else if (javaClass == Repr.class) {
-        return WamlReprs.reprForm();
+  public @Nullable WamlFormat<?> resolveWamlFormat(Type type) throws WamlProviderException {
+    if (type instanceof Class<?>) {
+      final Class<?> classType = (Class<?>) type;
+      if (UndefinedRepr.class.isAssignableFrom(classType)) {
+        return WamlReprs.undefinedFormat();
+      } else if (UnitRepr.class.isAssignableFrom(classType)) {
+        return WamlReprs.unitFormat();
+      } else if (BooleanRepr.class.isAssignableFrom(classType)) {
+        return WamlReprs.booleanFormat();
+      } else if (NumberRepr.class.isAssignableFrom(classType)) {
+        return WamlReprs.numberFormat();
+      } else if (StringRepr.class.isAssignableFrom(classType)) {
+        return WamlReprs.stringFormat();
+      } else if (BlobRepr.class.isAssignableFrom(classType)) {
+        return WamlReprs.blobFormat();
+      } else if (TermRepr.class.isAssignableFrom(classType)) {
+        return WamlReprs.termFormat();
+      } else if (ArrayRepr.class.isAssignableFrom(classType)) {
+        return WamlReprs.arrayFormat();
+      } else if (ObjectRepr.class.isAssignableFrom(classType)) {
+        return WamlReprs.objectFormat();
+      } else if (TupleRepr.class.isAssignableFrom(classType)) {
+        return WamlReprs.tupleFormat();
+      } else if (classType == Repr.class) {
+        return WamlReprs.valueFormat();
       }
     }
     return null;
@@ -118,193 +116,80 @@ public final class WamlReprs implements WamlProvider, ToSource {
     return this.toSource();
   }
 
-  private static final WamlReprs PROVIDER = new WamlReprs(BUILTIN_PRIORITY);
+  static final WamlReprs PROVIDER = new WamlReprs(BUILTIN_PRIORITY);
 
   public static WamlReprs provider(int priority) {
     if (priority == BUILTIN_PRIORITY) {
       return PROVIDER;
-    } else {
-      return new WamlReprs(priority);
     }
+    return new WamlReprs(priority);
   }
 
   public static WamlReprs provider() {
     return PROVIDER;
   }
 
-  public static WamlUndefinedForm<UndefinedRepr> undefinedForm() {
-    return WamlReprs.UndefinedForm.INSTANCE;
+  public static WamlAttrsParser<Repr, Attrs, Object> attrsParser() {
+    return AttrsFormat.INSTANCE;
   }
 
-  public static WamlUndefinedForm<UndefinedRepr> undefinedForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.UndefinedForm.INSTANCE;
-    } else {
-      return new WamlReprs.UndefinedForm(attrs);
-    }
+  public static WamlAttrsWriter<Repr, Object> attrsWriter() {
+    return AttrsFormat.INSTANCE;
   }
 
-  public static WamlUnitForm<UnitRepr> unitForm() {
-    return WamlReprs.UnitForm.INSTANCE;
+  public static WamlFormat<UndefinedRepr> undefinedFormat() {
+    return UndefinedFormat.INSTANCE;
   }
 
-  public static WamlUnitForm<UnitRepr> unitForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.UnitForm.INSTANCE;
-    } else {
-      return new WamlReprs.UnitForm(attrs);
-    }
+  public static WamlFormat<UnitRepr> unitFormat() {
+    return UnitFormat.INSTANCE;
   }
 
-  public static WamlIdentifierForm<Repr> identifierForm() {
-    return WamlReprs.IdentifierForm.INSTANCE;
+  public static WamlFormat<Repr> identifierFormat() {
+    return IdentifierFormat.INSTANCE;
   }
 
-  public static WamlIdentifierForm<Repr> identifierForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.IdentifierForm.INSTANCE;
-    } else {
-      return new WamlReprs.IdentifierForm(attrs);
-    }
+  public static WamlFormat<BooleanRepr> booleanFormat() {
+    return BooleanFormat.INSTANCE;
   }
 
-  public static WamlIdentifierForm<BooleanRepr> booleanForm() {
-    return WamlReprs.BooleanForm.INSTANCE;
+  public static WamlFormat<NumberRepr> numberFormat() {
+    return NumberFormat.INSTANCE;
   }
 
-  public static WamlIdentifierForm<BooleanRepr> booleanForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.BooleanForm.INSTANCE;
-    } else {
-      return new WamlReprs.BooleanForm(attrs);
-    }
+  public static WamlFormat<StringRepr> stringFormat() {
+    return StringFormat.INSTANCE;
   }
 
-  public static WamlNumberForm<NumberRepr> numberForm() {
-    return WamlReprs.NumberForm.INSTANCE;
+  public static WamlFormat<BlobRepr> blobFormat() {
+    return BlobFormat.INSTANCE;
   }
 
-  public static WamlNumberForm<NumberRepr> numberForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.NumberForm.INSTANCE;
-    } else {
-      return new WamlReprs.NumberForm(attrs);
-    }
+  public static WamlFormat<Repr> termFormat() {
+    return TermFormat.INSTANCE;
   }
 
-  public static WamlStringForm<StringBuilder, StringRepr> stringForm() {
-    return WamlReprs.StringForm.INSTANCE;
+  public static WamlFormat<ArrayRepr> markupFormat() {
+    return MarkupFormat.INSTANCE;
   }
 
-  public static WamlStringForm<StringBuilder, StringRepr> stringForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.StringForm.INSTANCE;
-    } else {
-      return new WamlReprs.StringForm(attrs);
-    }
+  public static WamlFormat<ArrayRepr> arrayFormat() {
+    return ArrayFormat.INSTANCE;
   }
 
-  public static WamlStringForm<?, BlobRepr> blobForm() {
-    return WamlReprs.BlobForm.INSTANCE;
+  public static WamlFormat<ObjectRepr> objectFormat() {
+    return ObjectFormat.INSTANCE;
   }
 
-  public static WamlStringForm<?, BlobRepr> blobForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.BlobForm.INSTANCE;
-    } else {
-      return new WamlReprs.BlobForm(attrs);
-    }
+  public static WamlFormat<Repr> tupleFormat() {
+    return TupleFormat.INSTANCE;
   }
 
-  public static WamlForm<Repr> termForm() {
-    return WamlReprs.TermForm.INSTANCE;
+  public static WamlFormat<Repr> valueFormat() {
+    return ValueFormat.INSTANCE;
   }
 
-  public static WamlForm<Repr> termForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.TermForm.INSTANCE;
-    } else {
-      return new WamlReprs.TermForm(attrs);
-    }
-  }
-
-  public static WamlArrayForm<Repr, ArrayRepr, ArrayRepr> arrayForm() {
-    return WamlReprs.ArrayForm.INSTANCE;
-  }
-
-  public static WamlArrayForm<Repr, ArrayRepr, ArrayRepr> arrayForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.ArrayForm.INSTANCE;
-    } else {
-      return new WamlReprs.ArrayForm(attrs);
-    }
-  }
-
-  public static WamlMarkupForm<Repr, ArrayRepr, ArrayRepr> markupForm() {
-    return WamlReprs.MarkupForm.INSTANCE;
-  }
-
-  public static WamlMarkupForm<Repr, ArrayRepr, ArrayRepr> markupForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.MarkupForm.INSTANCE;
-    } else {
-      return new WamlReprs.MarkupForm(attrs);
-    }
-  }
-
-  public static WamlForm<String> keyForm() {
-    return WamlReprs.KeyForm.INSTANCE;
-  }
-
-  public static WamlObjectForm<String, Repr, ObjectRepr, ObjectRepr> objectForm() {
-    return WamlReprs.ObjectForm.INSTANCE;
-  }
-
-  public static WamlObjectForm<String, Repr, ObjectRepr, ObjectRepr> objectForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.ObjectForm.INSTANCE;
-    } else {
-      return new WamlReprs.ObjectForm(attrs);
-    }
-  }
-
-  public static WamlTupleForm<String, Repr, TupleRepr, Repr> tupleForm() {
-    return WamlReprs.TupleForm.INSTANCE;
-  }
-
-  public static WamlTupleForm<String, Repr, TupleRepr, Repr> tupleForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.TupleForm.INSTANCE;
-    } else {
-      return new WamlReprs.TupleForm(attrs);
-    }
-  }
-
-  public static WamlAttrForm<Repr, BlobRepr> blobAttrForm() {
-    return WamlReprs.BlobAttrForm.INSTANCE;
-  }
-
-  public static WamlAttrForm<Repr, BlobRepr> blobAttrForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.BlobAttrForm.INSTANCE;
-    } else {
-      return new WamlReprs.BlobAttrForm(attrs);
-    }
-  }
-
-  public static WamlForm<Repr> reprForm() {
-    return WamlReprs.ReprForm.INSTANCE;
-  }
-
-  public static WamlForm<Repr> reprForm(Attrs attrs) {
-    if (attrs.isEmpty()) {
-      return WamlReprs.ReprForm.INSTANCE;
-    } else {
-      return new WamlReprs.ReprForm(attrs);
-    }
-  }
-
-  private static final ThreadLocal<CacheMap<String, StringRepr>> STRING_CACHE =
+  static final ThreadLocal<CacheMap<String, StringRepr>> STRING_CACHE =
       new ThreadLocal<CacheMap<String, StringRepr>>();
 
   public static CacheMap<String, StringRepr> stringCache() {
@@ -322,87 +207,85 @@ public final class WamlReprs implements WamlProvider, ToSource {
     return stringCache;
   }
 
-  private static final ThreadLocal<CacheSet<String>> KEY_CACHE =
-      new ThreadLocal<CacheSet<String>>();
-
-  public static CacheSet<String> keyCache() {
-    CacheSet<String> keyCache = KEY_CACHE.get();
-    if (keyCache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.waml.key.repr.cache.size"));
-      } catch (NumberFormatException cause) {
-        cacheSize = 512;
-      }
-      keyCache = new LruCacheSet<String>(cacheSize);
-      KEY_CACHE.set(keyCache);
+  static StringRepr cacheString(String string) {
+    final CacheMap<String, StringRepr> stringCache = WamlReprs.stringCache();
+    StringRepr value = stringCache.get(string);
+    if (value == null) {
+      value = stringCache.put(string, StringRepr.of(string));
     }
-    return keyCache;
+    return value;
   }
 
-  static final class UndefinedForm implements WamlReprForm<UndefinedRepr>, WamlUndefinedForm<UndefinedRepr>, ToSource {
+  static final class AttrsFormat implements WamlAttrsParser<Repr, Attrs, Object>, WamlAttrsWriter<Repr, Object>, ToSource {
 
-    final Attrs attrs;
-
-    UndefinedForm(Attrs attrs) {
-      this.attrs = attrs;
+    @Override
+    public WamlParser<Repr> getAttrValueParser(@Nullable String name) throws WamlException {
+      return WamlReprs.tupleFormat();
     }
 
     @Override
-    public Attrs attrs() {
-      return this.attrs;
+    public @Nullable Attrs emptyAttrs() throws WamlException {
+      return null;
     }
 
     @Override
-    public WamlForm<UndefinedRepr> withAttrs(Attrs attrs) {
-      return WamlReprs.undefinedForm(attrs);
+    public Attrs attrsBuilder() throws WamlException {
+      return Attrs.of();
     }
 
     @Override
-    public UndefinedRepr undefinedValue() {
-      return UndefinedRepr.undefined().withAttrs(this.attrs);
+    public Attrs updateAttr(Attrs builder, String name) throws WamlException {
+      builder.put(name, UnitRepr.unit());
+      return builder;
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable UndefinedRepr value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeIdentifier(output, this, "undefined", value.attrs().iterator());
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      }
+    public Attrs updateAttr(Attrs builder, String name, @Nullable Repr value) throws WamlException {
+      Objects.requireNonNull(value, "value");
+      builder.put(name, value);
+      return builder;
     }
 
     @Override
-    public Write<?> writeBlock(Output<?> output, @Nullable UndefinedRepr value, WamlWriter writer) {
-      if (value == null || value.attrs().isEmpty()) {
-        return Write.done();
-      } else {
-        return writer.writeIdentifier(output, this, "undefined", value.attrs().iterator());
-      }
+    public Object buildAttrs(Attrs builder) throws WamlException {
+      return builder;
     }
 
     @Override
-    public Term intoTerm(@Nullable UndefinedRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable UndefinedRepr fromTerm(Term term) {
-      if (term instanceof UndefinedRepr) {
-        return (UndefinedRepr) term;
-      } else {
+    public @Nullable Iterator<String> getAttrNames(@Nullable Object attrs) throws WamlException {
+      if (!(attrs instanceof Attrs)) {
         return null;
       }
+      return ((Attrs) attrs).keyIterator();
+    }
+
+    @Override
+    public @Nullable Repr getAttrValue(@Nullable Object attrs, String name) throws WamlException {
+      if (!(attrs instanceof Attrs)) {
+        return null;
+      }
+      return ((Attrs) attrs).get(name);
+    }
+
+    @Override
+    public <V extends Repr> WamlWriter<V> getAttrValueWriter(@Nullable Object attrs, String name, @Nullable V value) throws WamlException {
+      return Assume.contravariant(WamlReprs.valueFormat());
+    }
+
+    @Override
+    public boolean isEmptyAttrs(@Nullable Object attrs) {
+      return !(attrs instanceof Attrs) || ((Attrs) attrs).isEmpty();
+    }
+
+    @Override
+    public boolean isNullaryAttr(@Nullable Object attrs, String name, @Nullable Repr value) {
+      return UnitRepr.unit().equals(value);
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "undefinedForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
+      notation.beginInvoke("WamlReprs", "attrsFormat").endInvoke();
     }
 
     @Override
@@ -410,40 +293,161 @@ public final class WamlReprs implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-    static final WamlReprs.UndefinedForm INSTANCE = new WamlReprs.UndefinedForm(Attrs.empty());
+    static final AttrsFormat INSTANCE = new AttrsFormat();
 
   }
 
-  static final class UnitForm implements WamlReprForm<UnitRepr>, WamlUnitForm<UnitRepr>, ToSource {
+  static final class UndefinedFormat implements WamlFormat<UndefinedRepr>, WamlIdentifierParser<UndefinedRepr>, WamlIdentifierWriter<UndefinedRepr>, ToSource {
 
-    final Attrs attrs;
-
-    UnitForm(Attrs attrs) {
-      this.attrs = attrs;
+    @Override
+    public @Nullable String typeName() {
+      return "undefined";
     }
 
     @Override
-    public Attrs attrs() {
-      return this.attrs;
-    }
-
-    @Override
-    public WamlForm<UnitRepr> withAttrs(Attrs attrs) {
-      return WamlReprs.unitForm(attrs);
-    }
-
-    @Override
-    public UnitRepr unitValue() {
-      return UnitRepr.unit().withAttrs(this.attrs);
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable UnitRepr value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeUnit(output, this, value.attrs().iterator());
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
+    public @Nullable Object getAttrs(@Nullable UndefinedRepr value) {
+      if (value == null) {
+        return null;
       }
+      return value.attrs();
+    }
+
+    @Override
+    public UndefinedRepr fromIdentifier(@Nullable Object attrs, String value, WamlParserOptions options) throws WamlException {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      if ("undefined".equals(value)) {
+        return UndefinedRepr.undefined().withAttrs((Attrs) attrs);
+      }
+      throw new WamlException("unsupported identifier: " + value);
+    }
+
+    @Override
+    public @Nullable String intoIdentifier(@Nullable UndefinedRepr value) {
+      if (value != null) {
+        return "undefined";
+      }
+      return null;
+    }
+
+    @Override
+    public boolean filter(@Nullable UndefinedRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public UndefinedRepr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return UndefinedRepr.undefined().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public Write<?> writeBlock(Output<?> output, @Nullable UndefinedRepr value, WamlWriterOptions options) {
+      if (value == null || value.attrs().isEmpty()) {
+        return Write.done();
+      }
+      return WamlIdentifierWriter.super.writeBlock(output, value, options);
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("WamlReprs", "undefinedFormat").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final UndefinedFormat INSTANCE = new UndefinedFormat();
+
+  }
+
+  static final class UnitFormat implements WamlFormat<UnitRepr>, WamlTupleParser<Repr, UnitRepr, UnitRepr>, WamlTupleWriter<Repr, UnitRepr>, ToSource {
+
+    @Override
+    public @Nullable String typeName() {
+      return "unit";
+    }
+
+    @Override
+    public @Nullable Object getAttrs(@Nullable UnitRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.attrs();
+    }
+
+    @Override
+    public WamlParser<Repr> valueParser() {
+      return WamlReprs.valueFormat();
+    }
+
+    @Override
+    public UnitRepr emptyTuple(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return UnitRepr.unit().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public UnitRepr unaryTuple(@Nullable Object attrs, @Nullable Repr value) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return UnitRepr.unit().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public UnitRepr tupleBuilder(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return UnitRepr.unit().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public UnitRepr appendValue(UnitRepr builder, @Nullable Repr value) {
+      return builder;
+    }
+
+    @Override
+    public UnitRepr appendField(UnitRepr builder, @Nullable Repr key, @Nullable Repr value) {
+      return builder;
+    }
+
+    @Override
+    public UnitRepr buildTuple(@Nullable Object attrs, UnitRepr builder) throws WamlException {
+      return builder;
+    }
+
+    @Override
+    public @Nullable Iterator<? extends Map.Entry<String, Repr>> getFields(@Nullable UnitRepr value) {
+      return null;
+    }
+
+    @Override
+    public WamlWriter<String> keyWriter() {
+      return WamlLang.keyFormat();
+    }
+
+    @Override
+    public WamlWriter<Repr> valueWriter() {
+      return WamlReprs.valueFormat();
     }
 
     @Override
@@ -452,35 +456,37 @@ public final class WamlReprs implements WamlProvider, ToSource {
     }
 
     @Override
-    public Write<?> writeInline(Output<?> output, @Nullable UnitRepr value, WamlWriter writer) {
-      Objects.requireNonNull(value);
-      return writer.writeUnit(output, this, value.attrs().iterator());
-    }
-
-    @Override
-    public Term intoTerm(@Nullable UnitRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable UnitRepr fromTerm(Term term) {
-      if (term instanceof UnitRepr) {
-        return (UnitRepr) term;
-      } else if (term.isValidObject() && term.objectValue() == null) {
-        return UnitRepr.unit();
-      } else {
-        return null;
+    public boolean filter(@Nullable UnitRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
       }
+    }
+
+    @Override
+    public UnitRepr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return UnitRepr.unit().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Object attrs,
+                          @Nullable UnitRepr value, WamlWriterOptions options) {
+      return this.writeUnit(output, attrs, options);
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "unitForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
+      notation.beginInvoke("WamlReprs", "unitFormat").endInvoke();
     }
 
     @Override
@@ -488,111 +494,91 @@ public final class WamlReprs implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-    static final WamlReprs.UnitForm INSTANCE = new WamlReprs.UnitForm(Attrs.empty());
+    static final UnitFormat INSTANCE = new UnitFormat();
 
   }
 
-  static final class IdentifierForm implements WamlReprForm<Repr>, WamlIdentifierForm<Repr>, ToSource {
+  static final class IdentifierFormat implements WamlFormat<Repr>, WamlIdentifierParser<Repr>, WamlIdentifierWriter<Repr>, ToSource {
 
-    final Attrs attrs;
-
-    IdentifierForm(Attrs attrs) {
-      this.attrs = attrs;
+    @Override
+    public @Nullable String typeName() {
+      return "identifier";
     }
 
     @Override
-    public Attrs attrs() {
-      return this.attrs;
+    public @Nullable Object getAttrs(@Nullable Repr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.attrs();
     }
 
     @Override
-    public WamlForm<Repr> withAttrs(Attrs attrs) {
-      return WamlReprs.identifierForm(attrs);
-    }
-
-    @Override
-    public Repr identifierValue(String value, ExprParser parser) throws WamlException {
+    public Repr fromIdentifier(@Nullable Object attrs, String value, WamlParserOptions options) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
       switch (value) {
         case "undefined":
-          return UndefinedRepr.undefined().withAttrs(this.attrs);
+          return UndefinedRepr.undefined().withAttrs((Attrs) attrs);
         case "null":
-          return UnitRepr.unit().withAttrs(this.attrs);
+          return UnitRepr.unit().withAttrs((Attrs) attrs);
         case "false":
-          return BooleanRepr.of(false).withAttrs(this.attrs);
+          return BooleanRepr.of(false).withAttrs((Attrs) attrs);
         case "true":
-          return BooleanRepr.of(true).withAttrs(this.attrs);
+          return BooleanRepr.of(true).withAttrs((Attrs) attrs);
         default:
-          if (parser instanceof WamlParser && ((WamlParser) parser).options().exprsEnabled()) {
-            return TermRepr.of(new ChildExpr(ContextExpr.of(), StringRepr.of(value))).withAttrs(this.attrs);
-          } else {
-            return StringRepr.of(value).withAttrs(this.attrs);
+          if (options.exprsEnabled()) {
+            return TermRepr.of(new ChildExpr(ContextExpr.of(), Term.of(value))).withAttrs((Attrs) attrs);
           }
+          return WamlReprs.cacheString(value).withAttrs((Attrs) attrs);
       }
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable Repr value, WamlWriter writer) {
-      if (value == null) {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      } else if (value instanceof UndefinedRepr) {
-        return writer.writeIdentifier(output, this, "undefined", value.attrs().iterator());
+    public @Nullable String intoIdentifier(@Nullable Repr value) {
+      if (value instanceof UndefinedRepr) {
+        return "undefined";
       } else if (value instanceof UnitRepr) {
-        return writer.writeIdentifier(output, this, "null", value.attrs().iterator());
+        return "null";
       } else if (value instanceof BooleanRepr) {
-        return writer.writeIdentifier(output, this, value.booleanValue() ? "true" : "false", value.attrs().iterator());
-      } else {
-        return writer.writeIdentifier(output, this, value.stringValue(), value.attrs().iterator());
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Repr value) {
-      if (value == null) {
-        return Repr.unit();
-      } else if (value instanceof TermRepr && value.attrs().isEmpty()) {
-        return ((TermRepr) value).term();
-      } else {
-        return value;
-      }
-    }
-
-    @Override
-    public @Nullable Repr fromTerm(Term term) {
-      if (term instanceof BooleanRepr) {
-        return (BooleanRepr) term;
-      } else if (term.isValidString()) {
-        final String string = term.stringValue();
-        if (Waml.parser().isIdentifier(string)) {
-          if (term instanceof StringRepr) {
-            return (StringRepr) term;
-          } else {
-            return StringRepr.of(string);
-          }
-        }
-      } else {
-        if (term instanceof TermRepr) {
-          term = ((TermRepr) term).term();
-        }
-        if (term instanceof ChildExpr) {
-          final ChildExpr childExpr = (ChildExpr) term;
-          final Term scope = childExpr.scope();
-          final Term key = childExpr.key();
-          if (ContextExpr.of().equals(scope) && key.isValidString()) {
-            return StringRepr.of(key.stringValue());
-          }
+        return value.booleanValue() ? "true" : "false";
+      } else if (value instanceof TermRepr) {
+        final Term term = ((TermRepr) value).term();
+        if (term instanceof ChildExpr expr && expr.scope().equals(ContextExpr.of())
+            && expr.key().isValidString()) {
+          return expr.key().stringValue();
         }
       }
       return null;
     }
 
     @Override
+    public boolean filter(@Nullable Repr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public Repr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return UndefinedRepr.undefined().withAttrs((Attrs) attrs);
+    }
+
+    @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "identifierForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
+      notation.beginInvoke("WamlReprs", "identifierFormat").endInvoke();
     }
 
     @Override
@@ -600,172 +586,72 @@ public final class WamlReprs implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-    static final WamlReprs.IdentifierForm INSTANCE = new WamlReprs.IdentifierForm(Attrs.empty());
+    static final IdentifierFormat INSTANCE = new IdentifierFormat();
 
   }
 
-  static final class BooleanForm implements WamlReprForm<BooleanRepr>, WamlIdentifierForm<BooleanRepr>, ToSource {
+  static final class BooleanFormat implements WamlFormat<BooleanRepr>, WamlIdentifierParser<BooleanRepr>, WamlIdentifierWriter<BooleanRepr>, ToSource {
 
-    final Attrs attrs;
-
-    BooleanForm(Attrs attrs) {
-      this.attrs = attrs;
+    @Override
+    public @Nullable String typeName() {
+      return "boolean";
     }
 
     @Override
-    public Attrs attrs() {
-      return this.attrs;
-    }
-
-    @Override
-    public WamlForm<BooleanRepr> withAttrs(Attrs attrs) {
-      return WamlReprs.booleanForm(attrs);
-    }
-
-    @Override
-    public BooleanRepr identifierValue(String value, ExprParser parser) throws WamlException {
-      if ("true".equals(value)) {
-        return BooleanRepr.of(true).withAttrs(this.attrs);
-      } else if ("false".equals(value)) {
-        return BooleanRepr.of(false).withAttrs(this.attrs);
-      } else {
-        throw new WamlException("unsupported identifier: " + value);
-      }
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable BooleanRepr value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeIdentifier(output, this, value.stringValue(), value.attrs().iterator());
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable BooleanRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable BooleanRepr fromTerm(Term term) {
-      if (term instanceof BooleanRepr) {
-        return (BooleanRepr) term;
-      } else if (term.isValidBoolean()) {
-        return BooleanRepr.of(term.booleanValue());
-      } else {
-        return null;
-      }
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "booleanForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-    static final WamlReprs.BooleanForm INSTANCE = new WamlReprs.BooleanForm(Attrs.empty());
-
-  }
-
-  static final class NumberForm implements WamlReprForm<NumberRepr>, WamlNumberForm<NumberRepr>, ToSource {
-
-    final Attrs attrs;
-
-    NumberForm(Attrs attrs) {
-      this.attrs = attrs;
-    }
-
-    @Override
-    public Attrs attrs() {
-      return this.attrs;
-    }
-
-    @Override
-    public WamlForm<NumberRepr> withAttrs(Attrs attrs) {
-      return WamlReprs.numberForm(attrs);
-    }
-
-    @Override
-    public NumberRepr integerValue(long value) {
-      if (value == (long) (int) value) {
-        return NumberRepr.of((int) value).withAttrs(this.attrs);
-      } else {
-        return NumberRepr.of(value).withAttrs(this.attrs);
-      }
-    }
-
-    @Override
-    public NumberRepr hexadecimalValue(long value, int digits) {
-      if (value == (long) (int) value && digits <= 8) {
-        return NumberRepr.of((int) value).withAttrs(this.attrs);
-      } else {
-        return NumberRepr.of(value).withAttrs(this.attrs);
-      }
-    }
-
-    @Override
-    public NumberRepr bigIntegerValue(String value) {
-      return NumberRepr.of(new BigInteger(value)).withAttrs(this.attrs);
-    }
-
-    @Override
-    public NumberRepr decimalValue(String value) {
-      return NumberRepr.parse(value).withAttrs(this.attrs);
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable NumberRepr value, WamlWriter writer) {
+    public @Nullable Object getAttrs(@Nullable BooleanRepr value) {
       if (value == null) {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      } else if (value.isValidInt()) {
-        return writer.writeNumber(output, this, value.intValue(), value.attrs().iterator());
-      } else if (value.isValidLong()) {
-        return writer.writeNumber(output, this, value.longValue(), value.attrs().iterator());
-      } else if (value.isValidFloat()) {
-        return writer.writeNumber(output, this, value.floatValue(), value.attrs().iterator());
-      } else if (value.isValidDouble()) {
-        return writer.writeNumber(output, this, value.doubleValue(), value.attrs().iterator());
-      } else if (value.isValidBigInteger()) {
-        return writer.writeNumber(output, this, value.bigIntegerValue(), value.attrs().iterator());
-      } else {
-        return Write.error(new WriteException("unsupported value: " + value));
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable NumberRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable NumberRepr fromTerm(Term term) {
-      if (term instanceof NumberRepr) {
-        return (NumberRepr) term;
-      } else if (term.isValidNumber()) {
-        return NumberRepr.of(term.numberValue());
-      } else {
         return null;
       }
+      return value.attrs();
+    }
+
+    @Override
+    public BooleanRepr fromIdentifier(@Nullable Object attrs, String value, WamlParserOptions options) throws WamlException {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      if ("true".equals(value)) {
+        return BooleanRepr.of(true).withAttrs((Attrs) attrs);
+      } else if ("false".equals(value)) {
+        return BooleanRepr.of(false).withAttrs((Attrs) attrs);
+      }
+      throw new WamlException("unsupported identifier: " + value);
+    }
+
+    @Override
+    public @Nullable String intoIdentifier(@Nullable BooleanRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.booleanValue() ? "true" : "false";
+    }
+
+    @Override
+    public boolean filter(@Nullable BooleanRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public BooleanRepr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return BooleanRepr.of(false).withAttrs((Attrs) attrs);
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "numberForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
+      notation.beginInvoke("WamlReprs", "booleanFormat").endInvoke();
     }
 
     @Override
@@ -773,30 +659,146 @@ public final class WamlReprs implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-    static final WamlReprs.NumberForm INSTANCE = new WamlReprs.NumberForm(Attrs.empty());
+    static final BooleanFormat INSTANCE = new BooleanFormat();
 
   }
 
-  static final class StringForm implements WamlReprForm<StringRepr>, WamlStringForm<StringBuilder, StringRepr>, ToSource {
+  static final class NumberFormat implements WamlFormat<NumberRepr>, WamlNumberParser<NumberRepr>, WamlNumberWriter<NumberRepr>, ToSource {
 
-    final Attrs attrs;
-
-    StringForm(Attrs attrs) {
-      this.attrs = attrs;
+    @Override
+    public @Nullable String typeName() {
+      return "number";
     }
 
     @Override
-    public Attrs attrs() {
-      return this.attrs;
+    public @Nullable Object getAttrs(@Nullable NumberRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.attrs();
     }
 
     @Override
-    public WamlForm<StringRepr> withAttrs(Attrs attrs) {
-      return WamlReprs.stringForm(attrs);
+    public NumberRepr fromInteger(@Nullable Object attrs, long value) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      if (value == (long) (int) value) {
+        return NumberRepr.of((int) value).withAttrs((Attrs) attrs);
+      } else {
+        return NumberRepr.of(value).withAttrs((Attrs) attrs);
+      }
     }
 
     @Override
-    public StringBuilder stringBuilder() {
+    public NumberRepr fromHexadecimal(@Nullable Object attrs, long value, int digits) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      if (value == (long) (int) value && digits <= 8) {
+        return NumberRepr.of((int) value).withAttrs((Attrs) attrs);
+      } else {
+        return NumberRepr.of(value).withAttrs((Attrs) attrs);
+      }
+    }
+
+    @Override
+    public NumberRepr fromBigInteger(@Nullable Object attrs, String value) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return NumberRepr.of(new BigInteger(value)).withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public NumberRepr fromDecimal(@Nullable Object attrs, String value) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return NumberRepr.parse(value).withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public @Nullable Number intoNumber(@Nullable NumberRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.numberValue();
+    }
+
+    @Override
+    public boolean filter(@Nullable NumberRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public NumberRepr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return NumberRepr.of(0).withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Object attrs,
+                          @Nullable NumberRepr value, WamlWriterOptions options) {
+      if (value == null) {
+        return this.writeUnit(output, attrs, options);
+      } else if (value.isValidInt()) {
+        return this.writeInt(output, attrs, value.intValue(), options);
+      } else if (value.isValidLong()) {
+        return this.writeLong(output, attrs, value.longValue(), options);
+      } else if (value.isValidFloat()) {
+        return this.writeFloat(output, attrs, value.floatValue(), options);
+      } else if (value.isValidDouble()) {
+        return this.writeDouble(output, attrs, value.doubleValue(), options);
+      } else if (value.isValidBigInteger()) {
+        return this.writeBigInteger(output, attrs, value.bigIntegerValue(), options);
+      }
+      return this.writeNumber(output, attrs, value.numberValue(), options);
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("WamlReprs", "numberFormat").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final NumberFormat INSTANCE = new NumberFormat();
+
+  }
+
+  static final class StringFormat implements WamlFormat<StringRepr>, WamlStringParser<StringBuilder, StringRepr>, WamlStringWriter<StringRepr>, ToSource {
+
+    @Override
+    public @Nullable String typeName() {
+      return "string";
+    }
+
+    @Override
+    public @Nullable Object getAttrs(@Nullable StringRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.attrs();
+    }
+
+    @Override
+    public StringBuilder stringBuilder(@Nullable Object attrs) {
       return new StringBuilder();
     }
 
@@ -806,49 +808,47 @@ public final class WamlReprs implements WamlProvider, ToSource {
     }
 
     @Override
-    public StringRepr buildString(StringBuilder builder) {
-      final CacheMap<String, StringRepr> stringCache = WamlReprs.stringCache();
-      final String value = builder.toString();
-      StringRepr stringValue = stringCache.get(value);
-      if (stringValue == null) {
-        stringValue = stringCache.put(value, StringRepr.of(value));
+    public StringRepr buildString(@Nullable Object attrs, StringBuilder builder) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
       }
-      return stringValue.withAttrs(this.attrs);
+      return WamlReprs.cacheString(builder.toString()).withAttrs((Attrs) attrs);
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable StringRepr value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeString(output, this, value.stringValue(), value.attrs().iterator());
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable StringRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable StringRepr fromTerm(Term term) {
-      if (term instanceof StringRepr) {
-        return (StringRepr) term;
-      } else if (term.isValidString()) {
-        return StringRepr.of(term.stringValue());
-      } else {
+    public @Nullable String intoString(@Nullable StringRepr value) {
+      if (value == null) {
         return null;
       }
+      return value.stringValue();
+    }
+
+    @Override
+    public boolean filter(@Nullable StringRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public StringRepr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return StringRepr.empty().withAttrs((Attrs) attrs);
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "stringForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
+      notation.beginInvoke("WamlReprs", "stringFormat").endInvoke();
     }
 
     @Override
@@ -856,40 +856,45 @@ public final class WamlReprs implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-    static final WamlReprs.StringForm INSTANCE = new WamlReprs.StringForm(Attrs.empty());
+    static final StringFormat INSTANCE = new StringFormat();
 
   }
 
-  static final class BlobForm implements WamlReprForm<BlobRepr>, WamlStringForm<Output<BlobRepr>, BlobRepr>, ToSource {
+  static final class BlobFormat implements WamlFormat<BlobRepr>, WamlStringParser<Output<BlobRepr>, BlobRepr>, WamlStringWriter<BlobRepr>, ToSource {
 
-    final Attrs attrs;
-
-    BlobForm(Attrs attrs) {
-      this.attrs = attrs;
+    @Override
+    public @Nullable String typeName() {
+      return "base64";
     }
 
     @Override
-    public Attrs attrs() {
-      return this.attrs;
+    public @Nullable Object getAttrs(@Nullable BlobRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.attrs().updated("blob", UnitRepr.unit());
     }
 
     @Override
-    public WamlForm<BlobRepr> withAttrs(Attrs attrs) {
-      return WamlReprs.blobForm(attrs);
-    }
-
-    @Override
-    public Output<BlobRepr> stringBuilder() {
-      return Base64.standard().decodedOutput(new BlobReprOutput(BlobRepr.of().withAttrs(this.attrs)));
+    public Output<BlobRepr> stringBuilder(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      } else {
+        attrs = ((Attrs) attrs).removed("blob");
+      }
+      return Base64.standard().decodedOutput(new BlobReprOutput(BlobRepr.of().withAttrs((Attrs) attrs)));
     }
 
     @Override
     public Output<BlobRepr> appendCodePoint(Output<BlobRepr> builder, int c) {
-      return builder.write(c);
+      if (builder.isCont()) {
+        builder.write(c);
+      }
+      return builder;
     }
 
     @Override
-    public @Nullable BlobRepr buildString(Output<BlobRepr> builder) throws WamlException {
+    public @Nullable BlobRepr buildString(@Nullable Object attrs, Output<BlobRepr> builder) throws WamlException {
       try {
         return builder.get();
       } catch (OutputException cause) {
@@ -898,42 +903,222 @@ public final class WamlReprs implements WamlProvider, ToSource {
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable BlobRepr value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeString(output, this, value.toBase64(), new WamlReprs.BlobForm.AttrIterator(value.attrs().iterator()));
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
+    public @Nullable String intoString(@Nullable BlobRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.toBase64();
+    }
+
+    @Override
+    public boolean filter(@Nullable BlobRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
       }
     }
 
     @Override
-    public Term intoTerm(@Nullable BlobRepr value) {
-      return value != null ? value : Repr.unit();
+    public BlobRepr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return BlobRepr.empty().withAttrs((Attrs) attrs);
     }
 
     @Override
-    public @Nullable BlobRepr fromTerm(Term term) {
-      if (term instanceof BlobRepr) {
-        return (BlobRepr) term;
-      } else if (term.isValidObject()) {
-        final Object object = term.objectValue();
-        if (object instanceof ByteBuffer) {
-          return BlobRepr.from((ByteBuffer) object);
-        } else if (object instanceof byte[]) {
-          return BlobRepr.wrap((byte[]) object);
-        }
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("WamlReprs", "blobFormat").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final BlobFormat INSTANCE = new BlobFormat();
+
+  }
+
+  static final class TermFormat implements WamlFormat<Repr>, ToSource {
+
+    @Override
+    public @Nullable String typeName() {
+      return null;
+    }
+
+    @Override
+    public @Nullable Object getAttrs(@Nullable Repr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.attrs();
+    }
+
+    @Override
+    public boolean filter(@Nullable Repr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public Repr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return UndefinedRepr.undefined().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public Parse<Repr> parse(Input input, WamlParserOptions options) {
+      return ParseWamlRepr.parse(input, this, options, null);
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Object attrs,
+                          @Nullable Repr value, WamlWriterOptions options) {
+      if (value instanceof TermRepr) {
+        return this.writeTerm(output, attrs, ((TermRepr) value).term(), options);
+      }
+      return WamlReprs.valueFormat().write(output, attrs, value, options);
+    }
+
+    @Override
+    public Write<?> writeBlock(Output<?> output, @Nullable Repr value, WamlWriterOptions options) {
+      if (value instanceof TermRepr) {
+        return this.writeTerm(output, value.attrs(), ((TermRepr) value).term(), options);
+      }
+      return WamlReprs.valueFormat().writeBlock(output, value, options);
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("WamlReprs", "termFormat").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final TermFormat INSTANCE = new TermFormat();
+
+  }
+
+  static final class MarkupFormat implements WamlFormat<ArrayRepr>, WamlMarkupParser<Repr, ArrayRepr, ArrayRepr>, WamlMarkupWriter<Repr, ArrayRepr>, ToSource {
+
+    @Override
+    public @Nullable String typeName() {
+      return "markup";
+    }
+
+    @Override
+    public @Nullable Object getAttrs(@Nullable ArrayRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.attrs();
+    }
+
+    @Override
+    public WamlParser<Repr> nodeParser() {
+      return WamlReprs.valueFormat();
+    }
+
+    @Override
+    public ArrayRepr markupBuilder(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return ArrayRepr.of().withAttrs((Attrs) attrs).asMarkup();
+    }
+
+    @Override
+    public ArrayRepr appendNode(ArrayRepr builder, @Nullable Repr node) {
+      Objects.requireNonNull(node, "node");
+      builder.add(node);
+      return builder;
+    }
+
+    @Override
+    public ArrayRepr appendText(ArrayRepr builder, String text) {
+      builder.add(StringRepr.of(text));
+      return builder;
+    }
+
+    @Override
+    public ArrayRepr buildMarkup(@Nullable Object attrs, ArrayRepr builder) {
+      return builder;
+    }
+
+    @Override
+    public WamlWriter<Repr> nodeWriter() {
+      return WamlReprs.valueFormat();
+    }
+
+    @Override
+    public @Nullable String asText(@Nullable Repr node) {
+      if (node instanceof StringRepr) {
+        return ((StringRepr) node).stringValue();
       }
       return null;
     }
 
     @Override
+    public @Nullable Iterator<? extends Repr> intoNodes(@Nullable ArrayRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.iterator();
+    }
+
+    @Override
+    public boolean isInline(@Nullable ArrayRepr value) {
+      return value != null && value.isMarkup() && value.attrs().size() <= 1;
+    }
+
+    @Override
+    public boolean filter(@Nullable ArrayRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public ArrayRepr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return ArrayRepr.empty().withAttrs((Attrs) attrs);
+    }
+
+    @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "blobForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
+      notation.beginInvoke("WamlReprs", "markupFormat").endInvoke();
     }
 
     @Override
@@ -941,214 +1126,87 @@ public final class WamlReprs implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-    static final WamlReprs.BlobForm INSTANCE = new WamlReprs.BlobForm(Attrs.empty());
-
-    static final class AttrIterator implements Iterator<Map.Entry<String, Repr>> {
-
-      @Nullable Iterator<Map.Entry<String, Repr>> attrs;
-
-      AttrIterator(@Nullable Iterator<Map.Entry<String, Repr>> attrs) {
-        this.attrs = attrs;
-      }
-
-      @Override
-      public boolean hasNext() {
-        return this.attrs != null;
-      }
-
-      @Override
-      public Map.Entry<String, Repr> next() {
-        if (this.attrs != null) {
-          if (this.attrs.hasNext()) {
-            return this.attrs.next();
-          } else {
-            this.attrs = null;
-            return new SimpleImmutableEntry<String, Repr>("blob", Repr.unit());
-          }
-        } else {
-          throw new NoSuchElementException();
-        }
-      }
-
-    }
+    static final MarkupFormat INSTANCE = new MarkupFormat();
 
   }
 
-  static final class TermForm implements WamlReprForm<Repr>, ToSource {
+  static final class ArrayFormat implements WamlFormat<ArrayRepr>, WamlArrayParser<Repr, ArrayRepr, ArrayRepr>, WamlArrayWriter<Repr, ArrayRepr>, WamlMarkupWriter<Repr, ArrayRepr>, ToSource {
 
-    final Attrs attrs;
-
-    TermForm(Attrs attrs) {
-      this.attrs = attrs;
+    @Override
+    public @Nullable String typeName() {
+      return "array";
     }
 
     @Override
-    public Attrs attrs() {
-      return this.attrs;
+    public WamlMarkupParser<?, ?, ArrayRepr> markupParser() throws WamlException {
+      return WamlReprs.markupFormat().markupParser();
     }
 
     @Override
-    public WamlForm<Repr> withAttrs(Attrs attrs) {
-      return WamlReprs.termForm(attrs);
-    }
-
-    @Override
-    public Parse<Repr> parse(Input input, WamlParser parser) {
-      return parser.parseExpr(input, this);
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable Repr value, WamlWriter writer) {
+    public @Nullable Object getAttrs(@Nullable ArrayRepr value) {
       if (value == null) {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      } else if (value instanceof TermRepr) {
-        return writer.writeTerm(output, this, ((TermRepr) value).term(), value.attrs().iterator());
-      } else {
-        return WamlReprs.reprForm().write(output, value, writer);
+        return null;
       }
+      return value.attrs();
     }
 
     @Override
-    public Write<?> writeBlock(Output<?> output, @Nullable Repr value, WamlWriter writer) {
-      if (value == null) {
-        return Write.done();
-      } else if (value instanceof TermRepr) {
-        return writer.writeTerm(output, this, ((TermRepr) value).term(), value.attrs().iterator());
-      } else {
-        return WamlReprs.reprForm().writeBlock(output, value, writer);
+    public WamlParser<Repr> elementParser() {
+      return WamlReprs.valueFormat();
+    }
+
+    @Override
+    public ArrayRepr arrayBuilder(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
       }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Repr value) {
-      if (value == null) {
-        return Repr.unit();
-      } else if (value instanceof TermRepr && value.attrs().isEmpty()) {
-        return ((TermRepr) value).term();
-      } else {
-        return value;
-      }
-    }
-
-    @Override
-    public @Nullable Repr fromTerm(Term term) {
-      if (term instanceof Repr) {
-        return (Repr) term;
-      } else {
-        return TermRepr.of(term);
-      }
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "termForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-    static final WamlReprs.TermForm INSTANCE = new WamlReprs.TermForm(Attrs.empty());
-
-  }
-
-  static final class ArrayForm implements WamlReprForm<ArrayRepr>, WamlArrayForm<Repr, ArrayRepr, ArrayRepr>, WamlMarkupForm<Repr, ArrayRepr, ArrayRepr>, ToSource {
-
-    final Attrs attrs;
-
-    ArrayForm(Attrs attrs) {
-      this.attrs = attrs;
-    }
-
-    @Override
-    public Attrs attrs() {
-      return this.attrs;
-    }
-
-    @Override
-    public WamlForm<ArrayRepr> withAttrs(Attrs attrs) {
-      return WamlReprs.arrayForm(attrs);
-    }
-
-    @Override
-    public WamlForm<Repr> elementForm() {
-      return WamlReprs.reprForm();
-    }
-
-    @Override
-    public ArrayRepr arrayBuilder() {
-      return ArrayRepr.of().withAttrs(this.attrs);
+      return ArrayRepr.of().withAttrs((Attrs) attrs);
     }
 
     @Override
     public ArrayRepr appendElement(ArrayRepr builder, @Nullable Repr element) {
-      Objects.requireNonNull(element);
+      Objects.requireNonNull(element, "element");
       builder.add(element);
       return builder;
     }
 
     @Override
-    public ArrayRepr buildArray(ArrayRepr builder) {
+    public ArrayRepr buildArray(@Nullable Object attrs, ArrayRepr builder) {
       return builder;
     }
 
     @Override
-    public WamlForm<Repr> nodeForm() {
-      return WamlReprs.reprForm();
+    public @Nullable Iterator<? extends Repr> getElements(@Nullable ArrayRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.iterator();
+    }
+
+    @Override
+    public WamlWriter<Repr> elementWriter() {
+      return WamlReprs.valueFormat();
+    }
+
+    @Override
+    public WamlWriter<Repr> nodeWriter() {
+      return WamlReprs.valueFormat();
     }
 
     @Override
     public @Nullable String asText(@Nullable Repr node) {
       if (node instanceof StringRepr) {
         return ((StringRepr) node).stringValue();
-      } else {
+      }
+      return null;
+    }
+
+    @Override
+    public @Nullable Iterator<? extends Repr> intoNodes(@Nullable ArrayRepr value) {
+      if (value == null) {
         return null;
       }
-    }
-
-    @Override
-    public ArrayRepr markupBuilder() {
-      return ArrayRepr.of().withAttrs(this.attrs);
-    }
-
-    @Override
-    public ArrayRepr appendNode(ArrayRepr builder, @Nullable Repr node) {
-      Objects.requireNonNull(node);
-      builder.add(node);
-      return builder;
-    }
-
-    @Override
-    public ArrayRepr appendText(ArrayRepr builder, String text) {
-      builder.add(StringRepr.of(text));
-      return builder;
-    }
-
-    @Override
-    public ArrayRepr buildMarkup(ArrayRepr builder) {
-      return builder;
-    }
-
-    @Override
-    public Parse<ArrayRepr> parse(Input input, WamlParser parser) {
-      return parser.parseExpr(input, this);
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable ArrayRepr value, WamlWriter writer) {
-      if (value == null) {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      } else if (value.isMarkup()) {
-        return writer.writeMarkup(output, this, value.iterator(), value.attrs().iterator());
-      } else {
-        return writer.writeArray(output, this, value.iterator(), value.attrs().iterator());
-      }
+      return value.iterator();
     }
 
     @Override
@@ -1157,33 +1215,45 @@ public final class WamlReprs implements WamlProvider, ToSource {
     }
 
     @Override
-    public Write<?> writeInline(Output<?> output, @Nullable ArrayRepr value, WamlWriter writer) {
-      Objects.requireNonNull(value);
-      return writer.writeInlineMarkup(output, this, value.iterator(), value.attrs().iterator());
-    }
-
-    @Override
-    public Term intoTerm(@Nullable ArrayRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable ArrayRepr fromTerm(Term term) {
-      if (term instanceof ArrayRepr) {
-        return (ArrayRepr) term;
-      } else {
-        return null;
+    public boolean filter(@Nullable ArrayRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
       }
+    }
+
+    @Override
+    public ArrayRepr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return ArrayRepr.empty().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public Parse<ArrayRepr> parse(Input input, WamlParserOptions options) {
+      return this.parseValue(input, options);
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Object attrs,
+                          @Nullable ArrayRepr value, WamlWriterOptions options) {
+      if (value != null && value.isMarkup()) {
+        return WamlMarkupWriter.super.write(output, attrs, value, options);
+      }
+      return WamlArrayWriter.super.write(output, attrs, value, options);
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "arrayForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
+      notation.beginInvoke("WamlReprs", "arrayFormat").endInvoke();
     }
 
     @Override
@@ -1191,174 +1261,107 @@ public final class WamlReprs implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-    static final WamlReprs.ArrayForm INSTANCE = new WamlReprs.ArrayForm(Attrs.empty());
+    static final ArrayFormat INSTANCE = new ArrayFormat();
 
   }
 
-  static final class MarkupForm implements WamlReprForm<ArrayRepr>, WamlMarkupForm<Repr, ArrayRepr, ArrayRepr>, ToSource {
+  static final class ObjectFormat implements WamlFormat<ObjectRepr>, WamlObjectFormat<Repr, ObjectRepr, ObjectRepr>, ToSource {
 
-    final Attrs attrs;
-
-    MarkupForm(Attrs attrs) {
-      this.attrs = attrs;
+    @Override
+    public @Nullable String typeName() {
+      return "object";
     }
 
     @Override
-    public Attrs attrs() {
-      return this.attrs;
+    public WamlFieldFormat<? extends Repr, ObjectRepr> getFieldFormat(@Nullable ObjectRepr object, String key) {
+      return WamlFieldFormat.forKey(key, WamlLang.keyFormat(), WamlReprs.valueFormat(), FilterMode.DEFAULT);
     }
 
     @Override
-    public WamlForm<ArrayRepr> withAttrs(Attrs attrs) {
-      return WamlReprs.markupForm(attrs);
-    }
-
-    @Override
-    public WamlForm<Repr> nodeForm() {
-      return WamlReprs.reprForm();
-    }
-
-    @Override
-    public @Nullable String asText(@Nullable Repr node) {
-      if (node instanceof StringRepr) {
-        return ((StringRepr) node).stringValue();
-      } else {
-        return null;
+    public Iterator<WamlFieldFormat<? extends Repr, ObjectRepr>> getFieldFormats(@Nullable ObjectRepr object) {
+      if (object == null) {
+        return Collections.emptyIterator();
       }
+      return WamlCollections.mapFieldFormatIterator(object.keyIterator(), WamlLang.keyFormat(),
+                                                    WamlReprs.valueFormat(), FilterMode.DEFAULT);
     }
 
     @Override
-    public ArrayRepr markupBuilder() {
-      return ArrayRepr.of().withAttrs(this.attrs);
+    public Iterator<WamlFieldFormat<? extends Repr, ObjectRepr>> getDeclaredFieldFormats() {
+      return Collections.emptyIterator();
     }
 
     @Override
-    public ArrayRepr appendNode(ArrayRepr builder, @Nullable Repr node) {
-      Objects.requireNonNull(node);
-      builder.add(node);
-      return builder;
-    }
-
-    @Override
-    public ArrayRepr appendText(ArrayRepr builder, String text) {
-      builder.add(StringRepr.of(text));
-      return builder;
-    }
-
-    @Override
-    public ArrayRepr buildMarkup(ArrayRepr builder) {
-      return builder;
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable ArrayRepr value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeMarkup(output, this, value.iterator(), value.attrs().iterator());
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      }
-    }
-
-    @Override
-    public boolean isInline(@Nullable ArrayRepr value) {
-      return value != null && value.isMarkup() && value.attrs().size() <= 1;
-    }
-
-    @Override
-    public Write<?> writeInline(Output<?> output, @Nullable ArrayRepr value, WamlWriter writer) {
-      Objects.requireNonNull(value);
-      return writer.writeInlineMarkup(output, this, value.iterator(), value.attrs().iterator());
-    }
-
-    @Override
-    public Term intoTerm(@Nullable ArrayRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable ArrayRepr fromTerm(Term term) {
-      if (term instanceof ArrayRepr) {
-        return (ArrayRepr) term;
-      } else {
-        return null;
-      }
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "markupForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-    static final WamlReprs.MarkupForm INSTANCE = new WamlReprs.MarkupForm(Attrs.empty());
-
-  }
-
-  static final class KeyForm implements WamlIdentifierForm<String>, WamlStringForm<StringBuilder, String>, ToSource {
-
-    @Override
-    public String identifierValue(String value, ExprParser parser) {
-      return WamlReprs.keyCache().put(value);
-    }
-
-    @Override
-    public StringBuilder stringBuilder() {
-      return new StringBuilder();
-    }
-
-    @Override
-    public StringBuilder appendCodePoint(StringBuilder builder, int c) {
-      return builder.appendCodePoint(c);
-    }
-
-    @Override
-    public String buildString(StringBuilder builder) {
-      return WamlReprs.keyCache().put(builder.toString());
-    }
-
-    @Override
-    public Parse<String> parse(Input input, WamlParser parser) {
-      return parser.parseValue(input, this);
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable String value, WamlWriter writer) {
+    public @Nullable Object getAttrs(@Nullable ObjectRepr value) {
       if (value == null) {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      } else if (writer.isIdentifier(value) && !writer.isKeyword(value)) {
-        return writer.writeIdentifier(output, this, value, Collections.emptyIterator());
-      } else {
-        return writer.writeString(output, this, value, Collections.emptyIterator());
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable String value) {
-      return value != null ? StringRepr.of(value) : Repr.unit();
-    }
-
-    @Override
-    public @Nullable String fromTerm(Term term) {
-      if (term.isValidString()) {
-        return term.stringValue();
-      } else {
         return null;
       }
+      return value.attrs();
+    }
+
+    @Override
+    public ObjectRepr objectBuilder(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return ObjectRepr.of().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public WamlFieldParser<? extends Repr, ObjectRepr> getFieldParser(ObjectRepr object, String key) {
+      return WamlFieldParser.forKey(key, WamlReprs.valueFormat());
+    }
+
+    @Override
+    public @Nullable ObjectRepr buildObject(@Nullable Object attrs, ObjectRepr builder) {
+      return builder;
+    }
+
+    @Override
+    public WamlFieldWriter<? extends Repr, ObjectRepr> getFieldWriter(ObjectRepr object, String key) {
+      return WamlFieldWriter.forKey(key, WamlLang.keyFormat(), WamlReprs.valueFormat(), FilterMode.DEFAULT);
+    }
+
+    @Override
+    public Iterator<WamlFieldWriter<? extends Repr, ObjectRepr>> getFieldWriters(ObjectRepr object) {
+      return Assume.conforms(WamlCollections.mapFieldFormatIterator(object.keyIterator(), WamlLang.keyFormat(),
+                                                                    WamlReprs.valueFormat(), FilterMode.DEFAULT));
+    }
+
+    @Override
+    public boolean filter(@Nullable ObjectRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public @Nullable ObjectRepr merged(@Nullable ObjectRepr newObject, @Nullable ObjectRepr oldObject) {
+      if (newObject == null || oldObject == null) {
+        return newObject;
+      }
+      return newObject.letAll(oldObject);
+    }
+
+    @Override
+    public ObjectRepr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return ObjectRepr.empty().withAttrs((Attrs) attrs);
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "keyForm").endInvoke();
+      notation.beginInvoke("WamlReprs", "objectFormat").endInvoke();
     }
 
     @Override
@@ -1366,424 +1369,309 @@ public final class WamlReprs implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-    static final WamlReprs.KeyForm INSTANCE = new WamlReprs.KeyForm();
+    static final ObjectFormat INSTANCE = new ObjectFormat();
 
   }
 
-  static final class ObjectForm implements WamlReprForm<ObjectRepr>, WamlFieldForm<String, Repr, ObjectRepr>, WamlObjectForm<String, Repr, ObjectRepr, ObjectRepr>, ToSource {
+  static final class TupleFormat implements WamlFormat<Repr>, WamlTupleParser<Repr, TupleRepr, Repr>, WamlTupleWriter<Repr, Repr>, ToSource {
 
-    final Attrs attrs;
-
-    ObjectForm(Attrs attrs) {
-      this.attrs = attrs;
+    @Override
+    public @Nullable String typeName() {
+      return "tuple";
     }
 
     @Override
-    public Attrs attrs() {
-      return this.attrs;
+    public @Nullable Object getAttrs(@Nullable Repr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.attrs();
     }
 
     @Override
-    public WamlForm<ObjectRepr> withAttrs(Attrs attrs) {
-      return WamlReprs.objectForm(attrs);
+    public WamlParser<Repr> valueParser() {
+      return WamlReprs.valueFormat();
     }
 
     @Override
-    public WamlForm<String> keyForm() {
-      return WamlReprs.keyForm();
+    public Repr emptyTuple(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return UnitRepr.unit().withAttrs((Attrs) attrs);
     }
 
     @Override
-    public WamlForm<Repr> valueForm() {
-      return WamlReprs.reprForm();
+    public Repr unaryTuple(@Nullable Object attrs, @Nullable Repr value) {
+      Objects.requireNonNull(value, "value");
+      if (!(attrs instanceof Attrs) || ((Attrs) attrs).isEmpty()) {
+        return value;
+      } else if (value.attrs().isEmpty()) {
+        return value.withAttrs((Attrs) attrs);
+      } else {
+        final Attrs newAttrs = ((Attrs) attrs).asMutable();
+        newAttrs.putAll(value.attrs());
+        return value.withAttrs(newAttrs);
+      }
     }
 
     @Override
-    public WamlFieldForm<String, Repr, ObjectRepr> getFieldForm(String key) {
+    public TupleRepr tupleBuilder(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return TupleRepr.of().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public TupleRepr appendValue(TupleRepr builder, @Nullable Repr value) {
+      Objects.requireNonNull(value, "value");
+      builder.add(value);
+      return builder;
+    }
+
+    @Override
+    public TupleRepr appendField(TupleRepr builder, @Nullable Repr key, @Nullable Repr value) {
+      Objects.requireNonNull(key, "key");
+      Objects.requireNonNull(value, "value");
+      String keyString = null;
+      if (key.isValidString()) {
+        keyString = key.stringValue();
+      } else if (key instanceof TermRepr) {
+        final Term term = ((TermRepr) key).term();
+        if (term instanceof ChildExpr && ((ChildExpr) term).scope() instanceof ContextExpr) {
+          final Term childKey = ((ChildExpr) term).key();
+          if (childKey.isValidString()) {
+            keyString = childKey.stringValue();
+          }
+        }
+      }
+      if (keyString != null) {
+        builder.put(keyString, value);
+      } else {
+        builder.add(value);
+      }
+      return builder;
+    }
+
+    @Override
+    public @Nullable Repr buildTuple(@Nullable Object attrs, @Nullable TupleRepr builder) {
+      return builder;
+    }
+
+    @Override
+    public @Nullable Iterator<? extends Map.Entry<String, Repr>> getFields(@Nullable Repr value) {
+      if (value == null) {
+        return null;
+      } else if (value instanceof TupleRepr) {
+        return ((TupleRepr) value).iterator();
+      }
+      return Iterators.unary(new SimpleImmutableEntry<String, Repr>(null, value));
+    }
+
+    @Override
+    public WamlWriter<String> keyWriter() {
+      return WamlLang.keyFormat();
+    }
+
+    @Override
+    public WamlWriter<Repr> valueWriter() {
+      return WamlReprs.valueFormat();
+    }
+
+    @Override
+    public boolean filter(@Nullable Repr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public TupleRepr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return TupleRepr.empty().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public Write<?> writeBlock(Output<?> output, @Nullable Repr value, WamlWriterOptions options) {
+      if (value instanceof TupleRepr) {
+        return WamlTupleWriter.super.writeBlock(output, value, options);
+      }
+      return WamlReprs.valueFormat().writeBlock(output, value, options);
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("WamlReprs", "tupleFormat").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final TupleFormat INSTANCE = new TupleFormat();
+
+  }
+
+  static final class ValueFormat implements WamlFormat<Repr>, ToSource {
+
+    @Override
+    public @Nullable String typeName() {
+      return "any";
+    }
+
+    @Override
+    public WamlFormat<Repr> withAttrs(@Nullable Object attrs) {
+      if (attrs instanceof Attrs attributes) {
+        if (attributes.containsKey("blob")) {
+          return Assume.covariant(WamlReprs.blobFormat());
+        }
+      }
       return this;
     }
 
     @Override
-    public ObjectRepr objectBuilder() {
-      return ObjectRepr.of().withAttrs(this.attrs);
-    }
-
-    @Override
-    public ObjectRepr updateField(ObjectRepr builder, String key, @Nullable Repr value) {
-      Objects.requireNonNull(value, "value");
-      builder.put(key, value);
-      return builder;
-    }
-
-    @Override
-    public ObjectRepr buildObject(ObjectRepr builder) {
-      return builder;
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable ObjectRepr value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeObject(output, this, value.iterator(), value.attrs().iterator());
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable ObjectRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable ObjectRepr fromTerm(Term term) {
-      if (term instanceof ObjectRepr) {
-        return (ObjectRepr) term;
-      } else {
+    public @Nullable Object getAttrs(@Nullable Repr value) throws WamlException {
+      if (value == null) {
         return null;
-      }
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "objectForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-    static final WamlReprs.ObjectForm INSTANCE = new WamlReprs.ObjectForm(Attrs.empty());
-
-  }
-
-  static final class TupleForm implements WamlReprForm<Repr>, WamlTupleForm<String, Repr, TupleRepr, Repr>, ToSource {
-
-    final Attrs attrs;
-
-    TupleForm(Attrs attrs) {
-      this.attrs = attrs;
-    }
-
-    @Override
-    public Attrs attrs() {
-      return this.attrs;
-    }
-
-    @Override
-    public WamlForm<Repr> withAttrs(Attrs attrs) {
-      return WamlReprs.tupleForm(attrs);
-    }
-
-    @Override
-    public WamlForm<String> labelForm() {
-      return WamlReprs.keyForm();
-    }
-
-    @Override
-    public WamlForm<Repr> paramForm() {
-      return WamlReprs.reprForm();
-    }
-
-    @Override
-    public Repr emptyTuple() {
-      return Repr.unit().withAttrs(this.attrs);
-    }
-
-    @Override
-    public Repr unaryTuple(@Nullable Repr param) {
-      Objects.requireNonNull(param);
-      if (this.attrs.isEmpty()) {
-        return param;
-      } else if (param.attrs().isEmpty()) {
-        return param.withAttrs(this.attrs);
-      } else {
-        final Attrs attrs = this.attrs.asMutable();
-        attrs.putAll(param.attrs());
-        return param.withAttrs(attrs);
-      }
-    }
-
-    @Override
-    public TupleRepr tupleBuilder() {
-      return TupleRepr.of().withAttrs(this.attrs);
-    }
-
-    @Override
-    public TupleRepr appendParam(TupleRepr builder, @Nullable Repr param) {
-      Objects.requireNonNull(param);
-      builder.add(param);
-      return builder;
-    }
-
-    @Override
-    public TupleRepr appendParam(TupleRepr builder, @Nullable Repr label, @Nullable Repr param) {
-      Objects.requireNonNull(label, "label");
-      Objects.requireNonNull(param, "param");
-      String key = null;
-      if (label.isValidString()) {
-        key = label.stringValue();
-      } else if (label instanceof TermRepr) {
-        final Term term = ((TermRepr) label).term();
-        if (term instanceof ChildExpr && ((ChildExpr) term).scope() instanceof ContextExpr) {
-          final Term childKey = ((ChildExpr) term).key();
-          if (childKey.isValidString()) {
-            key = childKey.stringValue();
-          }
-        }
-      }
-      if (key != null) {
-        builder.put(key, param);
-      } else {
-        builder.add(param);
-      }
-      return builder;
-    }
-
-    @Override
-    public Repr buildTuple(TupleRepr builder) {
-      return builder;
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable Repr value, WamlWriter writer) {
-      if (value != null) {
-        return writer.writeTuple(output, this, value, value.attrs().iterator());
-      } else {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      }
-    }
-
-    @Override
-    public Write<?> writeBlock(Output<?> output, @Nullable Repr value, WamlWriter writer) {
-      if (value == null) {
-        return Write.done();
-      } else if (value instanceof TupleRepr) {
-        if (((TupleRepr) value).attrs().isEmpty()) {
-          return writer.writeBlock(output, this, ((TupleRepr) value).iterator());
-        } else {
-          return writer.writeTuple(output, this, value, value.attrs().iterator());
-        }
-      } else {
-        return WamlReprs.reprForm().writeBlock(output, value, writer);
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Repr value) {
-      if (value == null) {
-        return Repr.unit();
-      } else if (value instanceof TermRepr && value.attrs().isEmpty()) {
-        return ((TermRepr) value).term();
-      } else {
-        return value;
-      }
-    }
-
-    @Override
-    public @Nullable Repr fromTerm(Term term) {
-      if (term instanceof Repr) {
-        return (Repr) term;
-      } else {
-        return TermRepr.of(term);
-      }
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "tupleForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-    static final WamlReprs.TupleForm INSTANCE = new WamlReprs.TupleForm(Attrs.empty());
-
-  }
-
-  static final class BlobAttrForm implements WamlAttrForm<Repr, BlobRepr> {
-
-    final Attrs attrs;
-
-    BlobAttrForm(Attrs attrs) {
-      this.attrs = attrs;
-    }
-
-    @Override
-    public WamlForm<Repr> argsForm() {
-      return WamlReprs.tupleForm();
-    }
-
-    @Override
-    public boolean isNullary(@Nullable Repr args) {
-      return Repr.unit().equals(args);
-    }
-
-    @Override
-    public WamlForm<BlobRepr> refineForm(WamlForm<BlobRepr> form, String name, @Nullable Repr args) {
-      // Omit @blob attr
-      return WamlReprs.blobForm(this.attrs);
-    }
-
-    @Override
-    public WamlForm<BlobRepr> refineForm(WamlForm<BlobRepr> form, String name) {
-      // Omit @blob attr
-      return WamlReprs.blobForm(this.attrs);
-    }
-
-    static final WamlReprs.BlobAttrForm INSTANCE = new WamlReprs.BlobAttrForm(Attrs.empty());
-
-  }
-
-  static final class ReprForm implements WamlReprForm<Repr>, ToSource {
-
-    final Attrs attrs;
-
-    ReprForm(Attrs attrs) {
-      this.attrs = attrs;
-    }
-
-    @Override
-    public Attrs attrs() {
-      return this.attrs;
-    }
-
-    @Override
-    public WamlForm<Repr> withAttrs(Attrs attrs) {
-      return WamlReprs.reprForm(attrs);
-    }
-
-    @Override
-    public WamlAttrForm<?, ? extends Repr> getAttrForm(String name) throws WamlException {
-      if ("blob".equals(name)) {
-        return WamlReprs.blobAttrForm(this.attrs);
-      } else {
-        return WamlReprForm.super.getAttrForm(name);
-      }
-    }
-
-    @Override
-    public WamlUndefinedForm<UndefinedRepr> undefinedForm() {
-      return WamlReprs.undefinedForm(this.attrs);
-    }
-
-    @Override
-    public WamlUnitForm<UnitRepr> unitForm() {
-      return WamlReprs.unitForm(this.attrs);
-    }
-
-    @Override
-    public WamlNumberForm<NumberRepr> numberForm() {
-      return WamlReprs.numberForm(this.attrs);
-    }
-
-    @Override
-    public WamlIdentifierForm<Repr> identifierForm() {
-      return WamlReprs.identifierForm(this.attrs);
-    }
-
-    @Override
-    public WamlStringForm<?, StringRepr> stringForm() {
-      return WamlReprs.stringForm(this.attrs);
-    }
-
-    @Override
-    public WamlArrayForm<?, ?, ArrayRepr> arrayForm() {
-      return WamlReprs.arrayForm(this.attrs);
-    }
-
-    @Override
-    public WamlMarkupForm<?, ?, ArrayRepr> markupForm() {
-      return WamlReprs.markupForm(this.attrs);
-    }
-
-    @Override
-    public WamlObjectForm<?, ?, ?, ObjectRepr> objectForm() {
-      return WamlReprs.objectForm(this.attrs);
-    }
-
-    @Override
-    public WamlTupleForm<?, ?, ?, Repr> tupleForm() {
-      return WamlReprs.tupleForm(this.attrs);
-    }
-
-    @Override
-    public Parse<Repr> parse(Input input, WamlParser parser) {
-      return parser.parseExpr(input, this);
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable Repr value, WamlWriter writer) {
-      if (value == null) {
-        return writer.writeUnit(output, this, Collections.emptyIterator());
-      } else if (value instanceof UndefinedRepr) {
-        return WamlReprs.undefinedForm(this.attrs).write(output, (UndefinedRepr) value, writer);
-      } else if (value instanceof UnitRepr) {
-        return WamlReprs.unitForm(this.attrs).write(output, (UnitRepr) value, writer);
-      } else if (value instanceof BooleanRepr) {
-        return WamlReprs.booleanForm(this.attrs).write(output, (BooleanRepr) value, writer);
-      } else if (value instanceof NumberRepr) {
-        return WamlReprs.numberForm(this.attrs).write(output, (NumberRepr) value, writer);
-      } else if (value instanceof StringRepr) {
-        return WamlReprs.stringForm(this.attrs).write(output, (StringRepr) value, writer);
       } else if (value instanceof BlobRepr) {
-        return WamlReprs.blobForm(this.attrs).write(output, (BlobRepr) value, writer);
-      } else if (value instanceof TermRepr) {
-        return WamlReprs.termForm(this.attrs).write(output, (TermRepr) value, writer);
-      } else if (value instanceof ArrayRepr && ((ArrayRepr) value).isMarkup()) {
-        return WamlReprs.markupForm(this.attrs).write(output, (ArrayRepr) value, writer);
-      } else if (value instanceof ArrayRepr) {
-        return WamlReprs.arrayForm(this.attrs).write(output, (ArrayRepr) value, writer);
-      } else if (value instanceof ObjectRepr) {
-        return WamlReprs.objectForm(this.attrs).write(output, (ObjectRepr) value, writer);
-      } else if (value instanceof TupleRepr) {
-        return WamlReprs.tupleForm(this.attrs).write(output, (TupleRepr) value, writer);
-      } else {
-        return Write.error(new WriteException("unsupported value: " + value));
+        return WamlReprs.blobFormat().getAttrs((BlobRepr) value);
+      }
+      return value.attrs();
+    }
+
+    @Override
+    public WamlIdentifierParser<Repr> identifierParser() throws WamlException {
+      return WamlReprs.identifierFormat().identifierParser();
+    }
+
+    @Override
+    public WamlNumberParser<Repr> numberParser() throws WamlException {
+      return Assume.covariant(WamlReprs.numberFormat().numberParser());
+    }
+
+    @Override
+    public WamlStringParser<?, Repr> stringParser() throws WamlException {
+      return Assume.covariant(WamlReprs.stringFormat().stringParser());
+    }
+
+    @Override
+    public WamlMarkupParser<?, ?, Repr> markupParser() throws WamlException {
+      return Assume.covariant(WamlReprs.markupFormat().markupParser());
+    }
+
+    @Override
+    public WamlArrayParser<?, ?, Repr> arrayParser() throws WamlException {
+      return Assume.covariant(WamlReprs.arrayFormat().arrayParser());
+    }
+
+    @Override
+    public WamlObjectParser<?, ?, Repr> objectParser() throws WamlException {
+      return Assume.covariant(WamlReprs.objectFormat().objectParser());
+    }
+
+    @Override
+    public WamlTupleParser<?, ?, Repr> tupleParser() throws WamlException {
+      return WamlReprs.tupleFormat().tupleParser();
+    }
+
+    @Override
+    public boolean filter(@Nullable Repr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
       }
     }
 
     @Override
-    public Write<?> writeBlock(Output<?> output, @Nullable Repr value, WamlWriter writer) {
+    public Repr initializer(@Nullable Object attrs) {
+      if (!(attrs instanceof Attrs)) {
+        attrs = Attrs.empty();
+      }
+      return UnitRepr.unit().withAttrs((Attrs) attrs);
+    }
+
+    @Override
+    public Parse<Repr> parse(Input input, WamlParserOptions options) {
+      return ParseWamlRepr.parse(input, this, options, null);
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Object attrs,
+                          @Nullable Repr value, WamlWriterOptions options) {
+      if (value == null) {
+        return this.writeUnit(output, attrs, options);
+      } else if (value instanceof UndefinedRepr) {
+        return WamlReprs.undefinedFormat().write(output, attrs, (UndefinedRepr) value, options);
+      } else if (value instanceof UnitRepr) {
+        return WamlReprs.unitFormat().write(output, attrs, (UnitRepr) value, options);
+      } else if (value instanceof BooleanRepr) {
+        return WamlReprs.booleanFormat().write(output, attrs, (BooleanRepr) value, options);
+      } else if (value instanceof NumberRepr) {
+        return WamlReprs.numberFormat().write(output, attrs, (NumberRepr) value, options);
+      } else if (value instanceof StringRepr) {
+        return WamlReprs.stringFormat().write(output, attrs, (StringRepr) value, options);
+      } else if (value instanceof BlobRepr) {
+        return WamlReprs.blobFormat().write(output, attrs, (BlobRepr) value, options);
+      } else if (value instanceof TermRepr) {
+        return WamlReprs.termFormat().write(output, attrs, (TermRepr) value, options);
+      } else if (value instanceof ArrayRepr && ((ArrayRepr) value).isMarkup()) {
+        return WamlReprs.markupFormat().write(output, attrs, (ArrayRepr) value, options);
+      } else if (value instanceof ArrayRepr) {
+        return WamlReprs.arrayFormat().write(output, attrs, (ArrayRepr) value, options);
+      } else if (value instanceof ObjectRepr) {
+        return WamlReprs.objectFormat().write(output, attrs, (ObjectRepr) value, options);
+      } else if (value instanceof TupleRepr) {
+        return WamlReprs.tupleFormat().write(output, attrs, (TupleRepr) value, options);
+      }
+      return Write.error(new WamlException("unsupported value: " + value));
+    }
+
+    @Override
+    public Write<?> writeBlock(Output<?> output, @Nullable Repr value, WamlWriterOptions options) {
       if (value == null) {
         return Write.done();
       } else if (value instanceof UndefinedRepr) {
-        return WamlReprs.undefinedForm(this.attrs).writeBlock(output, (UndefinedRepr) value, writer);
+        return WamlReprs.undefinedFormat().writeBlock(output, (UndefinedRepr) value, options);
       } else if (value instanceof UnitRepr) {
-        return WamlReprs.unitForm(this.attrs).writeBlock(output, (UnitRepr) value, writer);
+        return WamlReprs.unitFormat().writeBlock(output, (UnitRepr) value, options);
       } else if (value instanceof BooleanRepr) {
-        return WamlReprs.booleanForm(this.attrs).writeBlock(output, (BooleanRepr) value, writer);
+        return WamlReprs.booleanFormat().writeBlock(output, (BooleanRepr) value, options);
       } else if (value instanceof NumberRepr) {
-        return WamlReprs.numberForm(this.attrs).writeBlock(output, (NumberRepr) value, writer);
+        return WamlReprs.numberFormat().writeBlock(output, (NumberRepr) value, options);
       } else if (value instanceof StringRepr) {
-        return WamlReprs.stringForm(this.attrs).writeBlock(output, (StringRepr) value, writer);
+        return WamlReprs.stringFormat().writeBlock(output, (StringRepr) value, options);
       } else if (value instanceof BlobRepr) {
-        return WamlReprs.blobForm(this.attrs).writeBlock(output, (BlobRepr) value, writer);
+        return WamlReprs.blobFormat().writeBlock(output, (BlobRepr) value, options);
       } else if (value instanceof TermRepr) {
-        return WamlReprs.termForm(this.attrs).writeBlock(output, (TermRepr) value, writer);
+        return WamlReprs.termFormat().writeBlock(output, (TermRepr) value, options);
       } else if (value instanceof ArrayRepr && ((ArrayRepr) value).isMarkup()) {
-        return WamlReprs.markupForm(this.attrs).writeBlock(output, (ArrayRepr) value, writer);
+        return WamlReprs.markupFormat().writeBlock(output, (ArrayRepr) value, options);
       } else if (value instanceof ArrayRepr) {
-        return WamlReprs.arrayForm(this.attrs).writeBlock(output, (ArrayRepr) value, writer);
+        return WamlReprs.arrayFormat().writeBlock(output, (ArrayRepr) value, options);
       } else if (value instanceof ObjectRepr) {
-        return WamlReprs.objectForm(this.attrs).writeBlock(output, (ObjectRepr) value, writer);
+        return WamlReprs.objectFormat().writeBlock(output, (ObjectRepr) value, options);
       } else if (value instanceof TupleRepr) {
-        return WamlReprs.tupleForm(this.attrs).writeBlock(output, (TupleRepr) value, writer);
-      } else {
-        return Write.error(new WriteException("unsupported value: " + value));
+        return WamlReprs.tupleFormat().writeBlock(output, (TupleRepr) value, options);
       }
+      return Write.error(new WamlException("unsupported value: " + value));
     }
 
     @Override
@@ -1793,62 +1681,37 @@ public final class WamlReprs implements WamlProvider, ToSource {
     }
 
     @Override
-    public Write<?> writeInline(Output<?> output, @Nullable Repr value, WamlWriter writer) {
+    public Write<?> writeInline(Output<?> output, @Nullable Repr value, WamlWriterOptions options) {
       if (value instanceof UndefinedRepr) {
-        return WamlReprs.undefinedForm(this.attrs).writeInline(output, (UndefinedRepr) value, writer);
+        return WamlReprs.undefinedFormat().writeInline(output, (UndefinedRepr) value, options);
       } else if (value instanceof UnitRepr) {
-        return WamlReprs.unitForm(this.attrs).writeInline(output, (UnitRepr) value, writer);
+        return WamlReprs.unitFormat().writeInline(output, (UnitRepr) value, options);
       } else if (value instanceof BooleanRepr) {
-        return WamlReprs.booleanForm(this.attrs).writeInline(output, (BooleanRepr) value, writer);
+        return WamlReprs.booleanFormat().writeInline(output, (BooleanRepr) value, options);
       } else if (value instanceof NumberRepr) {
-        return WamlReprs.numberForm(this.attrs).writeInline(output, (NumberRepr) value, writer);
+        return WamlReprs.numberFormat().writeInline(output, (NumberRepr) value, options);
       } else if (value instanceof StringRepr) {
-        return WamlReprs.stringForm(this.attrs).writeInline(output, (StringRepr) value, writer);
+        return WamlReprs.stringFormat().writeInline(output, (StringRepr) value, options);
       } else if (value instanceof BlobRepr) {
-        return WamlReprs.blobForm(this.attrs).writeInline(output, (BlobRepr) value, writer);
+        return WamlReprs.blobFormat().writeInline(output, (BlobRepr) value, options);
       } else if (value instanceof TermRepr) {
-        return WamlReprs.termForm(this.attrs).writeInline(output, (TermRepr) value, writer);
+        return WamlReprs.termFormat().writeInline(output, (TermRepr) value, options);
       } else if (value instanceof ArrayRepr && ((ArrayRepr) value).isMarkup()) {
-        return WamlReprs.markupForm(this.attrs).writeInline(output, (ArrayRepr) value, writer);
+        return WamlReprs.markupFormat().writeInline(output, (ArrayRepr) value, options);
       } else if (value instanceof ArrayRepr) {
-        return WamlReprs.arrayForm(this.attrs).writeInline(output, (ArrayRepr) value, writer);
+        return WamlReprs.arrayFormat().writeInline(output, (ArrayRepr) value, options);
       } else if (value instanceof ObjectRepr) {
-        return WamlReprs.objectForm(this.attrs).writeInline(output, (ObjectRepr) value, writer);
+        return WamlReprs.objectFormat().writeInline(output, (ObjectRepr) value, options);
       } else if (value instanceof TupleRepr) {
-        return WamlReprs.tupleForm(this.attrs).writeInline(output, (TupleRepr) value, writer);
-      } else {
-        return Write.error(new WriteException("unsupported value: " + value));
+        return WamlReprs.tupleFormat().writeInline(output, (TupleRepr) value, options);
       }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Repr value) {
-      if (value == null) {
-        return Repr.unit();
-      } else if (value instanceof TermRepr && value.attrs().isEmpty()) {
-        return ((TermRepr) value).term();
-      } else {
-        return value;
-      }
-    }
-
-    @Override
-    public @Nullable Repr fromTerm(Term term) {
-      if (term instanceof Repr) {
-        return (Repr) term;
-      } else {
-        return TermRepr.of(term);
-      }
+      return Write.error(new WamlException("unsupported value: " + value));
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("WamlReprs", "reprForm");
-      if (!this.attrs.isEmpty()) {
-        notation.appendArgument(this.attrs);
-      }
-      notation.endInvoke();
+      notation.beginInvoke("WamlReprs", "valueFormat").endInvoke();
     }
 
     @Override
@@ -1856,8 +1719,51 @@ public final class WamlReprs implements WamlProvider, ToSource {
       return this.toSource();
     }
 
-    static final WamlReprs.ReprForm INSTANCE = new WamlReprs.ReprForm(Attrs.empty());
+    static final ValueFormat INSTANCE = new ValueFormat();
 
+  }
+
+}
+
+final class ParseWamlRepr extends Parse<Repr> {
+
+  final WamlParser<Repr> parser;
+  final WamlParserOptions options;
+  final @Nullable Parse<Object> parseExpr;
+
+  ParseWamlRepr(WamlParser<Repr> parser, WamlParserOptions options,
+                @Nullable Parse<Object> parseExpr) {
+    this.parser = parser;
+    this.options = options;
+    this.parseExpr = parseExpr;
+  }
+
+  @Override
+  public Parse<Repr> consume(Input input) {
+    return ParseWamlRepr.parse(input, this.parser, this.options, this.parseExpr);
+  }
+
+  static Parse<Repr> parse(Input input, WamlParser<Repr> parser, WamlParserOptions options,
+                           @Nullable Parse<Object> parseExpr) {
+    if (parseExpr == null) {
+      parseExpr = CondExpr.parse(input, parser, options);
+    } else {
+      parseExpr = parseExpr.consume(input);
+    }
+    if (parseExpr.isDone()) {
+      final Object value = parseExpr.getUnchecked();
+      if (value == null || value instanceof Repr) {
+        return Assume.conforms(parseExpr);
+      } else {
+        return Parse.done(TermRepr.of((Term) value));
+      }
+    } else if (parseExpr.isError()) {
+      return parseExpr.asError();
+    }
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseWamlRepr(parser, options, parseExpr);
   }
 
 }

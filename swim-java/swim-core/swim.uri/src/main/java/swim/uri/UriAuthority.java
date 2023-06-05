@@ -16,8 +16,6 @@ package swim.uri;
 
 import java.io.IOException;
 import java.util.Objects;
-import swim.annotations.FromForm;
-import swim.annotations.IntoForm;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
@@ -26,6 +24,8 @@ import swim.codec.Input;
 import swim.codec.Parse;
 import swim.codec.ParseException;
 import swim.codec.StringInput;
+import swim.decl.Marshal;
+import swim.decl.Unmarshal;
 import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
@@ -62,11 +62,10 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
 
   @SuppressWarnings("ReferenceEquality")
   public UriAuthority withUser(UriUser user) {
-    if (user != this.user) {
-      return UriAuthority.of(user, this.host, this.port);
-    } else {
+    if (user == this.user) {
       return this;
     }
+    return UriAuthority.of(user, this.host, this.port);
   }
 
   public String userPart() {
@@ -110,11 +109,10 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
 
   @SuppressWarnings("ReferenceEquality")
   public UriAuthority withHost(UriHost host) {
-    if (host != this.host) {
-      return UriAuthority.of(this.user, host, this.port);
-    } else {
+    if (host == this.host) {
       return this;
     }
+    return UriAuthority.of(this.user, host, this.port);
   }
 
   public String hostPart() {
@@ -165,11 +163,10 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
 
   @SuppressWarnings("ReferenceEquality")
   public UriAuthority withPort(UriPort port) {
-    if (port != this.port) {
-      return UriAuthority.of(this.user, this.host, port);
-    } else {
+    if (port == this.port) {
       return this;
     }
+    return UriAuthority.of(this.user, this.host, port);
   }
 
   public String portPart() {
@@ -203,8 +200,7 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UriAuthority) {
-      final UriAuthority that = (UriAuthority) other;
+    } else if (other instanceof UriAuthority that) {
       return this.toString().equals(that.toString());
     }
     return false;
@@ -260,20 +256,20 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
   public void writeString(Appendable output) throws IOException {
     if (this.string != null) {
       output.append(this.string);
-    } else {
-      if (this.user.isDefined()) {
-        this.user.writeString(output);
-        output.append('@');
-      }
-      this.host.writeString(output);
-      if (this.port.isDefined()) {
-        output.append(':');
-        this.port.writeString(output);
-      }
+      return;
+    }
+    if (this.user.isDefined()) {
+      this.user.writeString(output);
+      output.append('@');
+    }
+    this.host.writeString(output);
+    if (this.port.isDefined()) {
+      output.append(':');
+      this.port.writeString(output);
     }
   }
 
-  @IntoForm
+  @Marshal
   @Override
   public String toString() {
     if (this.string == null) {
@@ -282,9 +278,9 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
     return this.string;
   }
 
-  private static final UriAuthority UNDEFINED = new UriAuthority(UriUser.undefined(),
-                                                                 UriHost.undefined(),
-                                                                 UriPort.undefined());
+  static final UriAuthority UNDEFINED = new UriAuthority(UriUser.undefined(),
+                                                         UriHost.undefined(),
+                                                         UriPort.undefined());
 
   public static UriAuthority undefined() {
     return UNDEFINED;
@@ -302,11 +298,10 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
     if (port == null) {
       port = UriPort.undefined();
     }
-    if (user.isDefined() || host.isDefined() || port.isDefined()) {
-      return new UriAuthority(user, host, port);
-    } else {
+    if (!user.isDefined() && !host.isDefined() && !port.isDefined()) {
       return UriAuthority.undefined();
     }
+    return new UriAuthority(user, host, port);
   }
 
   public static UriAuthority user(@Nullable UriUser user) {
@@ -346,7 +341,7 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
     return UriAuthority.port(UriPort.number(portNumber));
   }
 
-  @FromForm
+  @Unmarshal
   public static @Nullable UriAuthority from(String value) {
     return UriAuthority.parse(value).getOr(null);
   }
@@ -372,10 +367,10 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
     return parseAuthority;
   }
 
-  private static final ThreadLocal<CacheMap<String, Parse<UriAuthority>>> CACHE =
+  static final ThreadLocal<CacheMap<String, Parse<UriAuthority>>> CACHE =
       new ThreadLocal<CacheMap<String, Parse<UriAuthority>>>();
 
-  private static CacheMap<String, Parse<UriAuthority>> cache() {
+  static CacheMap<String, Parse<UriAuthority>> cache() {
     CacheMap<String, Parse<UriAuthority>> cache = CACHE.get();
     if (cache == null) {
       int cacheSize;

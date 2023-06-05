@@ -100,7 +100,7 @@ public final class ConnectionHeader extends HttpHeader {
     return ConnectionHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<String> parseValue(String value) throws HttpException {
+  static FingerTrieList<String> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     FingerTrieList<String> options = FingerTrieList.empty();
@@ -157,7 +157,7 @@ public final class ConnectionHeader extends HttpHeader {
     return options;
   }
 
-  private static String writeValue(Iterator<String> options) {
+  static String writeValue(Iterator<String> options) {
     final StringOutput output = new StringOutput();
     String option = null;
     do {

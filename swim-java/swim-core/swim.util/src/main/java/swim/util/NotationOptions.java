@@ -101,8 +101,9 @@ public class NotationOptions implements ToSource {
 
   @Override
   public boolean equals(@Nullable Object other) {
-    if (other instanceof NotationOptions) {
-      final NotationOptions that = (NotationOptions) other;
+    if (this == other) {
+      return true;
+    } else if (other instanceof NotationOptions that) {
       return that.canEqual(this)
           && this.verbose == that.verbose
           && this.stylize == that.stylize

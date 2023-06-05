@@ -93,8 +93,7 @@ public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHea
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpHeader) {
-      final HttpHeader that = (HttpHeader) other;
+    } else if (other instanceof HttpHeader that) {
       return this.name.equals(that.name) && this.value.equals(that.value);
     }
     return false;
@@ -130,9 +129,8 @@ public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHea
     final HttpHeaderType<?, ?> type = HttpHeader.registry().getHeaderType(name);
     if (type != null) {
       return type.of(name, value);
-    } else {
-      return new HttpHeader(name, value);
     }
+    return new HttpHeader(name, value);
   }
 
   public static Parse<HttpHeader> parse(Input input, @Nullable HttpHeaderRegistry headerRegistry) {

@@ -97,7 +97,7 @@ public final class OriginHeader extends HttpHeader {
     return OriginHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<Uri> parseValue(String value) throws HttpException {
+  static FingerTrieList<Uri> parseValue(String value) throws HttpException {
     FingerTrieList<Uri> origins = FingerTrieList.empty();
     if (!"null".equals(value)) {
       final StringInput input = new StringInput(value);
@@ -168,7 +168,7 @@ public final class OriginHeader extends HttpHeader {
     return origins;
   }
 
-  private static String writeValue(Iterator<Uri> origins) {
+  static String writeValue(Iterator<Uri> origins) {
     if (origins.hasNext()) {
       final StringBuilder output = new StringBuilder();
       Uri origin = null;

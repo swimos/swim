@@ -630,21 +630,20 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
       final Object[] slots = new Object[1];
       slots[0] = this.merge(key0, hash0, value0, key1, hash1, value1, shift + 5);
       return new HashTrieMap<K, V>(slotMap, 0, 2, slots);
-    } else {
-      final Object[] slots = new Object[4];
-      if (((branch0 - 1) & branch1) == 0) {
-        slots[0] = key0;
-        slots[1] = key1;
-        slots[2] = value1;
-        slots[3] = value0;
-      } else {
-        slots[0] = key1;
-        slots[1] = key0;
-        slots[2] = value0;
-        slots[3] = value1;
-      }
-      return new HashTrieMap<K, V>(0, slotMap, 2, slots);
     }
+    final Object[] slots = new Object[4];
+    if (((branch0 - 1) & branch1) == 0) {
+      slots[0] = key0;
+      slots[1] = key1;
+      slots[2] = value1;
+      slots[3] = value0;
+    } else {
+      slots[0] = key1;
+      slots[1] = key0;
+      slots[2] = value0;
+      slots[3] = value1;
+    }
+    return new HashTrieMap<K, V>(0, slotMap, 2, slots);
   }
 
   @Override
@@ -894,7 +893,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
   static final int TREE = 2;
   static final int KNOT = 3;
 
-  private static final HashTrieMap<Object, Object> EMPTY = new HashTrieMap<Object, Object>(0, 0, 0, new Object[0]);
+  static final HashTrieMap<Object, Object> EMPTY = new HashTrieMap<Object, Object>(0, 0, 0, new Object[0]);
 
   public static <K, V> HashTrieMap<K, V> empty() {
     return Assume.conforms(EMPTY);
@@ -1071,8 +1070,10 @@ abstract class HashTrieMapIterator<K, V> {
             default:
               throw new AssertionError("unreachable");
           }
+          continue;
         } else if (this.depth > 0) {
           this.pop();
+          continue;
         } else {
           return false;
         }
@@ -1082,10 +1083,10 @@ abstract class HashTrieMapIterator<K, V> {
           return true;
         } else {
           this.pop();
+          continue;
         }
-      } else {
-        throw new AssertionError("unreachable");
       }
+      throw new AssertionError("unreachable");
     } while (true);
   }
 
@@ -1122,11 +1123,12 @@ abstract class HashTrieMapIterator<K, V> {
             default:
               throw new AssertionError("unreachable");
           }
+          continue;
         } else if (this.depth > 0) {
           this.pop();
-        } else {
-          throw new NoSuchElementException();
+          continue;
         }
+        throw new NoSuchElementException();
       } else if (node instanceof ArrayMap<?, ?>) {
         final ArrayMap<K, V> knot = Assume.conforms(node);
         final int slotIndex = this.getSlotIndex();
@@ -1137,10 +1139,10 @@ abstract class HashTrieMapIterator<K, V> {
           return new SimpleImmutableEntry<K, V>(key, value);
         } else {
           this.pop();
+          continue;
         }
-      } else {
-        throw new AssertionError("unreachable");
       }
+      throw new AssertionError("unreachable");
     } while (true);
   }
 
@@ -1175,11 +1177,12 @@ abstract class HashTrieMapIterator<K, V> {
             default:
               throw new AssertionError("unreachable");
           }
+          continue;
         } else if (this.depth > 0) {
           this.pop();
-        } else {
-          throw new NoSuchElementException();
+          continue;
         }
+        throw new NoSuchElementException();
       } else if (node instanceof ArrayMap<?, ?>) {
         final ArrayMap<K, V> knot = Assume.conforms(node);
         final int slotIndex = this.getSlotIndex();
@@ -1189,10 +1192,10 @@ abstract class HashTrieMapIterator<K, V> {
           return key;
         } else {
           this.pop();
+          continue;
         }
-      } else {
-        throw new AssertionError("unreachable");
       }
+      throw new AssertionError("unreachable");
     } while (true);
   }
 
@@ -1227,11 +1230,12 @@ abstract class HashTrieMapIterator<K, V> {
             default:
               throw new AssertionError("unreachable");
           }
+          continue;
         } else if (this.depth > 0) {
           this.pop();
-        } else {
-          throw new NoSuchElementException();
+          continue;
         }
+        throw new NoSuchElementException();
       } else if (node instanceof ArrayMap<?, ?>) {
         final ArrayMap<K, V> knot = Assume.conforms(node);
         final int slotIndex = this.getSlotIndex();
@@ -1241,10 +1245,10 @@ abstract class HashTrieMapIterator<K, V> {
           return value;
         } else {
           this.pop();
+          continue;
         }
-      } else {
-        throw new AssertionError("unreachable");
       }
+      throw new AssertionError("unreachable");
     } while (true);
   }
 

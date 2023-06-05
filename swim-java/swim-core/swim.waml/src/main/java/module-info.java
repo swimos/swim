@@ -23,16 +23,18 @@ import swim.annotations.Since;
 module swim.waml {
 
   requires transitive swim.annotations;
+  requires transitive swim.decl;
   requires transitive swim.util;
   requires transitive swim.collections;
   requires transitive swim.codec;
-  requires transitive swim.expr;
+  requires transitive swim.term;
   requires transitive swim.repr;
 
   exports swim.waml;
+  exports swim.waml.decl;
 
   uses swim.waml.WamlProvider;
 
-  provides swim.codec.Codec with swim.waml.WamlCodec;
+  provides swim.codec.MetaCodec with swim.waml.WamlMetaCodec;
 
 }

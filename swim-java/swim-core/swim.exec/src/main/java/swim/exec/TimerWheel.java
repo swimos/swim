@@ -174,30 +174,29 @@ public class TimerWheel implements TimerService {
         // Try to acquire the config lock;
         // must happen before invoking the configuration function.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The config lock has been acquired.
-          status = newStatus;
-          configured = true;
-          try {
-            // Invoke the configuration function.
-            configuration.run();
-          } finally {
-            // Prepare to notify waiters upon releasing the config lock.
-            synchronized (this) {
-              // Release the config lock; must happen before notifying waiters.
-              status = (int) STATUS.compareAndExchangeAcquire(this, newStatus, oldStatus);
-              // Verify that the service status didn't change while configuring.
-              assert status == newStatus;
-              status = oldStatus;
-              // Notify waiters that the config lock has been released.
-              this.notifyAll();
-            }
-          }
-          break;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        // The config lock has been acquired.
+        status = newStatus;
+        configured = true;
+        try {
+          // Invoke the configuration function.
+          configuration.run();
+        } finally {
+          // Prepare to notify waiters upon releasing the config lock.
+          synchronized (this) {
+            // Release the config lock; must happen before notifying waiters.
+            status = (int) STATUS.compareAndExchangeAcquire(this, newStatus, oldStatus);
+            // Verify that the service status didn't change while configuring.
+            assert status == newStatus;
+            status = oldStatus;
+            // Notify waiters that the config lock has been released.
+            this.notifyAll();
+          }
+        }
+        break;
       } else if ((status & STATE_MASK) == CONFIG_LOCK) {
         // Another thread currently holds the config lock;
         // prepare to wait for the config lock to be released.
@@ -217,11 +216,10 @@ public class TimerWheel implements TimerService {
         }
         // Continue trying to acquire the config lock.
         continue;
-      } else {
-        // The service has already been started; to ensure consistent operation,
-        // configuration is no longer permitted.
-        break;
       }
+      // The service has already been started; to ensure consistent operation,
+      // configuration is no longer permitted.
+      break;
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service configuration.
@@ -245,17 +243,14 @@ public class TimerWheel implements TimerService {
             // Invoke didStart callback now that the timer thread has started.
             this.didStart();
           } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("didStart callback failed", cause);
-              // Stop the service on lifecycle callback failure.
-              this.stop();
-              // Reload service status after stop.
-              status = (int) STATUS.getOpaque(this);
-            } else {
-              // Rethrow the fatal exception.
+            if (Result.isFatal(cause)) {
               throw cause;
             }
+            this.log.error("didStart callback failed", cause);
+            // Stop the service on lifecycle callback failure.
+            this.stop();
+            // Reload service status after stop.
+            status = (int) STATUS.getOpaque(this);
           }
         }
         break;
@@ -287,41 +282,36 @@ public class TimerWheel implements TimerService {
         // Try to transition the service into the starting state;
         // must happen before initiating service startup.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The service has transitioned into the starting state.
-          status = newStatus;
-          causedStart = true;
-          try {
-            // Invoke willStart callback prior to starting the timer thread.
-            this.willStart();
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("willStart callback failed", cause);
-              // Stop the service on lifecycle callback failure.
-              this.stop();
-              // Reload service status after stop.
-              status = (int) STATUS.getOpaque(this);
-            } else {
-              // Rethrow the fatal exception.
-              throw cause;
-            }
-          }
-          // Start the timer thread.
-          this.thread.start();
-          // Continue startup sequence.
-          continue;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
+        // The service has transitioned into the starting state.
+        status = newStatus;
+        causedStart = true;
+        try {
+          // Invoke willStart callback prior to starting the timer thread.
+          this.willStart();
+        } catch (Throwable cause) {
+          if (Result.isFatal(cause)) {
+            throw cause;
+          }
+          this.log.error("willStart callback failed", cause);
+          // Stop the service on lifecycle callback failure.
+          this.stop();
+          // Reload service status after stop.
+          status = (int) STATUS.getOpaque(this);
+        }
+        // Start the timer thread.
+        this.thread.start();
+        // Continue startup sequence.
+        continue;
       } else if ((status & STATE_MASK) == STOPPING_STATE
               || (status & STATE_MASK) == STOPPED_STATE) {
         // The service is concurrently stopping, or has permanently stopped.
         break;
-      } else {
-        throw new AssertionError("unreachable");
       }
+      throw new AssertionError("unreachable");
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service startup.
@@ -375,13 +365,10 @@ public class TimerWheel implements TimerService {
             // Invoke didStop callback now that the timer thread has shutdown.
             this.didStop();
           } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("didStop callback failed", cause);
-            } else {
-              // Rethrow the fatal exception.
+            if (Result.isFatal(cause)) {
               throw cause;
             }
+            this.log.error("didStop callback failed", cause);
           }
         }
         break;
@@ -416,43 +403,38 @@ public class TimerWheel implements TimerService {
         // Try to transition the service into the stopping state;
         // must happen before initiating service shutdown.
         status = (int) STATUS.compareAndExchangeAcquire(this, oldStatus, newStatus);
-        if (status == oldStatus) {
-          // The service has transitioned into the stopping state.
-          status = newStatus;
-          causedStop = true;
-          try {
-            // Invoke willStop callback prior to stopping the timer thread.
-            this.willStop();
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.log.error("willStop callback failed", cause);
-            } else {
-              // Rethrow the fatal exception.
-              throw cause;
-            }
-          }
-          // Stop the timer thread.
-          while (this.thread.isAlive()) {
-            // Interrupt the timer thread so it will wakeup and die.
-            this.thread.interrupt();
-            try {
-              // Wait for the timer thread to exit.
-              this.thread.join(100);
-            } catch (InterruptedException cause) {
-              // Defer thread interrupt.
-              interrupted = true;
-            }
-          }
-          // Continue shutdown sequence.
-          continue;
-        } else {
+        if (status != oldStatus) {
           // CAS failed; try again.
           continue;
         }
-      } else {
-        throw new AssertionError("unreachable");
+        // The service has transitioned into the stopping state.
+        status = newStatus;
+        causedStop = true;
+        try {
+          // Invoke willStop callback prior to stopping the timer thread.
+          this.willStop();
+        } catch (Throwable cause) {
+          if (Result.isFatal(cause)) {
+            throw cause;
+          }
+          this.log.error("willStop callback failed", cause);
+        }
+        // Stop the timer thread.
+        while (this.thread.isAlive()) {
+          // Interrupt the timer thread so it will wakeup and die.
+          this.thread.interrupt();
+          try {
+            // Wait for the timer thread to exit.
+            this.thread.join(100);
+          } catch (InterruptedException cause) {
+            // Defer thread interrupt.
+            interrupted = true;
+          }
+        }
+        // Continue shutdown sequence.
+        continue;
       }
+      throw new AssertionError("unreachable");
     } while (true);
     if (interrupted) {
       // Resume thread interrupt that occurred during service shutdown.
@@ -561,32 +543,26 @@ public class TimerWheel implements TimerService {
       // Invoke service introspection callback.
       this.willScheduleTimer(delayMillis, handle);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willScheduleTimer callback failed", handle, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willScheduleTimer callback failed", handle, cause);
     }
+
     if (handle.timer instanceof TimerFunction) {
       try {
         // Invoke timer lifecycle callback.
         ((TimerFunction) handle.timer).willSchedule(delayMillis);
       } catch (Throwable cause) {
-        if (Result.isNonFatal(cause)) {
-          // Report the non-fatal exception.
-          this.log.errorStatus("willSchedule callback failed", handle, cause);
-        } else {
-          // Rethrow the fatal exception.
+        if (Result.isFatal(cause)) {
           throw cause;
         }
+        this.log.errorStatus("willSchedule callback failed", handle, cause);
       }
     }
 
     // Insert the new event into the timer wheel.
     this.insertEvent(newEvent);
-
     // The timer was successfully scheduled.
     return true;
   }
@@ -627,44 +603,40 @@ public class TimerWheel implements TimerService {
     // scheduling the event.
     final TimerEvent oldEvent = (TimerEvent) TimerHandle.EVENT.compareAndExchangeAcquire(handle, null, newEvent);
     // Check if the timer had a previously scheduled event.
-    if (oldEvent == null) {
-      // The timer did not have a previously scheduled event,
-      // so the new event can be scheduled.
-      try {
-        // Invoke service introspection callback.
-        this.willScheduleTimer(delayMillis, handle);
-      } catch (Throwable cause) {
-        if (Result.isNonFatal(cause)) {
-          // Report the non-fatal exception.
-          this.log.errorStatus("willScheduleTimer callback failed", handle, cause);
-        } else {
-          // Rethrow the fatal exception.
-          throw cause;
-        }
-      }
-      if (handle.timer instanceof TimerFunction) {
-        try {
-          // Invoke timer lifecycle callback.
-          ((TimerFunction) handle.timer).willSchedule(delayMillis);
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            // Report the non-fatal exception.
-            this.log.errorStatus("willSchedule callback failed", handle, cause);
-          } else {
-            // Rethrow the fatal exception.
-            throw cause;
-          }
-        }
-      }
-      // Insert the new event into the timer wheel.
-      this.insertEvent(newEvent);
-      // The timer was successfully scheduled.
-      return true;
-    } else {
+    if (oldEvent != null) {
       // The timer had a previously scheduled event,
       // so the new event does not need to be scheduled.
       return false;
     }
+
+    // The timer did not have a previously scheduled event,
+    // so the new event can be scheduled.
+    try {
+      // Invoke service introspection callback.
+      this.willScheduleTimer(delayMillis, handle);
+    } catch (Throwable cause) {
+      if (Result.isFatal(cause)) {
+        throw cause;
+      }
+      this.log.errorStatus("willScheduleTimer callback failed", handle, cause);
+    }
+
+    if (handle.timer instanceof TimerFunction) {
+      try {
+        // Invoke timer lifecycle callback.
+        ((TimerFunction) handle.timer).willSchedule(delayMillis);
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.log.errorStatus("willSchedule callback failed", handle, cause);
+      }
+    }
+
+    // Insert the new event into the timer wheel.
+    this.insertEvent(newEvent);
+    // The timer was successfully scheduled.
+    return true;
   }
 
   /**
@@ -690,45 +662,7 @@ public class TimerWheel implements TimerService {
       // Load the next event after the currently known last event;
       // must happen before the event is modified.
       final TimerEvent next = (TimerEvent) TimerEvent.NEXT.getAcquire(prev);
-      if (next == null) {
-        // prev is the last event in the queue.
-        if (targetTick >= prev.insertTick) {
-          // prev was inserted before the target tick, indicating that
-          // the timer thread hasn't yet finished executing the tick.
-          // prev.insertTick is the next tick sequence number that the timer
-          // thread will execute for this queue; set event.insertTick to match.
-          event.insertTick = prev.insertTick;
-          // Try to insert the new event at the end of the queue;
-          // must happen after the event.nsertTick is updated.
-          if (TimerEvent.NEXT.weakCompareAndSetRelease(prev, null, event)) {
-            // To reduce contention, only update the foot of the queue if it
-            // lags at least two events behind the last event in the queue.
-            if (prev != foot) {
-              // Update the foot of the queue; safely races with other threads
-              // because the event is already reachable from the previous foot
-              // of the queue.
-              TimerQueue.FOOT.setRelease(queue, event);
-            }
-            // The event is now scheduled.
-            break;
-          } else {
-            // Lost insertion race to another thread; try again.
-            continue;
-          }
-        } else {
-          // The timer thread is currently executing, or has already executed,
-          // the target tick; try the next tick of the timer wheel.
-          targetTick += 1L;
-          // Compute the bucket index for the next timer tick.
-          bucketIndex = (int) (targetTick % (long) this.tickCount);
-          // Get the event queue for the next timer bucket.
-          queue = this.wheel[bucketIndex];
-          // Reload the foot of the queue.
-          foot = (TimerEvent) TimerQueue.FOOT.getAcquire(queue);
-          // Continue searching from the foot of the next queue.
-          prev = foot;
-        }
-      } else {
+      if (next != null) {
         // Reload the foot of the queue.
         final TimerEvent newFoot = (TimerEvent) TimerQueue.FOOT.getAcquire(queue);
         if (foot != newFoot) {
@@ -741,6 +675,47 @@ public class TimerWheel implements TimerService {
           prev = next;
         }
       }
+      // prev is the last event in the queue.
+
+      // Check for stale insertion.
+      if (targetTick < prev.insertTick) {
+        // The timer thread is currently executing, or has already executed,
+        // the target tick; try the next tick of the timer wheel.
+        targetTick += 1L;
+        // Compute the bucket index for the next timer tick.
+        bucketIndex = (int) (targetTick % (long) this.tickCount);
+        // Get the event queue for the next timer bucket.
+        queue = this.wheel[bucketIndex];
+        // Reload the foot of the queue.
+        foot = (TimerEvent) TimerQueue.FOOT.getAcquire(queue);
+        // Continue searching from the foot of the next queue.
+        prev = foot;
+        continue;
+      }
+
+      // prev was inserted before the target tick, indicating that
+      // the timer thread hasn't yet finished executing the tick.
+      // prev.insertTick is the next tick sequence number that the timer
+      // thread will execute for this queue; set event.insertTick to match.
+      event.insertTick = prev.insertTick;
+      // Try to insert the new event at the end of the queue;
+      // must happen after the event.nsertTick is updated.
+      if (!TimerEvent.NEXT.weakCompareAndSetRelease(prev, null, event)) {
+        // Lost insertion race to another thread; try again.
+        continue;
+      }
+
+      // To reduce contention, only update the foot of the queue if it
+      // lags at least two events behind the last event in the queue.
+      if (prev != foot) {
+        // Update the foot of the queue; safely races with other threads
+        // because the event is already reachable from the previous foot
+        // of the queue.
+        TimerQueue.FOOT.setRelease(queue, event);
+      }
+
+      // The event is now scheduled.
+      break;
     } while (true);
   }
 
@@ -804,14 +779,11 @@ public class TimerWheel implements TimerService {
     } catch (Throwable cause) {
       // `handle.timer()` should never throw; but in case it does,
       // don't let it take down the timer thread.
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.error("invalid timer handle: " + handle, cause);
-        return;
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.error("invalid timer handle: " + handle, cause);
+      return;
     }
     if (timer == null) {
       // `handle.timer()` should never be null; but if it is,
@@ -824,13 +796,10 @@ public class TimerWheel implements TimerService {
       // Invoke service introspection callback.
       this.willRunTimer(handle);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willRunTimer callback failed", handle, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willRunTimer callback failed", handle, cause);
     }
 
     try {
@@ -843,24 +812,19 @@ public class TimerWheel implements TimerService {
         timer.run();
       }
     } catch (Throwable exception) {
-      if (Result.isNonFatal(exception)) {
-        try {
-          // Invoke service introspection callback.
-          this.didAbortTimer(handle, exception);
-          return;
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            // Report the non-fatal exception.
-            this.log.errorStatus("didAbortTimer callback failed", handle, cause);
-            return;
-          } else {
-            // Rethrow the fatal exception.
-            throw cause;
-          }
-        }
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(exception)) {
         throw exception;
+      }
+      try {
+        // Invoke service introspection callback.
+        this.didAbortTimer(handle, exception);
+        return;
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.log.errorStatus("didAbortTimer callback failed", handle, cause);
+        return;
       }
     }
 
@@ -868,13 +832,10 @@ public class TimerWheel implements TimerService {
       // Invoke service introspection callback.
       this.didRunTimer(handle);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("didRunTimer callback failed", handle, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didRunTimer callback failed", handle, cause);
     }
   }
 
@@ -1099,52 +1060,48 @@ final class TimerHandle implements TimerContext, LogEntity {
     // with null; must happen before cancelling the event.
     final TimerEvent event = (TimerEvent) EVENT.getAndSetAcquire(this, null);
     // Check if the timer handle had a previously scheduled event.
-    if (event != null) {
-      // Cancel the previously scheduled event by atomically clearing its
-      // reference to the timer handle, ensuring a sequentially consistent
-      // total ordering of timer executions and cancellations.
-      final TimerHandle handle = (TimerHandle) TimerEvent.HANDLE.getAndSet(event, null);
-      // Check if the previous event was successfully cancelled.
-      if (handle != null) {
-        // The timer handle was returned, indicating that the previously
-        // scheduled event was successfully cancelled.
-        if (handle.timer instanceof TimerFunction) {
-          try {
-            // Invoke timer lifecycle callback.
-            ((TimerFunction) handle.timer).didCancel();
-          } catch (Throwable cause) {
-            if (Result.isNonFatal(cause)) {
-              // Report the non-fatal exception.
-              this.service.log.errorStatus("didCancel callback failed", handle, cause);
-            } else {
-              // Rethrow the fatal exception.
-              throw cause;
-            }
-          }
-        }
-        try {
-          // Invoke service introspection callback.
-          this.service.didCancelTimer(handle);
-        } catch (Throwable cause) {
-          if (Result.isNonFatal(cause)) {
-            // Report the non-fatal exception.
-            this.service.log.errorStatus("didCancelTimer callback failed", handle, cause);
-          } else {
-            // Rethrow the fatal exception.
-            throw cause;
-          }
-        }
-        // Timer successfully cancelled.
-        return true;
-      } else {
-        // The timer handle was not returned, indicating that the previously
-        // scheduled event has already been executed or cancelled.
-        return false;
-      }
-    } else {
+    if (event == null) {
       // The timer is not currently scheduled.
       return false;
     }
+
+    // Cancel the previously scheduled event by atomically clearing its
+    // reference to the timer handle, ensuring a sequentially consistent
+    // total ordering of timer executions and cancellations.
+    final TimerHandle handle = (TimerHandle) TimerEvent.HANDLE.getAndSet(event, null);
+    // Check if the previous event was successfully cancelled.
+    if (handle == null) {
+      // The timer handle was not returned, indicating that the previously
+      // scheduled event has already been executed or cancelled.
+      return false;
+    }
+
+    // The timer handle was returned, indicating that the previously
+    // scheduled event was successfully cancelled.
+    if (handle.timer instanceof TimerFunction) {
+      try {
+        // Invoke timer lifecycle callback.
+        ((TimerFunction) handle.timer).didCancel();
+      } catch (Throwable cause) {
+        if (Result.isFatal(cause)) {
+          throw cause;
+        }
+        this.service.log.errorStatus("didCancel callback failed", handle, cause);
+      }
+    }
+
+    try {
+      // Invoke service introspection callback.
+      this.service.didCancelTimer(handle);
+    } catch (Throwable cause) {
+      if (Result.isFatal(cause)) {
+        throw cause;
+      }
+      this.service.log.errorStatus("didCancelTimer callback failed", handle, cause);
+    }
+
+    // Timer successfully cancelled.
+    return true;
   }
 
   @Override
@@ -1167,11 +1124,10 @@ final class TimerHandle implements TimerContext, LogEntity {
     final Object timerDetail = LogEntity.of(this.timer, level);
     if (timerDetail != null) {
       return timerDetail;
-    } else {
-      final TupleRepr detail = TupleRepr.of();
-      detail.put("id", Repr.of(Log.uniqueFocus(this)));
-      return detail;
     }
+    final TupleRepr detail = TupleRepr.of();
+    detail.put("id", Repr.of(Log.uniqueFocus(this)));
+    return detail;
   }
 
   /**
@@ -1378,13 +1334,12 @@ final class TimerThread extends Thread {
         }
         // Recompute the current service elapsed time.
         currentTime = service.nanoTime() - startTime;
-      } else {
-        // We've reached the deadline for the target tick;
-        // recompute the current service elapsed time.
-        currentTime = service.nanoTime() - startTime;
-        // And return the total number of milliseconds we waited.
-        return (currentTime - initialTime) / 1000000L;
       }
+      // We've reached the deadline for the target tick;
+      // recompute the current service elapsed time.
+      currentTime = service.nanoTime() - startTime;
+      // And return the total number of milliseconds we waited.
+      return (currentTime - initialTime) / 1000000L;
     } while (true);
   }
 
@@ -1408,6 +1363,7 @@ final class TimerThread extends Thread {
     // The sentinel event that will be inserted at the end of the queue
     // to complete the execution of this tick.
     final TimerEvent sentinel = new TimerEvent(nextRevolution, nextRevolution, null);
+
     // Loop until no events scheduled for this tick remain in the queue.
     do {
       if (next.targetTick <= tick) {
@@ -1438,6 +1394,7 @@ final class TimerThread extends Thread {
         // The next event is now the last known event to keep in the queue.
         prev = next;
       }
+
       // Check if the next event is the last in the queue.
       if (TimerEvent.NEXT.getOpaque(next) == null) {
         // Try to finish tick execution by appending a cancelled event to the
@@ -1460,6 +1417,7 @@ final class TimerThread extends Thread {
           break;
         }
       }
+
       // Advance to the next event in the queue.
       next = (TimerEvent) TimerEvent.NEXT.getAcquire(next);
     } while (true);
@@ -1518,13 +1476,10 @@ final class TimerThread extends Thread {
         }
       } while (true);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        service.log.fatal("timer thread failed", cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      service.log.fatal("timer thread failed", cause);
     } finally {
       synchronized (service) {
         // Set the service state to stopped.

@@ -126,7 +126,7 @@ public abstract class Base64 {
    * Returns a {@code Parse} instance that decodes base-64 (7-bit ASCII)
    * encoded input, and writes the decoded bytes to {@code output}.
    */
-  public <T> Parse<T> parser(Output<T> output) {
+  public <T> Parse<T> parse(Output<T> output) {
     return new ParseBase64<T>(this, output);
   }
 
@@ -205,19 +205,15 @@ public abstract class Base64 {
     return new WriteBase64(this, input, input.position(), input.limit(), 1);
   }
 
-  private static final Base64 STANDARD = new Base64Standard(true);
-
   /**
    * Returns the {@code Base64} encoding with the standard alphabet.
    */
   public static Base64 standard() {
-    return STANDARD;
+    return Base64Standard.PADDED;
   }
 
-  private static final Base64 STANDARD_UNPADDED = new Base64Standard(false);
-
   static Base64 standardUnpadded() {
-    return STANDARD_UNPADDED;
+    return Base64Standard.UNPADDED;
   }
 
   /**
@@ -226,26 +222,22 @@ public abstract class Base64 {
    */
   public static Base64 standard(boolean isPadded) {
     if (isPadded) {
-      return Base64.standard();
+      return Base64Standard.PADDED;
     } else {
-      return Base64.standardUnpadded();
+      return Base64Standard.UNPADDED;
     }
   }
-
-  private static final Base64 URL = new Base64Url(true);
 
   /**
    * Returns the {@code Base64} encoding with the url
    * and filename safe alphabet.
    */
   public static Base64 url() {
-    return URL;
+    return Base64Url.PADDED;
   }
 
-  private static final Base64 URL_UNPADDED = new Base64Url(false);
-
   public static Base64 urlUnpadded() {
-    return URL_UNPADDED;
+    return Base64Url.UNPADDED;
   }
 
   /**
@@ -254,9 +246,9 @@ public abstract class Base64 {
    */
   public static Base64 url(boolean isPadded) {
     if (isPadded) {
-      return Base64.url();
+      return Base64Url.PADDED;
     } else {
-      return Base64.urlUnpadded();
+      return Base64Url.UNPADDED;
     }
   }
 
@@ -297,6 +289,10 @@ final class Base64Standard extends Base64 {
         || c == '+' || c == '/';
   }
 
+  static final Base64 PADDED = new Base64Standard(true);
+
+  static final Base64 UNPADDED = new Base64Standard(false);
+
 }
 
 final class Base64Url extends Base64 {
@@ -333,6 +329,10 @@ final class Base64Url extends Base64 {
         || (c >= 'a' && c <= 'z')
         || c == '-' || c == '_';
   }
+
+  static final Base64 PADDED = new Base64Url(true);
+
+  static final Base64 UNPADDED = new Base64Url(false);
 
 }
 
@@ -590,13 +590,13 @@ final class Base64DecodedOutput<T> extends Output<T> {
                                       this.have, this.error);
   }
 
-  private static String invalidDigit(int c) {
+  static String invalidDigit(int c) {
     return Notation.of("expected base-64 digit, but found ")
                    .appendSourceCodePoint(c)
                    .toString();
   }
 
-  private static String invalidPadding(int c) {
+  static String invalidPadding(int c) {
     return Notation.of("expected '=', but found ")
                    .appendSourceCodePoint(c)
                    .toString();

@@ -1,0 +1,12 @@
+plugins {
+  id 'SwimCoreLibrary'
+  id 'SwimCorePublish'
+}
+
+description = 'Declarative introspection annotations'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-core/swim.decl'
+ext.moduleName = 'swim.decl'
+
+dependencies {
+  api project(':swim-annotations')
+}

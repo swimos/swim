@@ -16,10 +16,8 @@ package swim.json;
 
 import java.lang.reflect.Type;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
@@ -30,11 +28,10 @@ import swim.codec.Output;
 import swim.codec.OutputException;
 import swim.codec.Parse;
 import swim.codec.Write;
-import swim.codec.WriteException;
+import swim.decl.FilterMode;
+import swim.expr.ChildExpr;
+import swim.expr.CondExpr;
 import swim.expr.ContextExpr;
-import swim.expr.ExprParser;
-import swim.expr.Term;
-import swim.expr.selector.ChildExpr;
 import swim.repr.ArrayRepr;
 import swim.repr.BlobRepr;
 import swim.repr.BlobReprOutput;
@@ -47,10 +44,10 @@ import swim.repr.TermRepr;
 import swim.repr.TupleRepr;
 import swim.repr.UndefinedRepr;
 import swim.repr.UnitRepr;
+import swim.term.Term;
+import swim.util.Assume;
 import swim.util.CacheMap;
-import swim.util.CacheSet;
 import swim.util.LruCacheMap;
-import swim.util.LruCacheSet;
 import swim.util.Notation;
 import swim.util.ToSource;
 
@@ -70,31 +67,31 @@ public final class JsonReprs implements JsonProvider, ToSource {
   }
 
   @Override
-  public @Nullable JsonForm<?> resolveJsonForm(Type javaType) throws JsonFormException {
-    if (javaType instanceof Class<?>) {
-      final Class<?> javaClass = (Class<?>) javaType;
-      if (UndefinedRepr.class.isAssignableFrom(javaClass)) {
-        return JsonReprs.undefinedForm();
-      } else if (UnitRepr.class.isAssignableFrom(javaClass)) {
-        return JsonReprs.unitForm();
-      } else if (BooleanRepr.class.isAssignableFrom(javaClass)) {
-        return JsonReprs.booleanForm();
-      } else if (NumberRepr.class.isAssignableFrom(javaClass)) {
-        return JsonReprs.numberForm();
-      } else if (StringRepr.class.isAssignableFrom(javaClass)) {
-        return JsonReprs.stringForm();
-      } else if (BlobRepr.class.isAssignableFrom(javaClass)) {
-        return JsonReprs.blobForm();
-      } else if (TermRepr.class.isAssignableFrom(javaClass)) {
-        return JsonReprs.termForm();
-      } else if (ArrayRepr.class.isAssignableFrom(javaClass)) {
-        return JsonReprs.arrayForm();
-      } else if (ObjectRepr.class.isAssignableFrom(javaClass)) {
-        return JsonReprs.objectForm();
-      } else if (TupleRepr.class.isAssignableFrom(javaClass)) {
-        return JsonReprs.tupleForm();
-      } else if (javaClass == Repr.class) {
-        return JsonReprs.reprForm();
+  public @Nullable JsonFormat<?> resolveJsonFormat(Type type) throws JsonProviderException {
+    if (type instanceof Class<?>) {
+      final Class<?> classType = (Class<?>) type;
+      if (UndefinedRepr.class.isAssignableFrom(classType)) {
+        return JsonReprs.undefinedFormat();
+      } else if (UnitRepr.class.isAssignableFrom(classType)) {
+        return JsonReprs.unitFormat();
+      } else if (BooleanRepr.class.isAssignableFrom(classType)) {
+        return JsonReprs.booleanFormat();
+      } else if (NumberRepr.class.isAssignableFrom(classType)) {
+        return JsonReprs.numberFormat();
+      } else if (StringRepr.class.isAssignableFrom(classType)) {
+        return JsonReprs.stringFormat();
+      } else if (BlobRepr.class.isAssignableFrom(classType)) {
+        return JsonReprs.blobFormat();
+      } else if (TermRepr.class.isAssignableFrom(classType)) {
+        return JsonReprs.termFormat();
+      } else if (ArrayRepr.class.isAssignableFrom(classType)) {
+        return JsonReprs.arrayFormat();
+      } else if (ObjectRepr.class.isAssignableFrom(classType)) {
+        return JsonReprs.objectFormat();
+      } else if (TupleRepr.class.isAssignableFrom(classType)) {
+        return JsonReprs.tupleFormat();
+      } else if (classType == Repr.class) {
+        return JsonReprs.valueFormat();
       }
     }
     return null;
@@ -115,73 +112,68 @@ public final class JsonReprs implements JsonProvider, ToSource {
     return this.toSource();
   }
 
-  private static final JsonReprs PROVIDER = new JsonReprs(BUILTIN_PRIORITY);
+  static final JsonReprs PROVIDER = new JsonReprs(BUILTIN_PRIORITY);
 
   public static JsonReprs provider(int priority) {
     if (priority == BUILTIN_PRIORITY) {
       return PROVIDER;
-    } else {
-      return new JsonReprs(priority);
     }
+    return new JsonReprs(priority);
   }
 
   public static JsonReprs provider() {
     return PROVIDER;
   }
 
-  public static JsonUndefinedForm<UndefinedRepr> undefinedForm() {
-    return JsonReprs.UndefinedForm.INSTANCE;
+  public static JsonFormat<UndefinedRepr> undefinedFormat() {
+    return UndefinedFormat.INSTANCE;
   }
 
-  public static JsonNullForm<UnitRepr> unitForm() {
-    return JsonReprs.UnitForm.INSTANCE;
+  public static JsonFormat<UnitRepr> unitFormat() {
+    return UnitFormat.INSTANCE;
   }
 
-  public static JsonIdentifierForm<Repr> identifierForm() {
-    return JsonReprs.IdentifierForm.INSTANCE;
+  public static JsonFormat<Repr> identifierFormat() {
+    return IdentifierFormat.INSTANCE;
   }
 
-  public static JsonForm<BooleanRepr> booleanForm() {
-    return JsonReprs.BooleanForm.INSTANCE;
+  public static JsonFormat<BooleanRepr> booleanFormat() {
+    return BooleanFormat.INSTANCE;
   }
 
-  public static JsonNumberForm<NumberRepr> numberForm() {
-    return JsonReprs.NumberForm.INSTANCE;
+  public static JsonFormat<NumberRepr> numberFormat() {
+    return NumberFormat.INSTANCE;
   }
 
-  public static JsonStringForm<StringBuilder, StringRepr> stringForm() {
-    return JsonReprs.StringForm.INSTANCE;
+  public static JsonFormat<StringRepr> stringFormat() {
+    return StringFormat.INSTANCE;
   }
 
-  public static JsonForm<BlobRepr> blobForm() {
-    return JsonReprs.BlobForm.INSTANCE;
+  public static JsonFormat<BlobRepr> blobFormat() {
+    return BlobFormat.INSTANCE;
   }
 
-  public static JsonForm<Repr> termForm() {
-    return JsonReprs.TermForm.INSTANCE;
+  public static JsonFormat<Repr> termFormat() {
+    return TermFormat.INSTANCE;
   }
 
-  public static JsonArrayForm<Repr, ArrayRepr, ArrayRepr> arrayForm() {
-    return JsonReprs.ArrayForm.INSTANCE;
+  public static JsonFormat<ArrayRepr> arrayFormat() {
+    return ArrayFormat.INSTANCE;
   }
 
-  public static JsonForm<String> keyForm() {
-    return JsonReprs.KeyForm.INSTANCE;
+  public static JsonFormat<ObjectRepr> objectFormat() {
+    return ObjectFormat.INSTANCE;
   }
 
-  public static JsonObjectForm<String, Repr, ObjectRepr, ObjectRepr> objectForm() {
-    return JsonReprs.ObjectForm.INSTANCE;
+  public static JsonFormat<TupleRepr> tupleFormat() {
+    return TupleFormat.INSTANCE;
   }
 
-  public static JsonObjectForm<String, Repr, TupleRepr, TupleRepr> tupleForm() {
-    return JsonReprs.TupleForm.INSTANCE;
+  public static JsonFormat<Repr> valueFormat() {
+    return ValueFormat.INSTANCE;
   }
 
-  public static JsonForm<Repr> reprForm() {
-    return JsonReprs.ReprForm.INSTANCE;
-  }
-
-  private static final ThreadLocal<CacheMap<String, StringRepr>> STRING_CACHE =
+  static final ThreadLocal<CacheMap<String, StringRepr>> STRING_CACHE =
       new ThreadLocal<CacheMap<String, StringRepr>>();
 
   public static CacheMap<String, StringRepr> stringCache() {
@@ -199,54 +191,61 @@ public final class JsonReprs implements JsonProvider, ToSource {
     return stringCache;
   }
 
-  private static final ThreadLocal<CacheSet<String>> KEY_CACHE =
-      new ThreadLocal<CacheSet<String>>();
-
-  public static CacheSet<String> keyCache() {
-    CacheSet<String> keyCache = KEY_CACHE.get();
-    if (keyCache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.json.key.repr.cache.size"));
-      } catch (NumberFormatException cause) {
-        cacheSize = 512;
-      }
-      keyCache = new LruCacheSet<String>(cacheSize);
-      KEY_CACHE.set(keyCache);
+  static StringRepr cacheString(String string) {
+    final CacheMap<String, StringRepr> stringCache = JsonReprs.stringCache();
+    StringRepr value = stringCache.get(string);
+    if (value == null) {
+      value = stringCache.put(string, StringRepr.of(string));
     }
-    return keyCache;
+    return value;
   }
 
-  static final class UndefinedForm implements JsonUndefinedForm<UndefinedRepr>, ToSource {
+  static final class UndefinedFormat implements JsonFormat<UndefinedRepr>, JsonIdentifierParser<UndefinedRepr>, JsonIdentifierWriter<UndefinedRepr>, ToSource {
 
     @Override
-    public UndefinedRepr undefinedValue() {
+    public @Nullable String typeName() {
+      return "undefined";
+    }
+
+    @Override
+    public UndefinedRepr fromIdentifier(String value, JsonParserOptions options) throws JsonException {
+      if ("undefined".equals(value)) {
+        return UndefinedRepr.undefined();
+      }
+      throw new JsonException("unsupported identifier: " + value);
+    }
+
+    @Override
+    public @Nullable String intoIdentifier(@Nullable UndefinedRepr value) {
+      if (value != null) {
+        return "undefined";
+      }
+      return null;
+    }
+
+    @Override
+    public boolean filter(@Nullable UndefinedRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public UndefinedRepr initializer() {
       return UndefinedRepr.undefined();
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable UndefinedRepr value, JsonWriter writer) {
-      return writer.writeUndefined(output);
-    }
-
-    @Override
-    public Term intoTerm(@Nullable UndefinedRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable UndefinedRepr fromTerm(Term term) {
-      if (term instanceof UndefinedRepr) {
-        return (UndefinedRepr) term;
-      } else {
-        return null;
-      }
-    }
-
-    @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "undefinedForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "undefinedFormat").endInvoke();
     }
 
     @Override
@@ -254,42 +253,56 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.UndefinedForm INSTANCE = new JsonReprs.UndefinedForm();
+    static final UndefinedFormat INSTANCE = new UndefinedFormat();
 
   }
 
-  static final class UnitForm implements JsonNullForm<UnitRepr>, ToSource {
+  static final class UnitFormat implements JsonFormat<UnitRepr>, JsonIdentifierParser<UnitRepr>, JsonIdentifierWriter<UnitRepr>, ToSource {
 
     @Override
-    public UnitRepr nullValue() {
+    public @Nullable String typeName() {
+      return "null";
+    }
+
+    @Override
+    public UnitRepr fromIdentifier(String value, JsonParserOptions options) throws JsonException {
+      if ("null".equals(value)) {
+        return UnitRepr.unit();
+      }
+      throw new JsonException("unsupported identifier: " + value);
+    }
+
+    @Override
+    public @Nullable String intoIdentifier(@Nullable UnitRepr value) {
+      if (value != null) {
+        return "null";
+      }
+      return null;
+    }
+
+    @Override
+    public boolean filter(@Nullable UnitRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public UnitRepr initializer() {
       return UnitRepr.unit();
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable UnitRepr value, JsonWriter writer) {
-      return writer.writeNull(output);
-    }
-
-    @Override
-    public Term intoTerm(@Nullable UnitRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable UnitRepr fromTerm(Term term) {
-      if (term instanceof UnitRepr) {
-        return (UnitRepr) term;
-      } else if (term.isValidObject() && term.objectValue() == null) {
-        return UnitRepr.unit();
-      } else {
-        return null;
-      }
-    }
-
-    @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "unitForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "unitFormat").endInvoke();
     }
 
     @Override
@@ -297,14 +310,19 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.UnitForm INSTANCE = new JsonReprs.UnitForm();
+    static final UnitFormat INSTANCE = new UnitFormat();
 
   }
 
-  static final class IdentifierForm implements JsonIdentifierForm<Repr>, ToSource {
+  static final class IdentifierFormat implements JsonFormat<Repr>, JsonIdentifierParser<Repr>, JsonIdentifierWriter<Repr>, ToSource {
 
     @Override
-    public Repr identifierValue(String value, ExprParser parser) throws JsonException {
+    public @Nullable String typeName() {
+      return "identifier";
+    }
+
+    @Override
+    public Repr fromIdentifier(String value, JsonParserOptions options) throws JsonException {
       switch (value) {
         case "undefined":
           return UndefinedRepr.undefined();
@@ -315,73 +333,54 @@ public final class JsonReprs implements JsonProvider, ToSource {
         case "true":
           return BooleanRepr.of(true);
         default:
-          if (parser instanceof JsonParser && ((JsonParser) parser).options().exprsEnabled()) {
-            return TermRepr.of(new ChildExpr(ContextExpr.of(), StringRepr.of(value)));
-          } else {
-            throw new JsonException("unsupported identifier: " + value);
+          if (options.exprsEnabled()) {
+            return TermRepr.of(new ChildExpr(ContextExpr.of(), Term.of(value)));
           }
+          throw new JsonException("unsupported identifier: " + value);
       }
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable Repr value, JsonWriter writer) {
-      if (value == null) {
-        return writer.writeNull(output);
-      } else if (value instanceof UndefinedRepr) {
-        return writer.writeUndefined(output);
+    public @Nullable String intoIdentifier(@Nullable Repr value) {
+      if (value instanceof UndefinedRepr) {
+        return "undefined";
       } else if (value instanceof UnitRepr) {
-        return writer.writeNull(output);
+        return "null";
       } else if (value instanceof BooleanRepr) {
-        return writer.writeBoolean(output, value.booleanValue());
-      } else {
-        return writer.writeIdentifier(output, value.stringValue());
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Repr value) {
-      if (value == null) {
-        return Repr.unit();
-      } else if (value instanceof TermRepr && value.attrs().isEmpty()) {
-        return ((TermRepr) value).term();
-      } else {
-        return value;
-      }
-    }
-
-    @Override
-    public @Nullable Repr fromTerm(Term term) {
-      if (term instanceof BooleanRepr) {
-        return (BooleanRepr) term;
-      } else if (term.isValidString()) {
-        final String string = term.stringValue();
-        if (Json.parser().isIdentifier(string)) {
-          if (term instanceof StringRepr) {
-            return (StringRepr) term;
-          } else {
-            return StringRepr.of(string);
-          }
-        }
-      } else {
-        if (term instanceof TermRepr) {
-          term = ((TermRepr) term).term();
-        }
-        if (term instanceof ChildExpr) {
-          final ChildExpr childExpr = (ChildExpr) term;
-          final Term scope = childExpr.scope();
-          final Term key = childExpr.key();
-          if (ContextExpr.of().equals(scope) && key.isValidString()) {
-            return StringRepr.of(key.stringValue());
-          }
+        return value.booleanValue() ? "true" : "false";
+      } else if (value instanceof TermRepr) {
+        final Term term = ((TermRepr) value).term();
+        if (term instanceof ChildExpr expr && expr.scope().equals(ContextExpr.of())
+            && expr.key().isValidString()) {
+          return expr.key().stringValue();
         }
       }
       return null;
     }
 
     @Override
+    public boolean filter(@Nullable Repr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public Repr initializer() {
+      return UndefinedRepr.undefined();
+    }
+
+    @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "identifierForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "identifierFormat").endInvoke();
     }
 
     @Override
@@ -389,52 +388,58 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.IdentifierForm INSTANCE = new JsonReprs.IdentifierForm();
+    static final IdentifierFormat INSTANCE = new IdentifierFormat();
 
   }
 
-  static final class BooleanForm implements JsonIdentifierForm<BooleanRepr>, ToSource {
+  static final class BooleanFormat implements JsonFormat<BooleanRepr>, JsonIdentifierParser<BooleanRepr>, JsonIdentifierWriter<BooleanRepr>, ToSource {
 
     @Override
-    public BooleanRepr identifierValue(String value, ExprParser parser) throws JsonException {
+    public @Nullable String typeName() {
+      return "boolean";
+    }
+
+    @Override
+    public BooleanRepr fromIdentifier(String value, JsonParserOptions options) throws JsonException {
       if ("true".equals(value)) {
         return BooleanRepr.of(true);
       } else if ("false".equals(value)) {
         return BooleanRepr.of(false);
-      } else {
-        throw new JsonException("unsupported identifier: " + value);
       }
+      throw new JsonException("unsupported identifier: " + value);
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable BooleanRepr value, JsonWriter writer) {
-      if (value != null) {
-        return writer.writeBoolean(output, value.booleanValue());
-      } else {
-        return writer.writeNull(output);
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable BooleanRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable BooleanRepr fromTerm(Term term) {
-      if (term instanceof BooleanRepr) {
-        return (BooleanRepr) term;
-      } else if (term.isValidBoolean()) {
-        return BooleanRepr.of(term.booleanValue());
-      } else {
+    public @Nullable String intoIdentifier(@Nullable BooleanRepr value) {
+      if (value == null) {
         return null;
       }
+      return value.booleanValue() ? "true" : "false";
+    }
+
+    @Override
+    public boolean filter(@Nullable BooleanRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public BooleanRepr initializer() {
+      return BooleanRepr.of(false);
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "booleanForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "booleanFormat").endInvoke();
     }
 
     @Override
@@ -442,14 +447,19 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.BooleanForm INSTANCE = new JsonReprs.BooleanForm();
+    static final BooleanFormat INSTANCE = new BooleanFormat();
 
   }
 
-  static final class NumberForm implements JsonNumberForm<NumberRepr>, ToSource {
+  static final class NumberFormat implements JsonFormat<NumberRepr>, JsonNumberParser<NumberRepr>, JsonNumberWriter<NumberRepr>, ToSource {
 
     @Override
-    public NumberRepr integerValue(long value) {
+    public @Nullable String typeName() {
+      return "number";
+    }
+
+    @Override
+    public NumberRepr fromInteger(long value) {
       if (value == (long) (int) value) {
         return NumberRepr.of((int) value);
       } else {
@@ -458,7 +468,7 @@ public final class JsonReprs implements JsonProvider, ToSource {
     }
 
     @Override
-    public NumberRepr hexadecimalValue(long value, int digits) {
+    public NumberRepr fromHexadecimal(long value, int digits) {
       if (value == (long) (int) value && digits <= 8) {
         return NumberRepr.of((int) value);
       } else {
@@ -467,54 +477,64 @@ public final class JsonReprs implements JsonProvider, ToSource {
     }
 
     @Override
-    public NumberRepr bigIntegerValue(String value) {
+    public NumberRepr fromBigInteger(String value) {
       return NumberRepr.of(new BigInteger(value));
     }
 
     @Override
-    public NumberRepr decimalValue(String value) {
+    public NumberRepr fromDecimal(String value) {
       return NumberRepr.parse(value);
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable NumberRepr value, JsonWriter writer) {
+    public @Nullable Number intoNumber(@Nullable NumberRepr value) {
       if (value == null) {
-        return writer.writeNull(output);
-      } else if (value.isValidInt()) {
-        return writer.writeNumber(output, value.intValue());
-      } else if (value.isValidLong()) {
-        return writer.writeNumber(output, value.longValue());
-      } else if (value.isValidFloat()) {
-        return writer.writeNumber(output, value.floatValue());
-      } else if (value.isValidDouble()) {
-        return writer.writeNumber(output, value.doubleValue());
-      } else if (value.isValidBigInteger()) {
-        return writer.writeNumber(output, value.bigIntegerValue());
-      } else {
-        return Write.error(new WriteException("unsupported value: " + value));
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable NumberRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable NumberRepr fromTerm(Term term) {
-      if (term instanceof NumberRepr) {
-        return (NumberRepr) term;
-      } else if (term.isValidNumber()) {
-        return NumberRepr.of(term.numberValue());
-      } else {
         return null;
       }
+      return value.numberValue();
+    }
+
+    @Override
+    public boolean filter(@Nullable NumberRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public NumberRepr initializer() {
+      return NumberRepr.of(0);
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable NumberRepr value, JsonWriterOptions options) {
+      if (value == null) {
+        return this.writeNull(output);
+      } else if (value.isValidInt()) {
+        return this.writeInt(output, value.intValue());
+      } else if (value.isValidLong()) {
+        return this.writeLong(output, value.longValue());
+      } else if (value.isValidFloat()) {
+        return this.writeFloat(output, value.floatValue());
+      } else if (value.isValidDouble()) {
+        return this.writeDouble(output, value.doubleValue());
+      } else if (value.isValidBigInteger()) {
+        return this.writeBigInteger(output, value.bigIntegerValue());
+      }
+      return this.writeNumber(output, value.numberValue());
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "numberForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "numberFormat").endInvoke();
     }
 
     @Override
@@ -522,11 +542,16 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.NumberForm INSTANCE = new JsonReprs.NumberForm();
+    static final NumberFormat INSTANCE = new NumberFormat();
 
   }
 
-  static final class StringForm implements JsonStringForm<StringBuilder, StringRepr>, ToSource {
+  static final class StringFormat implements JsonFormat<StringRepr>, JsonStringParser<StringBuilder, StringRepr>, JsonStringWriter<StringRepr>, ToSource {
+
+    @Override
+    public @Nullable String typeName() {
+      return "string";
+    }
 
     @Override
     public StringBuilder stringBuilder() {
@@ -540,44 +565,40 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public StringRepr buildString(StringBuilder builder) {
-      final CacheMap<String, StringRepr> stringCache = JsonReprs.stringCache();
-      final String value = builder.toString();
-      StringRepr stringValue = stringCache.get(value);
-      if (stringValue == null) {
-        stringValue = stringCache.put(value, StringRepr.of(value));
-      }
-      return stringValue;
+      return JsonReprs.cacheString(builder.toString());
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable StringRepr value, JsonWriter writer) {
-      if (value != null) {
-        return writer.writeString(output, value.stringValue());
-      } else {
-        return writer.writeNull(output);
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable StringRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable StringRepr fromTerm(Term term) {
-      if (term instanceof StringRepr) {
-        return (StringRepr) term;
-      } else if (term.isValidString()) {
-        return StringRepr.of(term.stringValue());
-      } else {
+    public @Nullable String intoString(@Nullable StringRepr value) {
+      if (value == null) {
         return null;
       }
+      return value.stringValue();
+    }
+
+    @Override
+    public boolean filter(@Nullable StringRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public StringRepr initializer() {
+      return StringRepr.empty();
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "stringForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "stringFormat").endInvoke();
     }
 
     @Override
@@ -585,11 +606,16 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.StringForm INSTANCE = new JsonReprs.StringForm();
+    static final StringFormat INSTANCE = new StringFormat();
 
   }
 
-  static final class BlobForm implements JsonStringForm<Output<BlobRepr>, BlobRepr>, ToSource {
+  static final class BlobFormat implements JsonFormat<BlobRepr>, JsonStringParser<Output<BlobRepr>, BlobRepr>, JsonStringWriter<BlobRepr>, ToSource {
+
+    @Override
+    public @Nullable String typeName() {
+      return "base64";
+    }
 
     @Override
     public Output<BlobRepr> stringBuilder() {
@@ -614,91 +640,92 @@ public final class JsonReprs implements JsonProvider, ToSource {
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable BlobRepr value, JsonWriter writer) {
-      if (value != null) {
-        return writer.writeString(output, value.toBase64());
-      } else {
-        return writer.writeNull(output);
+    public @Nullable String intoString(@Nullable BlobRepr value) {
+      if (value == null) {
+        return null;
+      }
+      return value.toBase64();
+    }
+
+    @Override
+    public boolean filter(@Nullable BlobRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
       }
     }
 
     @Override
-    public Term intoTerm(@Nullable BlobRepr value) {
-      return value != null ? value : Repr.unit();
+    public BlobRepr initializer() {
+      return BlobRepr.empty();
     }
 
     @Override
-    public @Nullable BlobRepr fromTerm(Term term) {
-      if (term instanceof BlobRepr) {
-        return (BlobRepr) term;
-      } else if (term.isValidObject()) {
-        final Object object = term.objectValue();
-        if (object instanceof ByteBuffer) {
-          return BlobRepr.from((ByteBuffer) object);
-        } else if (object instanceof byte[]) {
-          return BlobRepr.wrap((byte[]) object);
-        }
-      }
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JsonReprs", "blobFormat").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final BlobFormat INSTANCE = new BlobFormat();
+
+  }
+
+  static final class TermFormat implements JsonFormat<Repr>, ToSource {
+
+    @Override
+    public @Nullable String typeName() {
       return null;
     }
 
     @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "blobForm").endInvoke();
+    public boolean filter(@Nullable Repr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
     }
 
     @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-    static final JsonReprs.BlobForm INSTANCE = new JsonReprs.BlobForm();
-
-  }
-
-  static final class TermForm implements JsonForm<Repr>, ToSource {
-
-    @Override
-    public Parse<Repr> parse(Input input, JsonParser parser) {
-      return parser.parseExpr(input, this);
+    public Repr initializer() {
+      return UndefinedRepr.undefined();
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable Repr value, JsonWriter writer) {
+    public Parse<Repr> parse(Input input, JsonParserOptions options) {
+      return ParseJsonRepr.parse(input, this, options, null);
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Repr value, JsonWriterOptions options) {
       if (value == null) {
-        return writer.writeNull(output);
+        return this.writeNull(output);
       } else if (value instanceof TermRepr) {
-        return writer.writeTerm(output, this, ((TermRepr) value).term());
-      } else {
-        return JsonReprs.reprForm().write(output, value, writer);
+        return this.writeTerm(output, ((TermRepr) value).term(), options);
       }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Repr value) {
-      if (value == null) {
-        return Repr.unit();
-      } else if (value instanceof TermRepr && value.attrs().isEmpty()) {
-        return ((TermRepr) value).term();
-      } else {
-        return value;
-      }
-    }
-
-    @Override
-    public @Nullable Repr fromTerm(Term term) {
-      if (term instanceof Repr) {
-        return (Repr) term;
-      } else {
-        return TermRepr.of(term);
-      }
+      return JsonReprs.valueFormat().write(output, value, options);
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "termForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "termFormat").endInvoke();
     }
 
     @Override
@@ -706,15 +733,20 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.TermForm INSTANCE = new JsonReprs.TermForm();
+    static final TermFormat INSTANCE = new TermFormat();
 
   }
 
-  static final class ArrayForm implements JsonArrayForm<Repr, ArrayRepr, ArrayRepr>, ToSource {
+  static final class ArrayFormat implements JsonFormat<ArrayRepr>, JsonArrayParser<Repr, ArrayRepr, ArrayRepr>, JsonArrayWriter<Repr, ArrayRepr>, ToSource {
 
     @Override
-    public JsonForm<Repr> elementForm() {
-      return JsonReprs.reprForm();
+    public @Nullable String typeName() {
+      return "array";
+    }
+
+    @Override
+    public JsonParser<Repr> elementParser() {
+      return JsonReprs.valueFormat();
     }
 
     @Override
@@ -735,99 +767,41 @@ public final class JsonReprs implements JsonProvider, ToSource {
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable ArrayRepr value, JsonWriter writer) {
-      if (value != null) {
-        return writer.writeArray(output, this, value.iterator());
-      } else {
-        return writer.writeNull(output);
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable ArrayRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable ArrayRepr fromTerm(Term term) {
-      if (term instanceof ArrayRepr) {
-        return (ArrayRepr) term;
-      } else {
-        return null;
-      }
-    }
-
-    @Override
-    public void writeSource(Appendable output) {
-      final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "arrayForm").endInvoke();
-    }
-
-    @Override
-    public String toString() {
-      return this.toSource();
-    }
-
-    static final JsonReprs.ArrayForm INSTANCE = new JsonReprs.ArrayForm();
-
-  }
-
-  static final class KeyForm implements JsonIdentifierForm<String>, JsonStringForm<StringBuilder, String>, ToSource {
-
-    @Override
-    public String identifierValue(String value, ExprParser parser) {
-      return JsonReprs.keyCache().put(value);
-    }
-
-    @Override
-    public StringBuilder stringBuilder() {
-      return new StringBuilder();
-    }
-
-    @Override
-    public StringBuilder appendCodePoint(StringBuilder builder, int c) {
-      return builder.appendCodePoint(c);
-    }
-
-    @Override
-    public String buildString(StringBuilder builder) {
-      return JsonReprs.keyCache().put(builder.toString());
-    }
-
-    @Override
-    public Parse<String> parse(Input input, JsonParser parser) {
-      return parser.parseValue(input, this);
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable String value, JsonWriter writer) {
+    public @Nullable Iterator<Repr> getElements(@Nullable ArrayRepr value) {
       if (value == null) {
-        return writer.writeNull(output);
-      } else if (writer.options().identifierKeys() && writer.isIdentifier(value) && !writer.isKeyword(value)) {
-        return writer.writeIdentifier(output, value);
-      } else {
-        return writer.writeString(output, value);
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable String value) {
-      return value != null ? StringRepr.of(value) : Repr.unit();
-    }
-
-    @Override
-    public @Nullable String fromTerm(Term term) {
-      if (term.isValidString()) {
-        return term.stringValue();
-      } else {
         return null;
       }
+      return value.iterator();
+    }
+
+    @Override
+    public JsonWriter<Repr> elementWriter() {
+      return JsonReprs.valueFormat();
+    }
+
+    @Override
+    public boolean filter(@Nullable ArrayRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public ArrayRepr initializer() {
+      return ArrayRepr.empty();
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "keyForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "arrayFormat").endInvoke();
     }
 
     @Override
@@ -835,25 +809,34 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.KeyForm INSTANCE = new JsonReprs.KeyForm();
+    static final ArrayFormat INSTANCE = new ArrayFormat();
 
   }
 
-  static final class ObjectForm implements JsonObjectForm<String, Repr, ObjectRepr, ObjectRepr>, JsonFieldForm<String, Repr, ObjectRepr>, ToSource {
+  static final class ObjectFormat implements JsonFormat<ObjectRepr>, JsonObjectFormat<Repr, ObjectRepr, ObjectRepr>, ToSource {
 
     @Override
-    public JsonForm<String> keyForm() {
-      return JsonReprs.keyForm();
+    public @Nullable String typeName() {
+      return "object";
     }
 
     @Override
-    public JsonForm<Repr> valueForm() {
-      return JsonReprs.reprForm();
+    public JsonFieldFormat<? extends Repr, ObjectRepr> getFieldFormat(@Nullable ObjectRepr object, String key) {
+      return JsonFieldFormat.forKey(key, JsonLang.keyFormat(), JsonReprs.valueFormat(), FilterMode.DEFAULT);
     }
 
     @Override
-    public JsonFieldForm<String, Repr, ObjectRepr> getFieldForm(String key) {
-      return this;
+    public Iterator<JsonFieldFormat<? extends Repr, ObjectRepr>> getFieldFormats(@Nullable ObjectRepr object) {
+      if (object == null) {
+        return Collections.emptyIterator();
+      }
+      return JsonCollections.mapFieldFormatIterator(object.keyIterator(), JsonLang.keyFormat(),
+                                                    JsonReprs.valueFormat(), FilterMode.DEFAULT);
+    }
+
+    @Override
+    public Iterator<JsonFieldFormat<? extends Repr, ObjectRepr>> getDeclaredFieldFormats() {
+      return Collections.emptyIterator();
     }
 
     @Override
@@ -862,44 +845,57 @@ public final class JsonReprs implements JsonProvider, ToSource {
     }
 
     @Override
-    public ObjectRepr updateField(ObjectRepr builder, String key, @Nullable Repr value) {
-      Objects.requireNonNull(value, "value");
-      builder.put(key, value);
+    public JsonFieldParser<? extends Repr, ObjectRepr> getFieldParser(ObjectRepr object, String key) {
+      return JsonFieldParser.forKey(key, JsonReprs.valueFormat());
+    }
+
+    @Override
+    public @Nullable ObjectRepr buildObject(ObjectRepr builder) {
       return builder;
     }
 
     @Override
-    public ObjectRepr buildObject(ObjectRepr builder) {
-      return builder;
+    public JsonFieldWriter<? extends Repr, ObjectRepr> getFieldWriter(ObjectRepr object, String key) {
+      return JsonFieldWriter.forKey(key, JsonLang.keyFormat(), JsonReprs.valueFormat(), FilterMode.DEFAULT);
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable ObjectRepr value, JsonWriter writer) {
-      if (value != null) {
-        return writer.writeObject(output, this, value.iterator());
-      } else {
-        return writer.writeNull(output);
+    public Iterator<JsonFieldWriter<? extends Repr, ObjectRepr>> getFieldWriters(ObjectRepr object) {
+      return Assume.conforms(JsonCollections.mapFieldFormatIterator(object.keyIterator(), JsonLang.keyFormat(),
+                                                                    JsonReprs.valueFormat(), FilterMode.DEFAULT));
+    }
+
+    @Override
+    public boolean filter(@Nullable ObjectRepr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
       }
     }
 
     @Override
-    public Term intoTerm(@Nullable ObjectRepr value) {
-      return value != null ? value : Repr.unit();
+    public @Nullable ObjectRepr merged(@Nullable ObjectRepr newObject, @Nullable ObjectRepr oldObject) {
+      if (newObject == null || oldObject == null) {
+        return newObject;
+      }
+      return newObject.letAll(oldObject);
     }
 
     @Override
-    public @Nullable ObjectRepr fromTerm(Term term) {
-      if (term instanceof ObjectRepr) {
-        return (ObjectRepr) term;
-      } else {
-        return null;
-      }
+    public ObjectRepr initializer() {
+      return ObjectRepr.empty();
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "objectForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "objectFormat").endInvoke();
     }
 
     @Override
@@ -907,25 +903,20 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.ObjectForm INSTANCE = new JsonReprs.ObjectForm();
+    static final ObjectFormat INSTANCE = new ObjectFormat();
 
   }
 
-  static final class TupleForm implements JsonArrayForm<Repr, TupleRepr, TupleRepr>, JsonObjectForm<String, Repr, TupleRepr, TupleRepr>, JsonFieldForm<String, Repr, TupleRepr>, ToSource {
+  static final class TupleFormat implements JsonFormat<TupleRepr>, JsonObjectParser<Repr, TupleRepr, TupleRepr>, JsonObjectWriter<Repr, TupleRepr>, JsonArrayWriter<Repr, TupleRepr>, ToSource {
 
     @Override
-    public JsonForm<String> keyForm() {
-      return JsonReprs.keyForm();
+    public @Nullable String typeName() {
+      return "tuple";
     }
 
     @Override
-    public JsonForm<Repr> valueForm() {
-      return JsonReprs.reprForm();
-    }
-
-    @Override
-    public JsonFieldForm<String, Repr, TupleRepr> getFieldForm(String key) {
-      return this;
+    public JsonArrayParser<?, ?, TupleRepr> arrayParser() {
+      return TupleArrayParser.INSTANCE;
     }
 
     @Override
@@ -934,20 +925,96 @@ public final class JsonReprs implements JsonProvider, ToSource {
     }
 
     @Override
-    public TupleRepr updateField(TupleRepr builder, String key, @Nullable Repr value) {
-      Objects.requireNonNull(value, "value");
-      builder.put(key, value);
+    public JsonFieldParser<? extends Repr, TupleRepr> getFieldParser(TupleRepr object, String key) {
+      return JsonFieldParser.forKey(key, JsonReprs.valueFormat());
+    }
+
+    @Override
+    public @Nullable TupleRepr buildObject(TupleRepr builder) {
       return builder;
     }
 
     @Override
-    public TupleRepr buildObject(TupleRepr builder) {
-      return builder;
+    public JsonFieldWriter<? extends Repr, TupleRepr> getFieldWriter(TupleRepr object, String key) {
+      return JsonFieldWriter.forKey(key, JsonLang.keyFormat(), JsonReprs.valueFormat(), FilterMode.DEFAULT);
     }
 
     @Override
-    public JsonForm<Repr> elementForm() {
-      return JsonReprs.reprForm();
+    public Iterator<JsonFieldWriter<? extends Repr, TupleRepr>> getFieldWriters(TupleRepr object) {
+      return Assume.conforms(JsonCollections.mapFieldFormatIterator(object.keyIterator(), JsonLang.keyFormat(),
+                                                                    JsonReprs.valueFormat(), FilterMode.DEFAULT));
+    }
+
+    @Override
+    public @Nullable Iterator<Repr> getElements(@Nullable TupleRepr object) {
+      if (object == null) {
+        return null;
+      }
+      return object.valueIterator();
+    }
+
+    @Override
+    public JsonWriter<Repr> elementWriter() {
+      return JsonReprs.valueFormat();
+    }
+
+    @Override
+    public boolean filter(@Nullable TupleRepr object, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return object != null && object.isDefined();
+        case TRUTHY:
+          return object != null && object.isTruthy();
+        case DISTINCT:
+          return object != null && object.isDistinct();
+        default:
+          return true;
+      }
+    }
+
+    @Override
+    public TupleRepr initializer() {
+      return TupleRepr.empty();
+    }
+
+    @Override
+    public Parse<TupleRepr> parse(Input input, JsonParserOptions options) {
+      return this.parseValue(input, options);
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable TupleRepr value, JsonWriterOptions options) {
+      if (value != null && !value.isEmpty() && value.isArray()) {
+        return JsonArrayWriter.super.write(output, value, options);
+      }
+      return JsonObjectWriter.super.write(output, value, options);
+    }
+
+    @Override
+    public void writeSource(Appendable output) {
+      final Notation notation = Notation.from(output);
+      notation.beginInvoke("JsonReprs", "tupleFormat").endInvoke();
+    }
+
+    @Override
+    public String toString() {
+      return this.toSource();
+    }
+
+    static final TupleFormat INSTANCE = new TupleFormat();
+
+  }
+
+  static final class TupleArrayParser implements JsonArrayParser<Repr, TupleRepr, TupleRepr>, ToSource {
+
+    @Override
+    public @Nullable String typeName() {
+      return "tuple";
+    }
+
+    @Override
+    public JsonParser<Repr> elementParser() {
+      return JsonReprs.valueFormat();
     }
 
     @Override
@@ -968,39 +1035,15 @@ public final class JsonReprs implements JsonProvider, ToSource {
     }
 
     @Override
-    public Parse<TupleRepr> parse(Input input, JsonParser parser) {
-      return parser.parseExpr(input, this);
-    }
-
-    @Override
-    public Write<?> write(Output<?> output, @Nullable TupleRepr value, JsonWriter writer) {
-      if (value == null) {
-        return writer.writeNull(output);
-      } else if (!value.isEmpty() && value.isArray()) {
-        return writer.writeArray(output, this, value.valueIterator());
-      } else {
-        return writer.writeObject(output, this, new JsonReprs.TupleForm.ParamIterator(value.iterator()));
-      }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable TupleRepr value) {
-      return value != null ? value : Repr.unit();
-    }
-
-    @Override
-    public @Nullable TupleRepr fromTerm(Term term) {
-      if (term instanceof TupleRepr) {
-        return (TupleRepr) term;
-      } else {
-        return null;
-      }
+    public TupleRepr initializer() {
+      return TupleRepr.empty();
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "tupleForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "tupleFormat").endInvoke()
+              .beginInvoke("arrayParser").endInvoke();
     }
 
     @Override
@@ -1008,136 +1051,98 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.TupleForm INSTANCE = new JsonReprs.TupleForm();
-
-    static final class ParamIterator implements Iterator<Map.Entry<String, Repr>> {
-
-      final Iterator<Map.Entry<String, Repr>> params;
-      int index;
-
-      ParamIterator(Iterator<Map.Entry<String, Repr>> params) {
-        this.params = params;
-        this.index = 0;
-      }
-
-      @Override
-      public boolean hasNext() {
-        return this.params.hasNext();
-      }
-
-      @Override
-      public Map.Entry<String, Repr> next() {
-        Map.Entry<String, Repr> param = this.params.next();
-        final int index = this.index;
-        String key = param.getKey();
-        if (key == null) {
-          key = "$" + Integer.toString(index);
-          final Repr value = param.getValue();
-          param = new AbstractMap.SimpleImmutableEntry<String, Repr>(key, value);
-        }
-        this.index = index + 1;
-        return param;
-      }
-
-    }
+    static final TupleArrayParser INSTANCE = new TupleArrayParser();
 
   }
 
-  static final class ReprForm implements JsonForm<Repr>, ToSource {
+  static final class ValueFormat implements JsonFormat<Repr>, ToSource {
 
     @Override
-    public JsonUndefinedForm<UndefinedRepr> undefinedForm() {
-      return JsonReprs.undefinedForm();
+    public @Nullable String typeName() {
+      return "any";
     }
 
     @Override
-    public JsonNullForm<UnitRepr> nullForm() {
-      return JsonReprs.unitForm();
+    public JsonIdentifierParser<Repr> identifierParser() throws JsonException {
+      return JsonReprs.identifierFormat().identifierParser();
     }
 
     @Override
-    public JsonIdentifierForm<Repr> identifierForm() {
-      return JsonReprs.identifierForm();
+    public JsonNumberParser<Repr> numberParser() throws JsonException {
+      return Assume.covariant(JsonReprs.numberFormat().numberParser());
     }
 
     @Override
-    public JsonNumberForm<NumberRepr> numberForm() {
-      return JsonReprs.numberForm();
+    public JsonStringParser<?, Repr> stringParser() throws JsonException {
+      return Assume.covariant(JsonReprs.stringFormat().stringParser());
     }
 
     @Override
-    public JsonStringForm<?, StringRepr> stringForm() {
-      return JsonReprs.stringForm();
+    public JsonArrayParser<?, ?, Repr> arrayParser() throws JsonException {
+      return Assume.covariant(JsonReprs.arrayFormat().arrayParser());
     }
 
     @Override
-    public JsonArrayForm<?, ?, ArrayRepr> arrayForm() {
-      return JsonReprs.arrayForm();
+    public JsonObjectParser<?, ?, Repr> objectParser() throws JsonException {
+      return Assume.covariant(JsonReprs.objectFormat().objectParser());
     }
 
     @Override
-    public JsonObjectForm<?, ?, ?, ObjectRepr> objectForm() {
-      return JsonReprs.objectForm();
+    public boolean filter(@Nullable Repr value, FilterMode filterMode) {
+      switch (filterMode) {
+        case DEFINED:
+          return value != null && value.isDefined();
+        case TRUTHY:
+          return value != null && value.isTruthy();
+        case DISTINCT:
+          return value != null && value.isDistinct();
+        default:
+          return true;
+      }
     }
 
     @Override
-    public Parse<Repr> parse(Input input, JsonParser parser) {
-      return parser.parseExpr(input, this);
+    public Repr initializer() {
+      return UnitRepr.unit();
     }
 
     @Override
-    public Write<?> write(Output<?> output, @Nullable Repr value, JsonWriter writer) {
+    public Parse<Repr> parse(Input input, JsonParserOptions options) {
+      return ParseJsonRepr.parse(input, this, options, null);
+    }
+
+    @Override
+    public Write<?> write(Output<?> output, @Nullable Repr value, JsonWriterOptions options) {
       if (value == null) {
-        return writer.writeNull(output);
+        return this.writeNull(output);
       } else if (value instanceof UndefinedRepr) {
-        return JsonReprs.undefinedForm().write(output, (UndefinedRepr) value, writer);
+        return JsonReprs.undefinedFormat().write(output, (UndefinedRepr) value, options);
       } else if (value instanceof UnitRepr) {
-        return JsonReprs.unitForm().write(output, (UnitRepr) value, writer);
+        return JsonReprs.unitFormat().write(output, (UnitRepr) value, options);
       } else if (value instanceof BooleanRepr) {
-        return JsonReprs.booleanForm().write(output, (BooleanRepr) value, writer);
+        return JsonReprs.booleanFormat().write(output, (BooleanRepr) value, options);
       } else if (value instanceof NumberRepr) {
-        return JsonReprs.numberForm().write(output, (NumberRepr) value, writer);
+        return JsonReprs.numberFormat().write(output, (NumberRepr) value, options);
       } else if (value instanceof StringRepr) {
-        return JsonReprs.stringForm().write(output, (StringRepr) value, writer);
+        return JsonReprs.stringFormat().write(output, (StringRepr) value, options);
       } else if (value instanceof BlobRepr) {
-        return JsonReprs.blobForm().write(output, (BlobRepr) value, writer);
+        return JsonReprs.blobFormat().write(output, (BlobRepr) value, options);
       } else if (value instanceof TermRepr) {
-        return JsonReprs.termForm().write(output, (TermRepr) value, writer);
+        return JsonReprs.termFormat().write(output, (TermRepr) value, options);
       } else if (value instanceof ArrayRepr) {
-        return JsonReprs.arrayForm().write(output, (ArrayRepr) value, writer);
+        return JsonReprs.arrayFormat().write(output, (ArrayRepr) value, options);
       } else if (value instanceof ObjectRepr) {
-        return JsonReprs.objectForm().write(output, (ObjectRepr) value, writer);
+        return JsonReprs.objectFormat().write(output, (ObjectRepr) value, options);
       } else if (value instanceof TupleRepr) {
-        return JsonReprs.tupleForm().write(output, (TupleRepr) value, writer);
-      } else {
-        return Write.error(new WriteException("unsupported value: " + value));
+        return JsonReprs.tupleFormat().write(output, (TupleRepr) value, options);
       }
-    }
-
-    @Override
-    public Term intoTerm(@Nullable Repr value) {
-      if (value == null) {
-        return Repr.unit();
-      } else if (value instanceof TermRepr && value.attrs().isEmpty()) {
-        return ((TermRepr) value).term();
-      } else {
-        return value;
-      }
-    }
-
-    @Override
-    public @Nullable Repr fromTerm(Term term) {
-      if (term instanceof Repr) {
-        return (Repr) term;
-      } else {
-        return TermRepr.of(term);
-      }
+      return Write.error(new JsonException("unsupported value: " + value));
     }
 
     @Override
     public void writeSource(Appendable output) {
       final Notation notation = Notation.from(output);
-      notation.beginInvoke("JsonReprs", "reprForm").endInvoke();
+      notation.beginInvoke("JsonReprs", "valueFormat").endInvoke();
     }
 
     @Override
@@ -1145,8 +1150,51 @@ public final class JsonReprs implements JsonProvider, ToSource {
       return this.toSource();
     }
 
-    static final JsonReprs.ReprForm INSTANCE = new JsonReprs.ReprForm();
+    static final ValueFormat INSTANCE = new ValueFormat();
 
+  }
+
+}
+
+final class ParseJsonRepr extends Parse<Repr> {
+
+  final JsonParser<Repr> parser;
+  final JsonParserOptions options;
+  final @Nullable Parse<Object> parseExpr;
+
+  ParseJsonRepr(JsonParser<Repr> parser, JsonParserOptions options,
+                @Nullable Parse<Object> parseExpr) {
+    this.parser = parser;
+    this.options = options;
+    this.parseExpr = parseExpr;
+  }
+
+  @Override
+  public Parse<Repr> consume(Input input) {
+    return ParseJsonRepr.parse(input, this.parser, this.options, this.parseExpr);
+  }
+
+  static Parse<Repr> parse(Input input, JsonParser<Repr> parser, JsonParserOptions options,
+                           @Nullable Parse<Object> parseExpr) {
+    if (parseExpr == null) {
+      parseExpr = CondExpr.parse(input, parser, options);
+    } else {
+      parseExpr = parseExpr.consume(input);
+    }
+    if (parseExpr.isDone()) {
+      final Object value = parseExpr.getUnchecked();
+      if (value == null || value instanceof Repr) {
+        return Assume.conforms(parseExpr);
+      } else {
+        return Parse.done(TermRepr.of((Term) value));
+      }
+    } else if (parseExpr.isError()) {
+      return parseExpr.asError();
+    }
+    if (input.isError()) {
+      return Parse.error(input.getError());
+    }
+    return new ParseJsonRepr(parser, options, parseExpr);
   }
 
 }

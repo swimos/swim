@@ -94,7 +94,7 @@ public final class Base10 {
    * {@code output}.
    */
   public static Write<?> writeFloat(Output<?> output, float input) {
-    return Text.transcoder().write(output, Float.toString(input));
+    return Text.write(output, Float.toString(input));
   }
 
   /**
@@ -102,7 +102,7 @@ public final class Base10 {
    * encoding of the {@code input} value.
    */
   public static Write<?> writeFloat(float input) {
-    return Text.transcoder().write(Float.toString(input));
+    return Text.write(Float.toString(input));
   }
 
   /**
@@ -110,7 +110,7 @@ public final class Base10 {
    * {@code output}.
    */
   public static Write<?> writeDouble(Output<?> output, double input) {
-    return Text.transcoder().write(output, Double.toString(input));
+    return Text.write(output, Double.toString(input));
   }
 
   /**
@@ -118,7 +118,7 @@ public final class Base10 {
    * encoding of the {@code input} value.
    */
   public static Write<?> writeDouble(double input) {
-    return Text.transcoder().write(Double.toString(input));
+    return Text.write(Double.toString(input));
   }
 
   /**
@@ -520,12 +520,10 @@ final class WriteLong extends Write<Object> {
 
   static Write<Object> write(Output<?> output, long input, int index, int step) {
     if (step == 1) {
-      if (input < 0L) {
-        if (output.isCont()) {
-          output.write('-');
-          step = 2;
-        }
-      } else {
+      if (input >= 0L) {
+        step = 2;
+      } else if (output.isCont()) {
+        output.write('-');
         step = 2;
       }
     }

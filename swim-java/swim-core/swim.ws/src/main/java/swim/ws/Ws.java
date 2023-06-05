@@ -74,21 +74,19 @@ public final class Ws {
   }
 
   public static WsEngine clientEngine(WsOptions options) {
-    if (options.clientCompressionLevel == 0 || options.clientMaxWindowBits != 15) {
+    if (options.clientCompressionLevel != 0 && options.clientMaxWindowBits == 15) {
       // java.util.zip doesn't support configurable sliding window.sizes.
-      return Ws.clientEngine();
-    } else {
       return Ws.deflateClientEngine(options);
     }
+    return Ws.clientEngine();
   }
 
   public static WsEngine serverEngine(WsOptions options) {
-    if (options.serverCompressionLevel == 0 || options.serverMaxWindowBits != 15) {
+    if (options.serverCompressionLevel != 0 && options.serverMaxWindowBits == 15) {
       // java.util.zip doesn't support configurable sliding window.sizes.
-      return Ws.serverEngine();
-    } else {
       return Ws.deflateServerEngine(options);
     }
+    return Ws.serverEngine();
   }
 
 }

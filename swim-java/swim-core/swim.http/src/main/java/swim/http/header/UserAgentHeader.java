@@ -88,7 +88,7 @@ public final class UserAgentHeader extends HttpHeader {
     return UserAgentHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<HttpProduct> parseValue(String value) throws HttpException {
+  static FingerTrieList<HttpProduct> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     FingerTrieList<HttpProduct> products = FingerTrieList.empty();
@@ -122,7 +122,7 @@ public final class UserAgentHeader extends HttpHeader {
     return products;
   }
 
-  private static String writeValue(Iterator<HttpProduct> products) {
+  static String writeValue(Iterator<HttpProduct> products) {
     final StringOutput output = new StringOutput();
     HttpProduct product = null;
     while (products.hasNext()) {

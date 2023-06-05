@@ -49,24 +49,22 @@ public abstract class UriPathPattern extends UriAuthorityPattern {
 
   @Override
   boolean matches(UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
-    if (!authority.isDefined()) {
-      return this.matches(path, query, fragment);
-    } else {
+    if (authority.isDefined()) {
       return false;
     }
+    return this.matches(path, query, fragment);
   }
 
   public static UriPathPattern compile(Uri pattern, UriPath path, UriQuery query, UriFragment fragment) {
-    if (!path.isEmpty()) {
-      final String component = path.head();
-      if (!component.isEmpty() && component.charAt(0) == ':') {
-        return new UriPathVariable(component.substring(1), UriPathPattern.compile(pattern, path.tail(), query, fragment));
-      } else {
-        return new UriPathLiteral(component, UriPathPattern.compile(pattern, path.tail(), query, fragment));
-      }
-    } else {
+    if (path.isEmpty()) {
       return UriQueryPattern.compile(pattern, query, fragment);
     }
+    final UriPathPattern subpathPattern = UriPathPattern.compile(pattern, path.tail(), query, fragment);
+    final String component = path.head();
+    if (!component.isEmpty() && component.charAt(0) == ':') {
+      return new UriPathVariable(component.substring(1), subpathPattern);
+    }
+    return new UriPathLiteral(component, subpathPattern);
   }
 
 }

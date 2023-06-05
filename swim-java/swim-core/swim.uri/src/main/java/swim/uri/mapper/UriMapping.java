@@ -78,8 +78,7 @@ final class UriMapping<T> extends TerminalUriMapper<T> {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UriMapping<?>) {
-      final UriMapping<?> that = (UriMapping<?>) other;
+    } else if (other instanceof UriMapping<?> that) {
       return this.value.equals(that.value);
     }
     return false;

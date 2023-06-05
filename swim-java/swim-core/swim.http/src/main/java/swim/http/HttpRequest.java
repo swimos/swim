@@ -19,6 +19,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.codec.Binary;
 import swim.codec.BinaryInputBuffer;
+import swim.codec.Codec;
 import swim.codec.CodecException;
 import swim.codec.Decode;
 import swim.codec.Diagnostic;
@@ -29,7 +30,6 @@ import swim.codec.Parse;
 import swim.codec.StringInput;
 import swim.codec.StringOutput;
 import swim.codec.Text;
-import swim.codec.Transcoder;
 import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.collections.FingerTrieList;
@@ -114,7 +114,7 @@ public final class HttpRequest<T> extends HttpMessage<T> {
                           this.headers, payload);
   }
 
-  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(InputBuffer input, Transcoder<T2> transcoder) throws HttpException {
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(InputBuffer input, Codec<T2> codec) throws HttpException {
     final HttpHeaders headers = this.headers();
     ContentLengthHeader contentLength = null;
     TransferEncodingHeader transferEncoding = null;
@@ -137,12 +137,12 @@ public final class HttpRequest<T> extends HttpMessage<T> {
       if (transferCodings.size() != 1 || !Assume.nonNull(transferCodings.head()).isChunked()) {
         throw new HttpException(HttpStatus.BAD_REQUEST, "unsupported Transfer-Encoding: " + transferEncoding.value());
       }
-      return HttpChunked.decode(input, transcoder);
+      return HttpChunked.decode(input, codec);
     }
 
     if (contentLength != null) {
       // RFC 7230 § 3.3.3 Item 5
-      return HttpBody.decode(input, transcoder, contentLength.length());
+      return HttpBody.decode(input, codec, contentLength.length());
     }
 
     // RFC 7230 § 3.3.3 Item 6
@@ -169,15 +169,15 @@ public final class HttpRequest<T> extends HttpMessage<T> {
       }
     }
 
-    Transcoder<T2> transcoder;
+    Codec<T2> codec;
     if (contentType != null) {
       try {
-        transcoder = Transcoder.get(contentType.mediaType(), Object.class);
+        codec = Codec.get(contentType.mediaType(), Object.class);
       } catch (CodecException cause) {
-        transcoder = Assume.conforms(Binary.byteBufferTranscoder());
+        codec = Assume.conforms(Binary.byteBufferCodec());
       }
     } else {
-      transcoder = Assume.conforms(Binary.byteBufferTranscoder());
+      codec = Assume.conforms(Binary.byteBufferCodec());
     }
 
     if (transferEncoding != null) {
@@ -186,20 +186,20 @@ public final class HttpRequest<T> extends HttpMessage<T> {
       if (transferCodings.size() != 1 || !Assume.nonNull(transferCodings.head()).isChunked()) {
         throw new HttpException(HttpStatus.BAD_REQUEST, "unsupported Transfer-Encoding: " + transferEncoding.value());
       }
-      return HttpChunked.decode(input, transcoder);
+      return HttpChunked.decode(input, codec);
     }
 
     if (contentLength != null) {
       // RFC 7230 § 3.3.3 Item 5
-      return HttpBody.decode(input, transcoder, contentLength.length());
+      return HttpBody.decode(input, codec, contentLength.length());
     }
 
     // RFC 7230 § 3.3.3 Item 6
     return HttpEmpty.decode(input);
   }
 
-  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(Transcoder<T2> transcoder) throws HttpException {
-    return this.decodePayload(BinaryInputBuffer.empty(), transcoder);
+  public <T2> Decode<? extends HttpPayload<T2>> decodePayload(Codec<T2> codec) throws HttpException {
+    return this.decodePayload(BinaryInputBuffer.empty(), codec);
   }
 
   public <T2> Decode<? extends HttpPayload<T2>> decodePayload() throws HttpException {
@@ -220,8 +220,7 @@ public final class HttpRequest<T> extends HttpMessage<T> {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpRequest<?>) {
-      final HttpRequest<?> that = (HttpRequest<?>) other;
+    } else if (other instanceof HttpRequest<?> that) {
       return this.method.equals(that.method)
           && this.target.equals(that.target)
           && this.version.equals(that.version)
@@ -518,7 +517,7 @@ final class WriteHttpRequest<T> extends Write<HttpRequest<T>> {
     }
     if (step == 3) {
       if (write == null) {
-        write = Text.transcoder().write(output, request.target());
+        write = Text.write(output, request.target());
       } else {
         write = write.produce(output);
       }

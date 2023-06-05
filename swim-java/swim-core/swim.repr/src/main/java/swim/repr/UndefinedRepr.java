@@ -63,9 +63,8 @@ public final class UndefinedRepr implements Repr, ToSource {
       return this;
     } else if (attrs == Attrs.empty()) {
       return UndefinedRepr.undefined();
-    } else {
-      return new UndefinedRepr(attrs);
     }
+    return new UndefinedRepr(attrs);
   }
 
   @Override
@@ -89,19 +88,19 @@ public final class UndefinedRepr implements Repr, ToSource {
 
   /**
    * Always returns {@code false} because {@code UndefinedRepr}
-   * is not a distinct value.
+   * is not  definite value.
    */
   @Override
-  public boolean isDistinct() {
+  public boolean isDefinite() {
     return false;
   }
 
   /**
    * Always returns {@code false} because {@code UndefinedRepr}
-   * is not  definite value.
+   * is not a distinct value.
    */
   @Override
-  public boolean isDefinite() {
+  public boolean isDistinct() {
     return false;
   }
 
@@ -129,8 +128,7 @@ public final class UndefinedRepr implements Repr, ToSource {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UndefinedRepr) {
-      final UndefinedRepr that = (UndefinedRepr) other;
+    } else if (other instanceof UndefinedRepr that) {
       return this.attrs.equals(that.attrs);
     }
     return false;
@@ -157,7 +155,7 @@ public final class UndefinedRepr implements Repr, ToSource {
     return this.toSource();
   }
 
-  private static final UndefinedRepr UNDEFINED = new UndefinedRepr(Attrs.empty());
+  static final UndefinedRepr UNDEFINED = new UndefinedRepr(Attrs.empty());
 
   public static UndefinedRepr undefined() {
     return UNDEFINED;

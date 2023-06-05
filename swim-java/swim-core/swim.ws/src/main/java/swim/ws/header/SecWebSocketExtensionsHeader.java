@@ -88,7 +88,7 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
     return SecWebSocketExtensionsHeader.of(NAME, value);
   }
 
-  private static FingerTrieList<WsExtension> parseValue(String value) throws HttpException {
+  static FingerTrieList<WsExtension> parseValue(String value) throws HttpException {
     final StringInput input = new StringInput(value);
     int c = 0;
     FingerTrieList<WsExtension> extensions = FingerTrieList.empty();
@@ -136,7 +136,7 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
     return extensions;
   }
 
-  private static String writeValue(Iterator<WsExtension> extensions) {
+  static String writeValue(Iterator<WsExtension> extensions) {
     final StringOutput output = new StringOutput();
     WsExtension extension = null;
     do {

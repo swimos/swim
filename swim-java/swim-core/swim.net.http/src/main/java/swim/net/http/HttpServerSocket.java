@@ -294,11 +294,10 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
         handler.doRead();
         // Start handling the next request, if the current request handler changed.
         final HttpServerResponder nextHandler = this.requester();
-        if (handler != nextHandler) {
-          handler = nextHandler;
-        } else {
+        if (handler == nextHandler) {
           break;
         }
+        handler = nextHandler;
       }
 
       if (this.isDoneReading()) {
@@ -335,16 +334,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke willReadRequest server callback.
       this.server.willReadRequest(handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("willReadRequest callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willReadRequest callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willReadRequest callback failed", this.server, cause);
     }
   }
 
@@ -353,16 +348,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke willReadRequestMessage server callback.
       this.server.willReadRequestMessage(handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("willReadRequestMessage callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willReadRequestMessage callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willReadRequestMessage callback failed", this.server, cause);
     }
   }
 
@@ -371,16 +362,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke didReadRequestMessage server callback.
       this.server.didReadRequestMessage(requestResult, handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("didReadRequestMessage callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("didReadRequestMessage callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didReadRequestMessage callback failed", this.server, cause);
     }
   }
 
@@ -389,16 +376,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke willReadRequestPayload server callback.
       this.server.willReadRequestPayload(request, handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("willReadRequestPayload callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willReadRequestPayload callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willReadRequestPayload callback failed", this.server, cause);
     }
   }
 
@@ -407,16 +390,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke didReadRequestPayload server callback.
       this.server.didReadRequestPayload(requestResult, handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("didReadRequestPayload callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("didReadRequestPayload callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didReadRequestPayload callback failed", this.server, cause);
     }
   }
 
@@ -425,16 +404,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke didReadRequest server callback.
       this.server.didReadRequest(requestResult, handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("didReadRequest callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("didReadRequest callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didReadRequest callback failed", this.server, cause);
     }
   }
 
@@ -458,14 +433,14 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
     do {
       // Try to atomically acquire the head of the responder queue.
       final HttpServerResponder handler = (HttpServerResponder) RESPONDER_ARRAY.getAcquire(this.responders, readIndex);
-      if (handler != null) {
-        // Return the current response handler.
-        return handler;
-      } else {
+      if (handler == null) {
         // A new current response handle is concurrently being enqueued;
         // spin and try again.
         Thread.onSpinWait();
+        continue;
       }
+      // Return the current response handler.
+      return handler;
     } while (true);
   }
 
@@ -481,14 +456,16 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
         return false;
       }
       writeIndex = (int) RESPONDER_WRITE_INDEX.compareAndExchangeAcquire(this, oldWriteIndex, newWriteIndex);
-      if (writeIndex == oldWriteIndex) {
-        // Successfully acquired a slot in the responder queue;
-        // release the response handler into the queue.
-        RESPONDER_ARRAY.setRelease(this.responders, oldWriteIndex, handler);
-        // Responders aren't ready to write when first enqueued; the response
-        // will begin after the request message has been received.
-        return true;
+      if (writeIndex != oldWriteIndex) {
+        // CAS failed; try again.
+        continue;
       }
+      // Successfully acquired a slot in the responder queue;
+      // release the response handler into the queue.
+      RESPONDER_ARRAY.setRelease(this.responders, oldWriteIndex, handler);
+      // Responders aren't ready to write when first enqueued; the response
+      // will begin after the request message has been received.
+      return true;
     } while (true);
   }
 
@@ -567,11 +544,10 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
         handler.doWrite();
         // Start handling the next response, if the current response handler changed.
         final HttpServerResponder nextResponder = this.responder();
-        if (handler != nextResponder) {
-          handler = nextResponder;
-        } else {
+        if (handler == nextResponder) {
           break;
         }
+        handler = nextResponder;
       }
 
       // Prepare to transfer data from the write buffer to the socket.
@@ -609,16 +585,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke willWriteResponse server callback.
       this.server.willWriteResponse(handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("willWriteResponse callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willWriteResponse callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willWriteResponse callback failed", this.server, cause);
     }
   }
 
@@ -627,16 +599,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke willWriteResponseMessage server callback.
       this.server.willWriteResponseMessage(handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("willWriteResponseMessage callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willWriteResponseMessage callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willWriteResponseMessage callback failed", this.server, cause);
     }
   }
 
@@ -645,16 +613,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke didWriteResponseMessage server callback.
       this.server.didWriteResponseMessage(responseResult, handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("didWriteResponseMessage callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("didWriteResponseMessage callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didWriteResponseMessage callback failed", this.server, cause);
     }
   }
 
@@ -663,16 +627,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke willWriteResponsePayload server callback.
       this.server.willWriteResponsePayload(response, handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("willWriteResponsePayload callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("willWriteResponsePayload callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("willWriteResponsePayload callback failed", this.server, cause);
     }
   }
 
@@ -681,16 +641,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke didWriteResponsePayload server callback.
       this.server.didWriteResponsePayload(responseResult, handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("didWriteResponsePayload callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("didWriteResponsePayload callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didWriteResponsePayload callback failed", this.server, cause);
     }
   }
 
@@ -699,16 +655,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke didWriteResponse server callback.
       this.server.didWriteResponse(responseResult, handler);
     } catch (HttpException cause) {
-      // Report the exception.
       this.log.warningStatus("didWriteResponse callback failed", this.server, cause);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorStatus("didWriteResponse callback failed", this.server, cause);
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorStatus("didWriteResponse callback failed", this.server, cause);
     }
   }
 
@@ -717,15 +669,12 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       // Invoke handleServerError delegate.
       this.server.handleServerError(error, handler);
     } catch (Throwable cause) {
-      if (Result.isNonFatal(cause)) {
-        // Report the non-fatal exception.
-        this.log.errorEntity("handleServerError delegate failed", this.server, cause);
-        // Last ditch attempt to write an error response.
-        handler.writeResponse(HttpResponse.error(error));
-      } else {
-        // Rethrow the fatal exception.
+      if (Result.isFatal(cause)) {
         throw cause;
       }
+      this.log.errorEntity("handleServerError delegate failed", this.server, cause);
+      // Last ditch attempt to write an error response.
+      handler.writeResponse(HttpResponse.error(error));
     }
   }
 
@@ -764,19 +713,17 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       final int oldStatus = status;
       final int newStatus = status | READ_DONE;
       status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        status = newStatus;
-        if ((oldStatus & READ_DONE) == 0) {
-          // Trigger a read to close the socket for reading.
-          this.triggerRead();
-          return true;
-        } else {
-          return false;
-        }
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      status = newStatus;
+      if ((oldStatus & READ_DONE) != 0) {
+        return false;
+      }
+      // Trigger a read to close the socket for reading.
+      this.triggerRead();
+      return true;
     } while (true);
   }
 
@@ -792,19 +739,17 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
       final int oldStatus = status;
       final int newStatus = status | WRITE_DONE;
       status = (int) STATUS.compareAndExchangeRelease(this, oldStatus, newStatus);
-      if (status == oldStatus) {
-        status = newStatus;
-        if ((oldStatus & WRITE_DONE) == 0) {
-          // Trigger a write to close the socket for writing.
-          this.triggerWrite();
-          return true;
-        } else {
-          return false;
-        }
-      } else {
+      if (status != oldStatus) {
         // CAS failed; try again.
         continue;
       }
+      status = newStatus;
+      if ((oldStatus & WRITE_DONE) != 0) {
+        return false;
+      }
+      // Trigger a write to close the socket for writing.
+      this.triggerWrite();
+      return true;
     } while (true);
   }
 
@@ -852,8 +797,7 @@ public class HttpServerSocket implements NetSocket, FlowContext, HttpServerConte
   static final VarHandle REQUESTER;
 
   /**
-   * {@code VarHandle} for atomically accessing elements of an
-   * {@link HttpSercerResponder} array.
+   * {@code VarHandle} for atomically accessing elements of an {@link HttpSercerResponder} array.
    */
   static final VarHandle RESPONDER_ARRAY;
 

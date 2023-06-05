@@ -90,8 +90,7 @@ public final class HttpCookieState implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof HttpCookieState) {
-      final HttpCookieState that = (HttpCookieState) other;
+    } else if (other instanceof HttpCookieState that) {
       return this.name.equals(that.name) && this.value.equals(that.value)
           && this.params.equals(that.params);
     }

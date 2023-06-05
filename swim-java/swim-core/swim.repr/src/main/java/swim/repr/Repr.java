@@ -14,12 +14,11 @@
 
 package swim.repr;
 
-import java.lang.reflect.Type;
 import java.math.BigInteger;
 import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.expr.Term;
+import swim.term.Term;
 
 @Public
 @Since("5.0")
@@ -27,26 +26,27 @@ public interface Repr extends Term {
 
   /**
    * Returns {@code true} if this {@code Repr} is not an
-   * {@link UndefinedRepr}.
+   * {@code UndefinedRepr}.
    */
   default boolean isDefined() {
     return true;
   }
 
   /**
-   * Returns {@code true} if this {@code Repr} is neither a
-   * {@link UnitRepr} nor an {@link UndefinedRepr}.
+   * Returns {@code true} if this {@code Repr} is neither an
+   * {@code UndefinedRepr} nor a {@code UnitRepr}.
    */
-  default boolean isDistinct() {
+  default boolean isDefinite() {
     return true;
   }
 
   /**
    * Returns {@code true} if this {@code Repr} is not one of:
-   * an empty {@code Block}, {@code False}, {@code UnitRepr},
-   * or {@code UndefinedRepr}.
+   * {@code UndefinedRepr}, {@code UnitRepr}, a false {@code BooleanRepr},
+   * or an empty {@code BlobRepr}, {@code ArrayRepr}, {@code ObjectRepr},
+   * or {@code TupleRepr}.
    */
-  default boolean isDefinite() {
+  default boolean isDistinct() {
     return true;
   }
 
@@ -204,10 +204,6 @@ public interface Repr extends Term {
   @Override
   Repr commit();
 
-  static ReprRegistry registry() {
-    return ReprRegistry.REGISTRY;
-  }
-
   static Repr unit() {
     return UnitRepr.unit();
   }
@@ -249,11 +245,10 @@ public interface Repr extends Term {
   }
 
   static Repr of(@Nullable String value) {
-    if (value != null) {
-      return StringRepr.of(value);
-    } else {
+    if (value == null) {
       return UnitRepr.unit();
     }
+    return StringRepr.of(value);
   }
 
   static Repr from(@Nullable Object value) throws ReprException {
@@ -263,17 +258,12 @@ public interface Repr extends Term {
       return (Repr) value;
     } else if (value instanceof Term) {
       return TermRepr.of((Term) value);
-    } else {
-      return Repr.registry().intoRepr(value);
     }
+    return Repr.registry().intoRepr(value);
   }
 
-  static <T> ReprForm<T> form(Type javaType) throws ReprFormException {
-    return Repr.registry().getReprForm(javaType);
-  }
-
-  static <T> ReprForm<T> form(@Nullable T value) throws ReprFormException {
-    return Repr.registry().getReprForm(value);
+  static ReprRegistry registry() {
+    return ReprRegistry.REGISTRY;
   }
 
 }

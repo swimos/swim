@@ -43,8 +43,8 @@ public class HttpServerTests {
 
       @Override
       public void willWriteResponse() {
-        final HttpBody<String> payload = HttpBody.of("Hello, world!\n", Text.transcoder());
-        //final HttpChunked<String> payload = HttpChunked.of("Hello, world!\n", Text.transcoder());
+        final HttpBody<String> payload = HttpBody.of("Hello, world!\n", Text.stringCodec());
+        //final HttpChunked<String> payload = HttpChunked.of("Hello, world!\n", Text.stringCodec());
         final HttpResponse<String> response = HttpResponse.of(HttpStatus.OK, payload.headers(), payload);
         this.writeResponse(response);
       }

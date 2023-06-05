@@ -67,21 +67,19 @@ final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
   UriMapper<T> getSuffix(UriScheme scheme, UriAuthority authority, UriPath path,
                          UriQuery query, UriFragment fragment) {
     final UriAuthorityMapper<T> mapping = this.table.get(scheme.name());
-    if (mapping != null) {
-      return mapping.getSuffix(authority, path, query, fragment);
-    } else {
+    if (mapping == null) {
       return UriMapper.empty();
     }
+    return mapping.getSuffix(authority, path, query, fragment);
   }
 
   @Override
   @Nullable T get(UriScheme scheme, UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
     final UriAuthorityMapper<T> mapping = this.table.get(scheme.name());
-    if (mapping != null) {
-      return mapping.get(authority, path, query, fragment);
-    } else {
+    if (mapping == null) {
       return null;
     }
+    return mapping.get(authority, path, query, fragment);
   }
 
   UriSchemeMapping<T> merged(UriSchemeMapping<T> that) {
@@ -105,26 +103,24 @@ final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
   UriSchemeMapper<T> merged(UriSchemeMapper<T> that) {
     if (that instanceof UriSchemeMapping<?>) {
       return this.merged((UriSchemeMapping<T>) that);
-    } else {
-      return that;
     }
+    return that;
   }
 
   @Override
   UriSchemeMapper<T> removed(UriScheme scheme, UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
     final String schemeName = scheme.name();
     final UriAuthorityMapper<T> oldMapping = this.table.get(schemeName);
-    if (oldMapping != null) {
-      final UriAuthorityMapper<T> newMapping = oldMapping.removed(authority, path, query, fragment);
-      if (oldMapping != newMapping) {
-        if (!oldMapping.isEmpty()) {
-          return new UriSchemeMapping<T>(this.table.updated(schemeName, newMapping));
-        } else {
-          return Assume.conforms(UriMapper.empty());
-        }
-      }
+    if (oldMapping == null) {
+      return this;
     }
-    return this;
+    final UriAuthorityMapper<T> newMapping = oldMapping.removed(authority, path, query, fragment);
+    if (oldMapping == newMapping) {
+      return this;
+    } else if (oldMapping.isEmpty()) {
+      return Assume.conforms(UriMapper.empty());
+    }
+    return new UriSchemeMapping<T>(this.table.updated(schemeName, newMapping));
   }
 
   UriSchemeMapper<T> unmerged(UriSchemeMapping<T> that) {
@@ -134,29 +130,28 @@ final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
       final Map.Entry<String, UriAuthorityMapper<T>> route = routes.next();
       final String schemeName = route.getKey();
       UriAuthorityMapper<T> mapping = table.get(schemeName);
-      if (mapping != null) {
-        mapping = mapping.unmerged(route.getValue());
-        if (!mapping.isEmpty()) {
-          table = table.updated(schemeName, mapping);
-        } else {
-          table = table.removed(schemeName);
-        }
+      if (mapping == null) {
+        continue;
+      }
+      mapping = mapping.unmerged(route.getValue());
+      if (!mapping.isEmpty()) {
+        table = table.updated(schemeName, mapping);
+      } else {
+        table = table.removed(schemeName);
       }
     }
-    if (!table.isEmpty()) {
-      return new UriSchemeMapping<T>(table);
-    } else {
+    if (table.isEmpty()) {
       return Assume.conforms(UriMapper.empty());
     }
+    return new UriSchemeMapping<T>(table);
   }
 
   @Override
   UriSchemeMapper<T> unmerged(UriSchemeMapper<T> that) {
     if (that instanceof UriSchemeMapping<?>) {
       return this.unmerged((UriSchemeMapping<T>) that);
-    } else {
-      return this;
     }
+    return this;
   }
 
   @Override
@@ -178,8 +173,7 @@ final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof UriSchemeMapping<?>) {
-      final UriSchemeMapping<?> that = (UriSchemeMapping<?>) other;
+    } else if (other instanceof UriSchemeMapping<?> that) {
       return this.table.equals(that.table);
     }
     return false;

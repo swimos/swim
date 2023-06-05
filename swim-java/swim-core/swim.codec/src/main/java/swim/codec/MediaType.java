@@ -106,8 +106,7 @@ public final class MediaType implements ToSource, ToString {
   public boolean equals(@Nullable Object other) {
     if (this == other) {
       return true;
-    } else if (other instanceof MediaType) {
-      final MediaType that = (MediaType) other;
+    } else if (other instanceof MediaType that) {
       return this.type.equals(that.type) && this.subtype.equals(that.subtype)
           && this.params.equals(that.params);
     }
@@ -125,15 +124,15 @@ public final class MediaType implements ToSource, ToString {
   @Override
   public void writeSource(Appendable output) {
     final Notation notation = Notation.from(output);
-    notation.beginInvoke("MediaType", "of");
-    notation.appendArgument(this.type);
-    notation.appendArgument(this.subtype);
-    notation.endInvoke();
+    notation.beginInvoke("MediaType", "of")
+            .appendArgument(this.type)
+            .appendArgument(this.subtype)
+            .endInvoke();
     for (Map.Entry<String, String> param : this.params) {
-      notation.beginInvoke("withParam");
-      notation.appendArgument(param.getKey());
-      notation.appendArgument(param.getValue());
-      notation.endInvoke();
+      notation.beginInvoke("withParam")
+              .appendArgument(param.getKey())
+              .appendArgument(param.getValue())
+              .endInvoke();
     }
   }
 
@@ -184,7 +183,7 @@ public final class MediaType implements ToSource, ToString {
     return parseMediaType;
   }
 
-  private static @Nullable CacheMap<String, Parse<MediaType>> cache;
+  static @Nullable CacheMap<String, Parse<MediaType>> cache;
 
   static CacheMap<String, Parse<MediaType>> cache() {
     if (MediaType.cache == null) {

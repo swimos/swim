@@ -165,9 +165,8 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
                                   this.branchMap2, this.branchMap3,
                                   newSize, this.flags | DEFINED_FLAG,
                                   this.branches, prefix, value);
-    } else {
-      return this;
     }
+    return this;
   }
 
   @Override
@@ -189,8 +188,6 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
         } else {
           return this.updatedBranch(c, newBranch);
         }
-      } else {
-        return this;
       }
     } else if (this.isDefined()) {
       final int newSize = this.size - 1;
@@ -198,9 +195,8 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
                                   this.branchMap2, this.branchMap3,
                                   newSize, this.flags & ~DEFINED_FLAG,
                                   this.branches, this.prefix, null);
-    } else {
-      return this;
     }
+    return this;
   }
 
   public @Nullable StringTrieMap<V> getSuffix(String prefix) {
@@ -219,23 +215,17 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
     if (x < 64) {
       if ((this.branchMap0 & (1L << x)) != 0L) {
         return Long.bitCount(this.branchMap0 & ((1L << x) - 1L));
-      } else {
-        return -1;
       }
     } else if (x < 128) {
       if ((this.branchMap1 & (1L << (x - 64))) != 0L) {
         return Long.bitCount(this.branchMap0)
              + Long.bitCount(this.branchMap1 & ((1L << (x - 64)) - 1L));
-      } else {
-        return -1;
       }
     } else if (x < 192) {
       if ((this.branchMap2 & (1L << (x - 128))) != 0L) {
         return Long.bitCount(this.branchMap0)
              + Long.bitCount(this.branchMap1)
              + Long.bitCount(this.branchMap2 & ((1L << (x - 128)) - 1L));
-      } else {
-        return -1;
       }
     } else {
       if ((this.branchMap3 & (1L << (x - 192))) != 0L) {
@@ -243,10 +233,9 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
              + Long.bitCount(this.branchMap1)
              + Long.bitCount(this.branchMap2)
              + Long.bitCount(this.branchMap3 & ((1L << (x - 192)) - 1L));
-      } else {
-        return -1;
       }
     }
+    return -1;
   }
 
   public @Nullable StringTrieMap<V> getBranch(byte b) {
@@ -421,21 +410,20 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
       final StringTrieMap<V> oldBranch = oldBranches[oldBranchIndex];
       if (oldBranch == newBranch) {
         return this;
-      } else {
-        final int branchCount = oldBranches.length;
-        final StringTrieMap<V>[] newBranches =
-            Assume.conforms(new StringTrieMap<?>[branchCount]);
-        int newSize = this.isDefined() ? 1 : 0;
-        for (int i = 0; i < branchCount; i += 1) {
-          final StringTrieMap<V> branch = i != oldBranchIndex ? oldBranches[i] : newBranch;
-          newBranches[i] = branch;
-          newSize += branch.size;
-        }
-        return new StringTrieMap<V>(this.branchMap0, this.branchMap1,
-                                    this.branchMap2, this.branchMap3,
-                                    newSize, this.flags, newBranches,
-                                    this.prefix, this.value);
       }
+      final int branchCount = oldBranches.length;
+      final StringTrieMap<V>[] newBranches =
+          Assume.conforms(new StringTrieMap<?>[branchCount]);
+      int newSize = this.isDefined() ? 1 : 0;
+      for (int i = 0; i < branchCount; i += 1) {
+        final StringTrieMap<V> branch = i != oldBranchIndex ? oldBranches[i] : newBranch;
+        newBranches[i] = branch;
+        newSize += branch.size;
+      }
+      return new StringTrieMap<V>(this.branchMap0, this.branchMap1,
+                                  this.branchMap2, this.branchMap3,
+                                  newSize, this.flags, newBranches,
+                                  this.prefix, this.value);
     }
   }
 
@@ -495,97 +483,96 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
 
   public StringTrieMap<V> removedBranch(byte b) {
     final int oldBranchIndex = this.getBranchIndex(b);
-    if (oldBranchIndex < 0) { // absent
+    if (oldBranchIndex < 0) {
       return this;
-    } else { // remove
-      long branchMap0 = this.branchMap0;
-      long branchMap1 = this.branchMap1;
-      long branchMap2 = this.branchMap2;
-      long branchMap3 = this.branchMap3;
-      long oldBranchMap0 = this.branchMap0;
-      long oldBranchMap1 = this.branchMap1;
-      long oldBranchMap2 = this.branchMap2;
-      long oldBranchMap3 = this.branchMap3;
-      final int x = b & 0xFF;
-      if (x < 64) {
-        branchMap0 ^= 1L << x;
-      } else if (x < 128) {
-        branchMap1 ^= 1L << (x - 64);
-      } else if (x < 192) {
-        branchMap2 ^= 1L << (x - 128);
-      } else {
-        branchMap3 ^= 1L << (x - 192);
-      }
-      long newBranchMap0 = branchMap0;
-      long newBranchMap1 = branchMap1;
-      long newBranchMap2 = branchMap2;
-      long newBranchMap3 = branchMap3;
-      final StringTrieMap<V>[] oldBranches = this.branches;
-      final StringTrieMap<V>[] newBranches =
-          Assume.conforms(new StringTrieMap<?>[Long.bitCount(branchMap0)
-                                             + Long.bitCount(branchMap1)
-                                             + Long.bitCount(branchMap2)
-                                             + Long.bitCount(branchMap3)]);
-      int i = 0;
-      int j = 0;
-      final int newSize = this.isDefined() ? 1 : 0;
-      while (newBranchMap0 != 0) {
-        if (((oldBranchMap0 & newBranchMap0) & 1) != 0) {
-          newBranches[j] = oldBranches[i];
-          i += 1;
-          j += 1;
-        } else if ((oldBranchMap0 & 1) != 0) {
-          i += 1;
-        } else {
-          assert (newBranchMap0 & 1) == 0;
-        }
-        oldBranchMap0 >>>= 1;
-        newBranchMap0 >>>= 1;
-      }
-      while (newBranchMap1 != 0) {
-        if (((oldBranchMap1 & newBranchMap1) & 1) != 0) {
-          newBranches[j] = oldBranches[i];
-          i += 1;
-          j += 1;
-        } else if ((oldBranchMap1 & 1) != 0) {
-          i += 1;
-        } else {
-          assert (newBranchMap0 & 1) == 0;
-        }
-        oldBranchMap1 >>>= 1;
-        newBranchMap1 >>>= 1;
-      }
-      while (newBranchMap2 != 0) {
-        if (((oldBranchMap2 & newBranchMap2) & 1) != 0) {
-          newBranches[j] = oldBranches[i];
-          i += 1;
-          j += 1;
-        } else if ((oldBranchMap2 & 1) != 0) {
-          i += 1;
-        } else {
-          assert (newBranchMap0 & 1) == 0;
-        }
-        oldBranchMap2 >>>= 1;
-        newBranchMap2 >>>= 1;
-      }
-      while (newBranchMap3 != 0) {
-        if (((oldBranchMap3 & newBranchMap3) & 1) != 0) {
-          newBranches[j] = oldBranches[i];
-          i += 1;
-          j += 1;
-        } else if ((oldBranchMap3 & 1) != 0) {
-          i += 1;
-        } else {
-          assert (newBranchMap0 & 1) == 0;
-        }
-        oldBranchMap3 >>>= 1;
-        newBranchMap3 >>>= 1;
-      }
-      return new StringTrieMap<V>(branchMap0, branchMap1,
-                                  branchMap2, branchMap3,
-                                  newSize, this.flags, newBranches,
-                                  this.prefix, this.value);
     }
+    long branchMap0 = this.branchMap0;
+    long branchMap1 = this.branchMap1;
+    long branchMap2 = this.branchMap2;
+    long branchMap3 = this.branchMap3;
+    long oldBranchMap0 = this.branchMap0;
+    long oldBranchMap1 = this.branchMap1;
+    long oldBranchMap2 = this.branchMap2;
+    long oldBranchMap3 = this.branchMap3;
+    final int x = b & 0xFF;
+    if (x < 64) {
+      branchMap0 ^= 1L << x;
+    } else if (x < 128) {
+      branchMap1 ^= 1L << (x - 64);
+    } else if (x < 192) {
+      branchMap2 ^= 1L << (x - 128);
+    } else {
+      branchMap3 ^= 1L << (x - 192);
+    }
+    long newBranchMap0 = branchMap0;
+    long newBranchMap1 = branchMap1;
+    long newBranchMap2 = branchMap2;
+    long newBranchMap3 = branchMap3;
+    final StringTrieMap<V>[] oldBranches = this.branches;
+    final StringTrieMap<V>[] newBranches =
+        Assume.conforms(new StringTrieMap<?>[Long.bitCount(branchMap0)
+                                           + Long.bitCount(branchMap1)
+                                           + Long.bitCount(branchMap2)
+                                           + Long.bitCount(branchMap3)]);
+    int i = 0;
+    int j = 0;
+    final int newSize = this.isDefined() ? 1 : 0;
+    while (newBranchMap0 != 0) {
+      if (((oldBranchMap0 & newBranchMap0) & 1) != 0) {
+        newBranches[j] = oldBranches[i];
+        i += 1;
+        j += 1;
+      } else if ((oldBranchMap0 & 1) != 0) {
+        i += 1;
+      } else {
+        assert (newBranchMap0 & 1) == 0;
+      }
+      oldBranchMap0 >>>= 1;
+      newBranchMap0 >>>= 1;
+    }
+    while (newBranchMap1 != 0) {
+      if (((oldBranchMap1 & newBranchMap1) & 1) != 0) {
+        newBranches[j] = oldBranches[i];
+        i += 1;
+        j += 1;
+      } else if ((oldBranchMap1 & 1) != 0) {
+        i += 1;
+      } else {
+        assert (newBranchMap0 & 1) == 0;
+      }
+      oldBranchMap1 >>>= 1;
+      newBranchMap1 >>>= 1;
+    }
+    while (newBranchMap2 != 0) {
+      if (((oldBranchMap2 & newBranchMap2) & 1) != 0) {
+        newBranches[j] = oldBranches[i];
+        i += 1;
+        j += 1;
+      } else if ((oldBranchMap2 & 1) != 0) {
+        i += 1;
+      } else {
+        assert (newBranchMap0 & 1) == 0;
+      }
+      oldBranchMap2 >>>= 1;
+      newBranchMap2 >>>= 1;
+    }
+    while (newBranchMap3 != 0) {
+      if (((oldBranchMap3 & newBranchMap3) & 1) != 0) {
+        newBranches[j] = oldBranches[i];
+        i += 1;
+        j += 1;
+      } else if ((oldBranchMap3 & 1) != 0) {
+        i += 1;
+      } else {
+        assert (newBranchMap0 & 1) == 0;
+      }
+      oldBranchMap3 >>>= 1;
+      newBranchMap3 >>>= 1;
+    }
+    return new StringTrieMap<V>(branchMap0, branchMap1,
+                                branchMap2, branchMap3,
+                                newSize, this.flags, newBranches,
+                                this.prefix, this.value);
   }
 
   public StringTrieMap<V> removedBranch(int c) {

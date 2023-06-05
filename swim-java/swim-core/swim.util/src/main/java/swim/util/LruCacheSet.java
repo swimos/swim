@@ -63,14 +63,13 @@ public class LruCacheSet<T> extends CacheSet<T> implements ToMarkup {
   @Override
   public synchronized @Nullable T get(T value) {
     final LruCacheSetEntry<T> entry = this.getEntry(Objects.hashCode(value), value);
-    if (entry != null) {
-      if (entry.prev != null) {
-        this.detachEntry(entry);
-        this.enqueueEntry(entry);
-      }
-      return entry.value;
+    if (entry == null) {
+      return null;
+    } else if (entry.prev != null) {
+      this.detachEntry(entry);
+      this.enqueueEntry(entry);
     }
-    return null;
+    return entry.value;
   }
 
   @Override
@@ -102,11 +101,12 @@ public class LruCacheSet<T> extends CacheSet<T> implements ToMarkup {
   @Override
   public synchronized @Nullable T remove(T value) {
     final LruCacheSetEntry<T> entry = this.removeEntry(Objects.hashCode(value), value);
-    if (entry != null) {
-      this.detachEntry(entry);
-      this.size -= 1;
+    if (entry == null) {
+      return null;
     }
-    return null;
+    this.detachEntry(entry);
+    this.size -= 1;
+    return entry.value;
   }
 
   final @Nullable LruCacheSetEntry<T> getEntry(int hash, T value) {
@@ -125,61 +125,52 @@ public class LruCacheSet<T> extends CacheSet<T> implements ToMarkup {
     final LruCacheSetEntry<T>[] table = this.table;
     final int index = Math.abs(entry.hash % table.length);
     LruCacheSetEntry<T> bucket = table[index];
-    if (bucket != null) {
-      if (Objects.equals(entry.value, bucket.value)) {
-        entry.nextCollision = bucket.nextCollision;
-        table[index] = bucket;
-      } else {
-        LruCacheSetEntry<T> prev = bucket;
-        do {
-          bucket = prev.nextCollision;
-          if (bucket != null) {
-            if (Objects.equals(entry.value, bucket.value)) {
-              entry.nextCollision = bucket.nextCollision;
-              prev.nextCollision = entry;
-              break;
-            } else {
-              prev = bucket;
-            }
-          } else {
-            prev.nextCollision = entry;
-            break;
-          }
-        } while (true);
-      }
-    } else {
+    if (bucket == null) {
       table[index] = entry;
+      return;
+    } else if (Objects.equals(entry.value, bucket.value)) {
+      entry.nextCollision = bucket.nextCollision;
+      table[index] = bucket;
+      return;
     }
+    LruCacheSetEntry<T> prev = bucket;
+    do {
+      bucket = prev.nextCollision;
+      if (bucket == null) {
+        prev.nextCollision = entry;
+        return;
+      } else if (Objects.equals(entry.value, bucket.value)) {
+        entry.nextCollision = bucket.nextCollision;
+        prev.nextCollision = entry;
+        return;
+      }
+      prev = bucket;
+    } while (true);
   }
 
   final @Nullable LruCacheSetEntry<T> removeEntry(int hash, T value) {
     final LruCacheSetEntry<T>[] table = this.table;
     final int index = Math.abs(hash % table.length);
     LruCacheSetEntry<T> bucket = table[index];
-    if (bucket != null) {
-      if (Objects.equals(value, bucket.value)) {
-        table[index] = bucket.nextCollision;
+    if (bucket == null) {
+      return null;
+    } else if (Objects.equals(value, bucket.value)) {
+      table[index] = bucket.nextCollision;
+      bucket.nextCollision = null;
+      return bucket;
+    }
+    LruCacheSetEntry<T> prev = bucket;
+    do {
+      bucket = prev.nextCollision;
+      if (bucket == null) {
+        return null;
+      } else if (Objects.equals(value, bucket.value)) {
+        prev.nextCollision = bucket.nextCollision;
         bucket.nextCollision = null;
         return bucket;
-      } else {
-        LruCacheSetEntry<T> prev = bucket;
-        do {
-          bucket = prev.nextCollision;
-          if (bucket != null) {
-            if (Objects.equals(value, bucket.value)) {
-              prev.nextCollision = bucket.nextCollision;
-              bucket.nextCollision = null;
-              return bucket;
-            } else {
-              prev = bucket;
-            }
-          } else {
-            break;
-          }
-        } while (true);
       }
-    }
-    return null;
+      prev = bucket;
+    } while (true);
   }
 
   final void enqueueEntry(LruCacheSetEntry<T> entry) {
@@ -228,17 +219,17 @@ public class LruCacheSet<T> extends CacheSet<T> implements ToMarkup {
   public synchronized void writeMarkup(Appendable output) {
     final Notation notation = Notation.from(output);
     if (notation.options().verbose()) {
-      notation.beginObject("LruCacheSet");
-      notation.appendField("capacity", this.capacity);
-      notation.appendField("size", this.size);
+      notation.beginObject("LruCacheSet")
+              .appendField("capacity", this.capacity)
+              .appendField("size", this.size);
       if (this.head != null) {
         notation.appendField("headValue", this.head.value);
       }
       if (this.foot != null) {
         notation.appendField("footValue", this.foot.value);
       }
-      notation.appendField("table", this.table);
-      notation.endObject();
+      notation.appendField("table", this.table)
+              .endObject();
     } else {
       notation.beginArray("LruCacheSet");
       LruCacheSetEntry<T> entry = this.head;
@@ -287,9 +278,9 @@ final class LruCacheSetEntry<T> implements ToMarkup {
   public void writeMarkup(Appendable output) {
     final Notation notation = Notation.from(output);
     if (notation.options().verbose()) {
-      notation.beginObject();
-      notation.appendField("hash", this.hash);
-      notation.appendField("value", this.value);
+      notation.beginObject()
+              .appendField("hash", this.hash)
+              .appendField("value", this.value);
       if (this.prev != null) {
         notation.appendField("prevValue", this.prev.value);
       }

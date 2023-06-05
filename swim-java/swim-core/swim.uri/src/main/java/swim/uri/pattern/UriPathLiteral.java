@@ -52,20 +52,18 @@ final class UriPathLiteral extends UriPathPattern {
   @Override
   Map<String, String> unapply(UriPath path, UriQuery query, UriFragment fragment,
                               Map<String, String> args) {
-    if (!path.isEmpty() && this.component.equals(path.head())) {
-      return this.rest.unapply(path.tail(), query, fragment, args);
-    } else {
+    if (path.isEmpty() || !this.component.equals(path.head())) {
       return args;
     }
+    return this.rest.unapply(path.tail(), query, fragment, args);
   }
 
   @Override
   boolean matches(UriPath path, UriQuery query, UriFragment fragment) {
-    if (!path.isEmpty() && this.component.equals(path.head())) {
-      return this.rest.matches(path.tail(), query, fragment);
-    } else {
+    if (path.isEmpty() || !this.component.equals(path.head())) {
       return false;
     }
+    return this.rest.matches(path.tail(), query, fragment);
   }
 
 }
