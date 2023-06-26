@@ -42,9 +42,11 @@ pipeline {
                 stage('js') {
                     steps {
                         container('node') {
-                            sh 'npm install'
-                            sh 'npm run bootstrap'
-                            sh 'npx swim-build'
+                            dir('swim-js') {
+                                sh 'npm install'
+                                sh 'npm run bootstrap'
+                                sh 'npx swim-build'
+                            }
                         }
                     }
                 }
