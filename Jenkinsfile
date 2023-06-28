@@ -22,6 +22,10 @@ pipeline {
         }
     }
 
+    environment {
+        NO_COLOR = "false"
+    }
+
     stages {
         stage('build') {
             parallel {
@@ -39,17 +43,18 @@ pipeline {
                         }
                     }
                 }
-                stage('js') {
-                    steps {
-                        container('node') {
-                            dir('swim-js') {
-                                sh 'npm install'
-                                sh 'npm run bootstrap'
-                                sh 'npx swim-build'
-                            }
-                        }
-                    }
-                }
+//                stage('js') {
+//                    steps {
+//                        container('node') {
+//                            dir('swim-js') {
+//                                sh 'npm config set color false'
+//                                sh 'npm install'
+//                                sh 'npm run bootstrap'
+//                                sh 'npx swim-build'
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
     }
