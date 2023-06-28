@@ -27,35 +27,32 @@ pipeline {
     }
 
     stages {
-        stage('build') {
-            parallel {
-                stage('java') {
-                    steps {
-                        container('java') {
-                            dir('swim-java') {
-                                sh "./gradlew build"
-                            }
-                        }
-                    }
-                    post {
-                        always {
-                            testNG()
-                        }
+        stage('build-java') {
+            steps {
+                container('java') {
+                    dir('swim-java') {
+                        sh "./gradlew build"
                     }
                 }
-//                stage('js') {
-//                    steps {
-//                        container('node') {
-//                            dir('swim-js') {
-//                                sh 'npm config set color false'
-//                                sh 'npm install'
-//                                sh 'npm run bootstrap'
-//                                sh 'npx swim-build'
-//                            }
-//                        }
-//                    }
-//                }
+            }
+            post {
+                always {
+                    testNG()
+                }
             }
         }
+        stage('js') {
+            steps {
+                container('node') {
+                    dir('swim-js') {
+                        sh 'npm config set color false'
+                        sh 'npm install'
+                        sh 'npm run bootstrap'
+                        sh 'npx swim-build'
+                    }
+                }
+            }
+        }
+        
     }
 }
