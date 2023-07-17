@@ -69,7 +69,7 @@ pipeline {
 """
                     def changelog = gitChangelog(
                             template: template,
-                            github: [api:'https://api.github.com/repos/swimos/swim']
+                            github: [api:'https://api.github.com/repos/swimos/swim'],
                             from: [type: 'COMMIT', value: lastCommit],
                             to: [type: 'COMMIT', value: env.GIT_COMMIT]
                     )
