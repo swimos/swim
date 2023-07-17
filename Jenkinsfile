@@ -29,8 +29,15 @@ pipeline {
     stages {
         stage('release-notes') {
             steps {
+                script {
+                    def lastCommit = "000000"
+                    if(env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
+                        lastCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+                    }
+                }
+
                 sh "echo GIT_COMMIT '${GIT_COMMIT}'"
-                sh "echo GIT_PREVIOUS_SUCCESSFUL_COMMIT '${GIT_PREVIOUS_SUCCESSFUL_COMMIT}'"
+                sh "echo GIT_PREVIOUS_SUCCESSFUL_COMMIT '${lastCommit}'"
 
                 script {
                     def template =
