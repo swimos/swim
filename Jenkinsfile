@@ -53,20 +53,12 @@ pipeline {
 ### {{name}}
   {{/hasIssue}}
 
-  {{#commits}}
-**{{{messageTitle}}}**
 
-{{#messageBodyItems}}
- * {{.}} 
-{{/messageBodyItems}}
-
-[{{hash}}](https://github.com/{{ownerName}}/{{repoName}}/commit/{{hash}}) {{authorName}} *{{commitTime}}*
-
-  {{/commits}}
 
  {{/issues}}
 {{/tags}}
 """
+
                     def changelog = gitChangelog(
                             template: template,
                             github: [api:'https://api.github.com/repos/swimos/swim'],
