@@ -29,20 +29,21 @@ pipeline {
     stages {
         stage('release-notes') {
             steps {
-                def template =
-"""
-
-"""
-
                 sh "echo GIT_COMMIT '${GIT_COMMIT}'"
                 sh "echo GIT_PREVIOUS_SUCCESSFUL_COMMIT '${GIT_PREVIOUS_SUCCESSFUL_COMMIT}'"
 
+                script {
+                    def template =
+                            """
 
+"""
 //                def changelog = gitChangelog(
 //                        template: template
 //                        from: [type: 'COMMIT', value:  ]
 //                        to: []
 //                )
+                }
+
             }
         }
 
