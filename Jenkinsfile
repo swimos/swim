@@ -73,7 +73,7 @@ pipeline {
                             to: [type: 'COMMIT', value: env.GIT_COMMIT]
                     )
 
-                    echo $changelog
+                    echo changelog
                 }
 
 
