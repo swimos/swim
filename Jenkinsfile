@@ -31,11 +31,11 @@ pipeline {
             steps {
                 script {
                     def lastCommit = "0000000000000000000000000000000000000000"
-                    if(env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
+                    if (env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
                         lastCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
                     }
                     def template =
-"""
+                            """
 # Changelog
 
 {{#tags}}
@@ -68,14 +68,13 @@ pipeline {
 {{/tags}}
 """
                     def changelog = gitChangelog(
-                            template: template
-                            from: [type: 'COMMIT', value: lastCommit ]
-                            to: [type: 'COMMIT', value: env.GIT_COMMIT ]
+                            template: template,
+                            from: [type: 'COMMIT', value: lastCommit],
+                            to: [type: 'COMMIT', value: env.GIT_COMMIT]
                     )
 
                     echo $changelog
                 }
-
 
 
             }
