@@ -27,6 +27,25 @@ pipeline {
     }
 
     stages {
+        stage('release-notes') {
+            steps {
+                def template =
+"""
+
+"""
+
+                sh "echo GIT_COMMIT '${GIT_COMMIT}'"
+                sh "echo GIT_PREVIOUS_SUCCESSFUL_COMMIT '${GIT_PREVIOUS_SUCCESSFUL_COMMIT}'"
+
+
+//                def changelog = gitChangelog(
+//                        template: template
+//                        from: [type: 'COMMIT', value:  ]
+//                        to: []
+//                )
+            }
+        }
+
         stage('build-java') {
             steps {
                 container('java') {
@@ -53,6 +72,6 @@ pipeline {
                 }
             }
         }
-        
+
     }
 }
