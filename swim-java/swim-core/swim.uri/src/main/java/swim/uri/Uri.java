@@ -449,14 +449,9 @@ public final class Uri implements Comparable<Uri>, ToSource, ToString {
     return Uri.of(this.scheme, this.authority, this.path.body(), null, null);
   }
 
-  public boolean isRelativeTo(Uri absolute) {
+  public boolean isSubpathOf(Uri absolute) {
     return this.scheme.equals(absolute.scheme) && this.authority.equals(absolute.authority)
-        && this.path.isRelativeTo(absolute.path);
-  }
-
-  public boolean isChildOf(Uri absolute) {
-    return this.scheme.equals(absolute.scheme) && this.authority.equals(absolute.authority)
-        && this.path.isChildOf(absolute.path);
+        && this.path.isSubpathOf(absolute.path);
   }
 
   public Uri resolve(Uri relative) {

@@ -522,10 +522,11 @@ public interface Term {
     return true;
   }
 
+  @SuppressWarnings("UnnecessaryStringBuilder")
   static String toCamelCase(String name) {
     final char c;
     if (name.length() != 0 && Character.isUpperCase(c = name.charAt(0))) {
-      name = new StringBuilder(name.length())
+      name = new StringBuilder(name.length()) // exact string length
                 .append(Character.toLowerCase(c))
                 .append(name.substring(1))
                 .toString();

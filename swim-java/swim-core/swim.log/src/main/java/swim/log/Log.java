@@ -531,9 +531,10 @@ public interface Log {
     return Logger.root().getChild(topic);
   }
 
+  @SuppressWarnings("UnnecessaryStringBuilder")
   static String uniqueId(@Nullable Object object) {
     final int hash = Murmur3.mash(System.identityHashCode(object));
-    return new StringBuilder(4)
+    return new StringBuilder(4) // exact string length
         .append("0123456789ABCDEF".charAt(hash >>> 12 & 0xF))
         .append("0123456789ABCDEF".charAt(hash >>> 8 & 0xF))
         .append("0123456789ABCDEF".charAt(hash >>> 4 & 0xF))
@@ -541,9 +542,10 @@ public interface Log {
         .toString();
   }
 
+  @SuppressWarnings("UnnecessaryStringBuilder")
   static String uniqueFocus(@Nullable Object object) {
     final int hash = Murmur3.mash(System.identityHashCode(object));
-    return new StringBuilder(5)
+    return new StringBuilder(5) // exact string length
         .append('%')
         .append("0123456789ABCDEF".charAt(hash >>> 12 & 0xF))
         .append("0123456789ABCDEF".charAt(hash >>> 8 & 0xF))

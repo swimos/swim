@@ -124,7 +124,7 @@ public class UriResolverTests {
     assertEquals(Uri.parse("/").getNonNull(),
                  Uri.parse("http://a").getNonNull()
                     .unresolve(Uri.parse("http://a/").getNonNull()));
-    assertEquals(Uri.parse("c").getNonNull(),
+    assertEquals(Uri.parse("/c").getNonNull(),
                  Uri.parse("http://a").getNonNull()
                     .unresolve(Uri.parse("http://a/c").getNonNull()));
     assertEquals(Uri.parse("?y").getNonNull(),

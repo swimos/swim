@@ -126,28 +126,16 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     } while (true);
   }
 
-  public boolean isRelativeTo(UriPath b) {
+  public boolean isSubpathOf(UriPath b) {
     UriPath a = this;
     while (!a.isEmpty() && !b.isEmpty()) {
-      if (!a.head().equals(b.head())) {
+      if (a.isRelative() != b.isRelative() || !a.head().equals(b.head())) {
         return false;
       }
       a = a.tail();
       b = b.tail();
     }
     return b.isEmpty();
-  }
-
-  public boolean isChildOf(UriPath b) {
-    UriPath a = this;
-    while (!a.isEmpty() && !b.isEmpty()) {
-      if (!a.head().equals(b.head())) {
-        return false;
-      }
-      a = a.tail();
-      b = b.tail();
-    }
-    return b.isEmpty() && !a.isEmpty() && a.tail().isEmpty();
   }
 
   @Override
@@ -370,13 +358,15 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
   public UriPath unmerge(UriPath that) {
     UriPath base = this;
     UriPath relative = that;
+    if (base.isEmpty()) {
+      return relative;
+    }
     do {
       if (base.isEmpty()) {
-        if (!relative.isEmpty() && !relative.tail().isEmpty()) {
-          return relative.tail();
-        } else {
+        if (relative.isEmpty() || relative.tail().isEmpty()) {
           return relative;
         }
+        return relative.tail();
       } else if (base.isRelative()) {
         return relative;
       } else if (relative.isRelative()) {
@@ -386,7 +376,9 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
       UriPath b = relative.tail();
       if (!a.isEmpty() && b.isEmpty()) {
         return UriPath.slash();
-      } else if (a.isEmpty() || b.isEmpty() || !a.head().equals(b.head())) {
+      } else if (a.isEmpty() || b.isEmpty()
+          || a.isRelative() != b.isRelative()
+          || !a.head().equals(b.head())) {
         return b;
       }
       a = a.tail();

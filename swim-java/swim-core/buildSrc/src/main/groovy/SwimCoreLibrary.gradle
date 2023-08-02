@@ -26,9 +26,6 @@ dependencies {
   errorprone "com.google.errorprone:error_prone_core:$errorproneCoreVersion"
   annotationProcessor "com.uber.nullaway:nullaway:$nullawayVersion"
   testAnnotationProcessor "com.uber.nullaway:nullaway:$nullawayVersion"
-
-  // JUnit
-  testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
 }
 
 tasks.named('compileJava') {
@@ -57,38 +54,38 @@ tasks.withType(JavaCompile) {
   }
 }
 
-test {
-  useJUnitPlatform() {
-    // Run `gradle -Pslow test` to include slow tests.
-    if (!project.hasProperty('slow')) {
-      excludeTags 'slow'
-    }
-    // Run `gradle -Pbenchmark test` to include benchmark tests.
-    if (!project.hasProperty('benchmark')) {
-      excludeTags 'benchmark'
-    }
-    // Run `gradle -Pmanual test` to run manual tests.
-    if (!project.hasProperty('manual')) {
-      excludeTags 'manual'
+testing.suites.test {
+  useJUnitJupiter()
+  targets.all {
+    testTask.configure {
+      // Run `gradle -Pslow test` to include slow tests.
+      if (!project.hasProperty('slow')) {
+        options.excludeTags 'slow'
+      }
+      // Run `gradle -Pbenchmark test --rerun` to include benchmark tests.
+      if (!project.hasProperty('benchmark')) {
+        options.excludeTags 'benchmark'
+      }
+      // Run `gradle -Pmanual test --rerun` to run manual tests.
+      if (!project.hasProperty('manual')) {
+        options.excludeTags 'manual'
+      }
+
+      // Pass -P*log.* properties through to tests.
+      project.getProperties().each { prop ->
+        if (prop.key.contains('log.')) {
+          systemProperty prop.key, prop.value
+        }
+      }
+
+      testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'full'
+        displayGranularity = 2
+        showStandardStreams true
+      }
     }
   }
-
-  // Pass -P*log.* properties through to tests.
-  project.getProperties().each { prop ->
-    if (prop.key.contains('log.')) {
-      systemProperty prop.key, prop.value
-    }
-  }
-
-  testLogging {
-    events 'passed', 'skipped', 'failed'
-    exceptionFormat 'full'
-    displayGranularity = 2
-    showStandardStreams true
-  }
-
-  outputs.upToDateWhen { false }
-
 }
 
 checkstyle {
