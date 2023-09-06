@@ -141,6 +141,17 @@ public class UriMapperSpec {
   }
 
   @Test
+  public void mapMultipleUriAndUriVariablePaths() {
+    UriMapper<String> mapper = UriMapper.empty();
+
+    mapper = mapper.updated("/a/:b/c/:d", "ABCD");
+    mapper = mapper.updated("/a/x", "AX");
+
+    assertEquals(mapper.get("/a/x"), "AX");
+    assertEquals(mapper.get("/a/b/c/d"), "ABCD");
+  }
+
+  @Test
   public void removeUriMappings() {
     UriMapper<String> mapper = UriMapper.<String>empty()
                                         .updated("/a/b", "B")
