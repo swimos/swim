@@ -108,6 +108,8 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
   UriPathMapper<T> merged(UriPathMapper<T> that) {
     if (that instanceof UriPathMapping<?>) {
       return this.merged((UriPathMapping<T>) that);
+    } else if (that.isEmpty()) {
+      return this;
     } else {
       return that;
     }
