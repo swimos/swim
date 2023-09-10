@@ -62,6 +62,8 @@ final class DocumentParser<I, V> extends Parser<V> {
         if (c == '{') {
           input = input.step();
           step = 2;
+        } else if (c == '[') {
+          return json.parseArray(input);
         } else {
           return Parser.error(Diagnostic.expected('{', input));
         }
