@@ -36,27 +36,27 @@ pipeline {
                     }
                     def template =
                             """
-# Changelog
+# Release Notes
 
-{{#tags}}
-## {{name}}
- {{#issues}}
-  {{#hasIssue}}
-   {{#hasLink}}
-### {{name}} [{{issue}}]({{link}}) {{title}} {{#hasIssueType}} *{{issueType}}* {{/hasIssueType}} {{#hasLabels}} {{#labels}} *{{.}}* {{/labels}} {{/hasLabels}}
-   {{/hasLink}}
-   {{^hasLink}}
-### {{name}} {{issue}} {{title}} {{#hasIssueType}} *{{issueType}}* {{/hasIssueType}} {{#hasLabels}} {{#labels}} *{{.}}* {{/labels}} {{/hasLabels}}
-   {{/hasLink}}
-  {{/hasIssue}}
-  {{^hasIssue}}
-### {{name}}
-  {{/hasIssue}}
+{{#ifContainsIssueLabel issues label='enhancement'}}
+## Enhancements
 
+{{#issues}}
+{{#ifIssueLabel . label='enhancement'}}
+* [{{ issue }} - {{ title}}]({{ link }})
+{{/ifIssueLabel}}
+{{/issues}}
+{{/ifContainsIssueLabel}}
 
+{{#ifContainsIssueLabel issues label='bug'}}
+## Bugs
 
- {{/issues}}
-{{/tags}}
+{{#issues}}
+{{#ifIssueLabel . label='bug'}}
+* [{{ issue }} - {{ title}}]({{ link }})
+{{/ifIssueLabel}}
+{{/issues}}
+{{/ifContainsIssueLabel}}
 """
 
                     def changelog = gitChangelog(
