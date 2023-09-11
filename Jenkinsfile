@@ -30,16 +30,16 @@ pipeline {
         stage('release-notes') {
             steps {
                 sh "export"
-                
+
                 script {
                     def fromCommit = "0000000000000000000000000000000000000000"
                     def fromCommitType = null
                     if (env.BRANCH == 'main' || env.BRANCH == 'master') {
                         fromCommitType = 'REF'
-                        fromCommit = env.BRANCH
+                        fromCommit = "refs/heads/${env.BRANCH}"
                     } else if (env.BRANCH && env.CHANGE_TARGET && env.BRANCH.startsWith("PR-")) {
                         lastCommitType = 'REF'
-                        fromCommit = env.CHANGE_TARGET
+                        fromCommit = "refs/heads/${env.CHANGE_TARGET}"
                     } else if (env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
                         fromCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
                         lastCommitType = 'COMMIT'
@@ -79,7 +79,7 @@ pipeline {
                             from: [type: lastCommitType, value: fromCommit],
                             to: [type: 'COMMIT', value: env.GIT_COMMIT]
                     )
-
+                    
                     echo changelog
                 }
 
