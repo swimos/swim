@@ -27,6 +27,34 @@ pipeline {
     }
 
     stages {
+
+
+        stage('build-java') {
+            steps {
+                container('java') {
+                    dir('swim-java') {
+                        sh "./gradlew build"
+                    }
+                }
+            }
+            post {
+                always {
+                    testNG()
+                }
+            }
+        }
+        stage('js') {
+            steps {
+                container('node') {
+                    dir('swim-js') {
+                        sh 'npm config set color false'
+                        sh 'npm install'
+                        sh 'npm run bootstrap'
+                        sh 'npx swim-build'
+                    }
+                }
+            }
+        }
         stage('release-notes') {
             steps {
                 sh "export"
@@ -88,11 +116,11 @@ pipeline {
 """
 
                     def args = [
-                        template: template,
-                        gitHub: [api: 'https://api.github.com/repos/swimos/swim', issuePattern: '#([0-9]+)'],
-                        from: [type: fromCommitType, value: fromCommit],
-                        to: [type: toCommitType, value: toCommit],
-                        ignoreCommitsWithoutIssue: true
+                            template: template,
+                            gitHub: [api: 'https://api.github.com/repos/swimos/swim', issuePattern: '#([0-9]+)'],
+                            from: [type: fromCommitType, value: fromCommit],
+                            to: [type: toCommitType, value: toCommit],
+                            ignoreCommitsWithoutIssue: true
                     ]
 
                     echo(
@@ -108,40 +136,12 @@ pipeline {
                     )
 
 
-                    
+
                     echo changelog
                 }
 
 
             }
         }
-
-//        stage('build-java') {
-//            steps {
-//                container('java') {
-//                    dir('swim-java') {
-//                        sh "./gradlew build"
-//                    }
-//                }
-//            }
-//            post {
-//                always {
-//                    testNG()
-//                }
-//            }
-//        }
-//        stage('js') {
-//            steps {
-//                container('node') {
-//                    dir('swim-js') {
-//                        sh 'npm config set color false'
-//                        sh 'npm install'
-//                        sh 'npm run bootstrap'
-//                        sh 'npx swim-build'
-//                    }
-//                }
-//            }
-//        }
-
     }
 }
