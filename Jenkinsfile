@@ -29,6 +29,7 @@ pipeline {
     stages {
         stage('release-notes') {
             steps {
+                sh "export"
                 script {
                     def lastCommit = "0000000000000000000000000000000000000000"
                     if (env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
