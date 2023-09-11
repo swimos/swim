@@ -84,8 +84,10 @@ pipeline {
                         to: [type: 'COMMIT', value: env.GIT_COMMIT],
                         ignoreCommitsWithoutIssue: true
                     ]
-                    
-                    echo writeYaml returnText: true, data: args
+
+                    echo(
+                            writeYaml(returnText: true, data: args)
+                    )
 
                     def changelog = gitChangelog(
                             template: template,
