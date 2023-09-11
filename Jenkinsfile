@@ -34,22 +34,32 @@ pipeline {
                 script {
                     def fromCommit = "0000000000000000000000000000000000000000"
                     def fromCommitType = null
+                    def toCommit = env.GIT_COMMIT
+                    def toCommitType = "COMMIT"
+
                     if (env.BRANCH == 'main' || env.BRANCH == 'master') {
                         echo "Using BRANCH($env.BRANCH)"
-                        fromCommitType = 'REF'
-                        fromCommit = "refs/heads/${env.BRANCH}"
+
+                        fromCommitType = 'COMMIT'
+                        if(null!=env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
+                            fromCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+                        } else {
+                            fromCommit = "0000000000000000000000000000000000000000"
+                        }
                     } else if (null != env.GIT_BRANCH && null != env.CHANGE_TARGET && env.GIT_BRANCH.startsWith("PR-")) {
                         echo "Using CHANGE_TARGET($env.CHANGE_TARGET)"
-                        lastCommitType = 'REF'
+                        fromCommitType = 'REF'
                         fromCommit = "refs/heads/${env.CHANGE_TARGET}"
+                        toCommit = "refs/heads/${env.GIT_BRANCH}"
+                        toCommitType = 'REF'
                     } else if (env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
                         echo "Using GIT_PREVIOUS_SUCCESSFUL_COMMIT($env.GIT_PREVIOUS_SUCCESSFUL_COMMIT)"
                         fromCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
-                        lastCommitType = 'COMMIT'
+                        fromCommitType = 'COMMIT'
                     } else {
                         fromCommit = "0000000000000000000000000000000000000000"
                         echo "Using Fallback(${fromCommit})"
-                        lastCommitType = 'COMMIT'
+                        fromCommitType = 'COMMIT'
                     }
 
                     def template =
@@ -80,8 +90,8 @@ pipeline {
                     def args = [
                         template: template,
                         gitHub: [api: 'https://api.github.com/repos/swimos/swim', issuePattern: '#([0-9]+)'],
-                        from: [type: lastCommitType, value: fromCommit],
-                        to: [type: 'COMMIT', value: env.GIT_COMMIT],
+                        from: [type: fromCommitType, value: fromCommit],
+                        to: [type: toCommitType, value: toCommit],
                         ignoreCommitsWithoutIssue: true
                     ]
 
@@ -92,8 +102,8 @@ pipeline {
                     def changelog = gitChangelog(
                             template: template,
                             gitHub: [api: 'https://api.github.com/repos/swimos/swim', issuePattern: '#([0-9]+)'],
-                            from: [type: lastCommitType, value: fromCommit],
-                            to: [type: 'COMMIT', value: env.GIT_COMMIT],
+                            from: [type: fromCommitType, value: fromCommit],
+                            to: [type: toCommitType, value: toCommit],
                             ignoreCommitsWithoutIssue: true
                     )
 
