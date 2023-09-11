@@ -38,7 +38,7 @@ pipeline {
                         echo "Using BRANCH($env.BRANCH)"
                         fromCommitType = 'REF'
                         fromCommit = "refs/heads/${env.BRANCH}"
-                    } else if (null != env.BRANCH && null != env.CHANGE_TARGET && env.BRANCH.startsWith("PR-")) {
+                    } else if (null != env.GIT_BRANCH && null != env.CHANGE_TARGET && env.GIT_BRANCH.startsWith("PR-")) {
                         echo "Using CHANGE_TARGET($env.CHANGE_TARGET)"
                         lastCommitType = 'REF'
                         fromCommit = "refs/heads/${env.CHANGE_TARGET}"
