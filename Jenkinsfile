@@ -35,6 +35,7 @@ pipeline {
                     if (env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
                         lastCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
                     }
+                    lastCommit = 'main'
                     def template =
                             """
 # Release Notes
