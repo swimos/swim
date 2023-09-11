@@ -135,12 +135,9 @@ pipeline {
                             ignoreCommitsWithoutIssue: true
                     )
 
-
-
-                    echo changelog
+                    writeFile file: 'releasenotes.md', text: changelog
+                    archiveArtifacts artifacts: 'releasenotes.md', followSymlinks: false
                 }
-
-
             }
         }
     }
