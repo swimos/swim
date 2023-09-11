@@ -56,7 +56,7 @@ pipeline {
                             """
 # Release Notes
 
-{{#ifContainsIssueLabel issues label='enhancement'}}
+{{#ifContainsIssueLabel issues label='C-enhancement'}}
 ## Enhancements
 
 {{#issues}}
@@ -66,7 +66,7 @@ pipeline {
 {{/issues}}
 {{/ifContainsIssueLabel}}
 
-{{#ifContainsIssueLabel issues label='bug'}}
+{{#ifContainsIssueLabel issues label='C-bug'}}
 ## Bugs
 
 {{#issues}}
