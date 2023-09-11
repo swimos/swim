@@ -31,12 +31,22 @@ pipeline {
             steps {
                 sh "export"
                 script {
-                    def lastCommit = "0000000000000000000000000000000000000000"
-                    if (env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
-                        lastCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+                    def fromCommit = "0000000000000000000000000000000000000000"
+                    def fromCommitType = null
+                    if (env.BRANCH = 'main' || env.BRANCH = 'master') {
+                        fromCommitType = 'REF'
+                        fromCommit = env.BRANCH
+                    } else if (env.BRANCH && env.CHANGE_TARGET && env.BRANCH.startsWith("PR-")) {
+                        lastCommitType = 'REF'
+                        fromCommit = env.CHANGE_TARGET
+                    } else if (env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
+                        fromCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
+                        lastCommitType = 'COMMIT'
+                    } else {
+                        fromCommit = "0000000000000000000000000000000000000000"
+                        lastCommitType = 'COMMIT'
                     }
-                    lastCommitType = 'REF'
-                    lastCommit = 'main'
+
                     def template =
                             """
 # Release Notes
@@ -65,7 +75,7 @@ pipeline {
                     def changelog = gitChangelog(
                             template: template,
                             gitHub: [api:'https://api.github.com/repos/swimos/swim'],
-                            from: [type: lastCommitType, value: lastCommit],
+                            from: [type: lastCommitType, value: fromCommit],
                             to: [type: 'COMMIT', value: env.GIT_COMMIT]
                     )
 
