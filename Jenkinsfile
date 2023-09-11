@@ -77,15 +77,15 @@ pipeline {
 {{/ifContainsIssueLabel}}
 """
 
-//                    def args = [
-//                        template: template,
-//                        gitHub: [api: 'https://api.github.com/repos/swimos/swim', issuePattern: '#([0-9]+)'],
-//                        from: [type: lastCommitType, value: fromCommit],
-//                        to: [type: 'COMMIT', value: env.GIT_COMMIT],
-//                        ignoreCommitsWithoutIssue: true
-//                    ]
-//
-//                    echo args
+                    def args = [
+                        template: template,
+                        gitHub: [api: 'https://api.github.com/repos/swimos/swim', issuePattern: '#([0-9]+)'],
+                        from: [type: lastCommitType, value: fromCommit],
+                        to: [type: 'COMMIT', value: env.GIT_COMMIT],
+                        ignoreCommitsWithoutIssue: true
+                    ]
+                    
+                    echo writeYaml returnText: true, data: args
 
                     def changelog = gitChangelog(
                             template: template,
