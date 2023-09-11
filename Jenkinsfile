@@ -35,16 +35,20 @@ pipeline {
                     def fromCommit = "0000000000000000000000000000000000000000"
                     def fromCommitType = null
                     if (env.BRANCH == 'main' || env.BRANCH == 'master') {
+                        echo "Using BRANCH($env.BRANCH)"
                         fromCommitType = 'REF'
                         fromCommit = "refs/heads/${env.BRANCH}"
                     } else if (env.BRANCH && env.CHANGE_TARGET && env.BRANCH.startsWith("PR-")) {
+                        echo "Using GIT_PREVIOUS_SUCCESSFUL_COMMIT($env.CHANGE_TARGET)"
                         lastCommitType = 'REF'
                         fromCommit = "refs/heads/${env.CHANGE_TARGET}"
                     } else if (env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
+                        echo "Using GIT_PREVIOUS_SUCCESSFUL_COMMIT($env.GIT_PREVIOUS_SUCCESSFUL_COMMIT)"
                         fromCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
                         lastCommitType = 'COMMIT'
                     } else {
                         fromCommit = "0000000000000000000000000000000000000000"
+                        echo "Using Fallback(${fromCommit})"
                         lastCommitType = 'COMMIT'
                     }
 
@@ -83,7 +87,13 @@ pipeline {
 
                     echo args
 
-                    def changelog = gitChangelog(args)
+                    def changelog = gitChangelog(
+                            template: template,
+                            gitHub: [api: 'https://api.github.com/repos/swimos/swim', issuePattern: '#([0-9]+)'],
+                            from: [type: lastCommitType, value: fromCommit],
+                            to: [type: 'COMMIT', value: env.GIT_COMMIT],
+                            ignoreCommitsWithoutIssue: true
+                    )
 
 
                     
