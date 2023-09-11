@@ -38,8 +38,8 @@ pipeline {
                         echo "Using BRANCH($env.BRANCH)"
                         fromCommitType = 'REF'
                         fromCommit = "refs/heads/${env.BRANCH}"
-                    } else if (env.BRANCH && env.CHANGE_TARGET && env.BRANCH.startsWith("PR-")) {
-                        echo "Using GIT_PREVIOUS_SUCCESSFUL_COMMIT($env.CHANGE_TARGET)"
+                    } else if (null != env.BRANCH && null != env.CHANGE_TARGET && env.BRANCH.startsWith("PR-")) {
+                        echo "Using CHANGE_TARGET($env.CHANGE_TARGET)"
                         lastCommitType = 'REF'
                         fromCommit = "refs/heads/${env.CHANGE_TARGET}"
                     } else if (env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
