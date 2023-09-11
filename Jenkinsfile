@@ -77,7 +77,7 @@ pipeline {
                             template: template,
                             gitHub: [api: 'https://api.github.com/repos/swimos/swim', issuePattern: '#([0-9]+)'],
                             from: [type: lastCommitType, value: fromCommit],
-                            to: [type: 'COMMIT', value: env.GIT_COMMIT]
+                            to: [type: 'COMMIT', value: env.GIT_COMMIT],
                             ignoreCommitsWithoutIssue: true
                     )
 
