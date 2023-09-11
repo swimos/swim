@@ -33,7 +33,7 @@ pipeline {
             steps {
                 container('java') {
                     dir('swim-java') {
-                        sh "./gradlew build"
+                        sh "./gradlew build --no-daemon"
                     }
                 }
             }
