@@ -35,6 +35,7 @@ pipeline {
                     if (env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
                         lastCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
                     }
+                    lastCommitType = 'REF'
                     lastCommit = 'main'
                     def template =
                             """
@@ -63,8 +64,8 @@ pipeline {
 
                     def changelog = gitChangelog(
                             template: template,
-                            github: [api:'https://api.github.com/repos/swimos/swim'],
-                            from: [type: 'COMMIT', value: lastCommit],
+                            gitHub: [api:'https://api.github.com/repos/swimos/swim'],
+                            from: [type: lastCommitType, value: lastCommit],
                             to: [type: 'COMMIT', value: env.GIT_COMMIT]
                     )
 
