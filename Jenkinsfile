@@ -60,7 +60,7 @@ pipeline {
 ## Enhancements
 
 {{#issues}}
-{{#ifIssueLabel . label='enhancement'}}
+{{#ifIssueLabel . label='C-enhancement'}}
 * [{{ issue }} - {{ title}}]({{ link }})
 {{/ifIssueLabel}}
 {{/issues}}
@@ -70,7 +70,7 @@ pipeline {
 ## Bugs
 
 {{#issues}}
-{{#ifIssueLabel . label='bug'}}
+{{#ifIssueLabel . label='C-bug'}}
 * [{{ issue }} - {{ title}}]({{ link }})
 {{/ifIssueLabel}}
 {{/issues}}
