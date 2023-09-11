@@ -30,6 +30,7 @@ pipeline {
         stage('release-notes') {
             steps {
                 sh "export"
+                
                 script {
                     def fromCommit = "0000000000000000000000000000000000000000"
                     def fromCommitType = null
