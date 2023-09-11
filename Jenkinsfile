@@ -33,7 +33,7 @@ pipeline {
                 script {
                     def fromCommit = "0000000000000000000000000000000000000000"
                     def fromCommitType = null
-                    if (env.BRANCH = 'main' || env.BRANCH = 'master') {
+                    if (env.BRANCH == 'main' || env.BRANCH == 'master') {
                         fromCommitType = 'REF'
                         fromCommit = env.BRANCH
                     } else if (env.BRANCH && env.CHANGE_TARGET && env.BRANCH.startsWith("PR-")) {
