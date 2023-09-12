@@ -79,7 +79,8 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
       if (mapping == null) {
         mapping = this.wildcard;
       }
-      return mapping.get(path.tail(), query, fragment);
+      final T result = mapping.get(path.tail(), query, fragment);
+      return result != null ? result : this.wildcard.get(path.tail(), query, fragment);
     } else {
       return this.terminal.get(query, fragment);
     }
