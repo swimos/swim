@@ -1,4 +1,7 @@
 pipeline {
+    options {
+        timeout(time: 1, unit: 'HOURS')
+    }
     agent {
         kubernetes {
             cloud 'kubernetes'
@@ -28,6 +31,18 @@ pipeline {
 
     stages {
 
+        stage('build-js') {
+            steps {
+                container('node') {
+                    dir('swim-js') {
+                        sh 'npm config set color false'
+                        sh 'npm install'
+                        sh 'npm run bootstrap'
+                        sh 'npx swim-build'
+                    }
+                }
+            }
+        }
 
         stage('build-java') {
             steps {
@@ -43,18 +58,7 @@ pipeline {
                 }
             }
         }
-        stage('js') {
-            steps {
-                container('node') {
-                    dir('swim-js') {
-                        sh 'npm config set color false'
-                        sh 'npm install'
-                        sh 'npm run bootstrap'
-                        sh 'npx swim-build'
-                    }
-                }
-            }
-        }
+
         stage('release-notes') {
             steps {
                 sh "export"
@@ -69,7 +73,7 @@ pipeline {
                         echo "Using BRANCH($env.BRANCH)"
 
                         fromCommitType = 'COMMIT'
-                        if(null!=env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
+                        if (null != env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
                             fromCommit = env.GIT_PREVIOUS_SUCCESSFUL_COMMIT
                         } else {
                             fromCommit = "0000000000000000000000000000000000000000"
@@ -90,36 +94,38 @@ pipeline {
                         fromCommitType = 'COMMIT'
                     }
 
+                    def sections = [
+                            "Enhancements": "C-enhancement",
+                            "Bugs": "C-bug"
+                    ]
+
                     def template =
                             """
 # Release Notes
 
+"""
+                    sections.each {entry ->
+                        template +=
+"""
+
 {{#ifContainsIssueLabel issues label='C-enhancement'}}
-## Enhancements
+## ${entry.key}
 
 {{#issues}}
-{{#ifIssueLabel . label='C-enhancement'}}
-* [{{ issue }} - {{ title}}]({{ link }})
-{{/ifIssueLabel}}
-{{/issues}}
-{{/ifContainsIssueLabel}}
-
-{{#ifContainsIssueLabel issues label='C-bug'}}
-## Bugs
-
-{{#issues}}
-{{#ifIssueLabel . label='C-bug'}}
+{{#ifIssueLabel . label='${entry.value}'}}
 * [{{ issue }} - {{ title}}]({{ link }})
 {{/ifIssueLabel}}
 {{/issues}}
 {{/ifContainsIssueLabel}}
 """
+                    }
+
 
                     def args = [
-                            template: template,
-                            gitHub: [api: 'https://api.github.com/repos/swimos/swim', issuePattern: '#([0-9]+)'],
-                            from: [type: fromCommitType, value: fromCommit],
-                            to: [type: toCommitType, value: toCommit],
+                            template                 : template,
+                            gitHub                   : [api: 'https://api.github.com/repos/swimos/swim', issuePattern: '#([0-9]+)'],
+                            from                     : [type: fromCommitType, value: fromCommit],
+                            to                       : [type: toCommitType, value: toCommit],
                             ignoreCommitsWithoutIssue: true
                     ]
 
