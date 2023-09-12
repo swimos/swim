@@ -56,7 +56,7 @@ export class MockServer {
     if (data instanceof Envelope) {
       data = data.toRecon();
     }
-    this.socket!.send(data);
+    this.socket!.send(data as Buffer);
   }
 
   close(): void {
