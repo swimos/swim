@@ -149,6 +149,7 @@ public class UriMapperSpec {
 
     assertEquals(mapper.get("/a/x"), "AX");
     assertEquals(mapper.get("/a/b/c/d"), "ABCD");
+    assertEquals(mapper.get("/a/x/c/d"), "ABCD");
   }
 
   @Test
