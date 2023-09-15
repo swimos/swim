@@ -52,6 +52,11 @@ test {
     if (!project.hasProperty('benchmark')) {
       excludeGroups 'benchmark'
     }
+
+    options {
+      listeners << 'org.testng.reporters.XMLReporter'
+    }
+
   }
 
   scanForTestClasses = false
