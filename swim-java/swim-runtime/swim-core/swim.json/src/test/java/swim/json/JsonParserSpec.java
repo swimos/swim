@@ -37,6 +37,7 @@ public class JsonParserSpec {
   @Test
   public void parseEmptyArrays() {
     assertParses("[]", Record.empty());
+    assertParsesObject("[]", Record.empty());
   }
 
   @Test
@@ -326,12 +327,17 @@ public class JsonParserSpec {
     assertParses("[{},[],\"\",0,true,false,null]",
                  Record.of(Record.empty(), Record.empty(), "", 0, Bool.from(true),
                            Bool.from(false), Value.extant()));
+    assertParsesObject("[{},[],\"\",0,true,false,null]",
+        Record.of(Record.empty(), Record.empty(), "", 0, Bool.from(true),
+            Bool.from(false), Value.extant()));
   }
 
   @Test
   public void parseArraysWithWhitespace() {
     assertParses(" [ ] ", Record.empty());
     assertParses(" [ 1 , 2 ] ", Record.of(1, 2));
+    assertParsesObject(" [ ] ", Record.empty());
+    assertParsesObject(" [ 1 , 2 ] ", Record.of(1, 2));
   }
 
   @Test
