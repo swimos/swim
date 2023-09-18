@@ -26,6 +26,7 @@ import swim.web.route.ResourceDirectoryRoute;
  * SwimOS kernel module for routing HTTP requests for the bundled UI.
  */
 public class UiRouter extends KernelProxy {
+
   final double kernelPriority;
   final WebRoute uiRoute;
 
@@ -98,4 +99,5 @@ public class UiRouter extends KernelProxy {
     }
     return null;
   }
+
 }
