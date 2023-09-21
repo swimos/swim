@@ -173,12 +173,12 @@ pipeline {
         }
 
         stage('release-java') {
-            when {
-                anyOf {
-                    branch 'main';
-                    branch pattern: "^\\d+.\\d+.\\d+", comparator: "REGEXP"
-                }
-            }
+//            when {
+//                anyOf {
+//                    branch 'main';
+//                    branch pattern: "^\\d+.\\d+.\\d+", comparator: "REGEXP"
+//                }
+//            }
             environment {
                 ORG_GRADLE_PROJECT_signingKey = credentials("jenkins-gpg-key")
                 ORG_GRADLE_PROJECT_signingPassword = credentials("jenkins-gpg-key-password")
