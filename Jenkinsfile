@@ -197,18 +197,18 @@ pipeline {
         }
 
 
-        stage('build-js') {
-            steps {
-                container('node') {
-                    dir('swim-js') {
-                        sh 'npm config set color false'
-                        sh 'npm install'
-                        sh 'npm run bootstrap'
-                        sh 'npx swim-build'
-                    }
-                }
-            }
-        }
+//        stage('build-js') {
+//            steps {
+//                container('node') {
+//                    dir('swim-js') {
+//                        sh 'npm config set color false'
+//                        sh 'npm install'
+//                        sh 'npm run bootstrap'
+//                        sh 'npx swim-build'
+//                    }
+//                }
+//            }
+//        }
 
         stage('create-release') {
             when { branch 'main' }
