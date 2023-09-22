@@ -22,7 +22,7 @@ web services, streaming APIs, and real-time UIs.
 
 ## Getting Started
 
-Check out the [SwimOS tutorials](https://www.swimos.org/tutorials) to get
+Check out the [SwimOS tutorials][tutorial] to get
 started building stateful web services with streaming APIs and real-time UIs.
 
 ## Documentation
@@ -49,6 +49,7 @@ Help keep SwimOS open and inclusive to all by reading and following our
 Licensed under the [Apache 2.0 License][license].
 
 [swimos]: https://www.swimos.org
+[tutorial]: https://www.swimos.org/tutorials/index.html
 [backend]: https://www.swimos.org/start/#java-server
 [frontend]: https://www.swimos.org/start/#web-ui
 [runtime]: https://www.swimos.org/start/#java-server

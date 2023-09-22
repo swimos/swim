@@ -21,17 +21,17 @@ OS process per compute node.
 
 ## Quick Start
 
-Clone the [Swim quick start](https://github.com/swimos/swim-quick-start)
+Clone the [Swim starter application][tutorial]
 repository:
 
 ```sh
-git clone https://github.com/swimos/swim-quick-start.git
+git clone https://github.com/swimos/tutorial.git
 ```
 
 Start the application to run the complete software stack in a local process.
 
 ```sh
-cd swim-quick-start
+cd tutorial
 ./gradlew run
 ```
 
@@ -102,11 +102,12 @@ to the Swim Java SDK.
 
 Licensed under the [Apache 2.0 License][license].
 
-[backend]: https://www.swimos.org/backend
-[web-agents]: https://www.swimos.org/backend/web-agents
-[lanes]: https://www.swimos.org/backend/lanes
-[links]: https://www.swimos.org/backend/links
-[planes]: https://www.swimos.org/backend/planes
+[tutorial]: https://www.swimos.org/tutorials/transit.html
+[backend]: https://www.swimos.org/reference/index.html
+[web-agents]: https://www.swimos.org/reference/web-agents.html
+[lanes]: https://www.swimos.org/reference/lanes.html
+[links]: https://www.swimos.org/reference/links.html
+[planes]: https://www.swimos.org/reference/planes.html
 [openjdk]: https://openjdk.java.net
 [graalvm]: https://www.graalvm.org/downloads/
 [gradle]: https://gradle.org
