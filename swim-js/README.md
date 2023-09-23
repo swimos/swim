@@ -1,75 +1,30 @@
-# <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/breach-marlin-blue-wide.svg"></a> Swim TypeScript SDK
+# [![Swim](https://docs.swimos.org/readme/breach-marlin-blue-wide.svg)](https://www.swimos.org) Swim Frontend Stack&ensp;[![license](https://img.shields.io/badge/license-Apache--2.0-32c5ff)](https://github.com/swimos/swim-js/blob/main/LICENSE)&ensp;[![npm package](https://img.shields.io/badge/npm-4.0.0--dev-32c5ff)](https://npmjs.com/package/@swim/swim)
 
-The [Swim TypeScript SDK][frontend] contains software frameworks for consuming
-multiplexed streaming APIs, and building real-time user interfaces.
+<img src="https://docs.swimos.org/readme/swim-stack-sidebar.svg" align="right">
 
-- **Streaming API Client:** Web Agent client that runs in Node.js
-  and browser applications.
-- **UI Engine:** MVC framework for building beautifully animated,
-  pervasively real-time user interfaces.
-- **UX Toolkit:** UX components for structuring highly dynamic,
-  continuously updating applications.
-- **Data Visualizations:** Real-time gauges, pie charts, and graphs.
-- **Real-Time Maps:** Continuously animated map overlays.
+Swim is a full stack **streaming application platform** for building
+stateful services, streaming APIs, and real-time UIs.
 
-## Quick Start
+- **Streaming applications** push data through the full application stack,
+  eliminating the need for polling.
+- **Stateful services** remember what they're doing between operations,
+  taking queries off the critical path.
+- **Streaming APIs** publish differential state changes,
+  streaming only what each client chooses to observe.
+- **Real-time UIs** render live views of distributed application state
+  that update with half-ping latency.
 
-Clone the [Swim quick start](https://github.com/swimos/swim-quick-start)
-repository:
+The **Swim frontend stack** provides everything app developers need to build
+truly real-time user interfaces that run in any modern browser, including:
 
-```sh
-git clone https://github.com/swimos/swim-quick-start.git
-```
-
-Start the application to run the complete software stack in a local process.
-
-```sh
-cd swim-quick-start
-./gradlew run
-```
-
-## Documentation
-
-- **[Swim frontend stack][frontend]**
-- [Streaming UI engine][ui]
-- [Dynamic UX toolkit][ux]
-- [Animated charts][vis]
-- [Real-time maps][maps]
-
-## Usage
-
-#### npm
-
-```sh
-npm install --save @swim/runtime # for node.js projects
-npm install --save @swim/toolkit # for real-time web apps
-```
-
-#### browser
-
-```html
-<!-- Development -->
-<script src="https://cdn.swimos.org/js/4.x/swim-runtime.js"></script>
-<script src="https://cdn.swimos.org/js/4.x/swim-toolkit.js"></script>
-
-<!-- Production -->
-<script src="https://cdn.swimos.org/js/4.x/swim-runtime.min.js"></script>
-<script src="https://cdn.swimos.org/js/4.x/swim-toolkit.min.js"></script>
-```
-
-## Contributing
-
-Check out the [Contributing Guide][contributing] to learn how to contribute
-to the Swim TypeScript SDK.
-
-## License
-
-Licensed under the [Apache 2.0 License][license].
-
-[frontend]: https://www.swimos.org/frontend
-[ui]: https://www.swimos.org/frontend/ui
-[ux]: https://www.swimos.org/frontend/ux
-[vis]: https://www.swimos.org/frontend/vis
-[maps]: https://www.swimos.org/frontend/maps
-[contributing]: CONTRIBUTING.md
-[license]: LICENSE
+- A **foundation framework** for real-time applications that runs
+  in Node.js and web browsers.
+- A **streaming API client** for consuming multiplexed streaming APIs.
+- A **UI engine** for efficiently rendering real-time user interfaces
+  at high frame rates.
+- A **UX toolkit** with reusable views and controllers tailor-made
+  for real-time user experiences.
+- Real-time **data visualizations**, including procedurally animated graphs,
+  charts, and gauges.
+- Real-time **map overlays** that display live geospatial visualizations
+  on top of third-party base maps.
