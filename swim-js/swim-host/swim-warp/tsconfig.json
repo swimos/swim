@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {"path": "./main"},
+    {"path": "./test"}
+  ]
+}

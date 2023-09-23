@@ -1,0 +1,14 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "out": "lib/doc",
+  "categorizeByGroup": false,
+  "excludeInternal": true,
+  "entryPointStrategy": "packages",
+  "entryPoints": [
+    "swim-map",
+    "swim-mapbox",
+    "swim-leaflet",
+    "swim-googlemap",
+    "swim-esrimap"
+  ]
+}

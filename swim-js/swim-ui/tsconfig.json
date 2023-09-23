@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {"path": "./swim-model"},
+    {"path": "./swim-style"},
+    {"path": "./swim-theme"},
+    {"path": "./swim-view"},
+    {"path": "./swim-dom"},
+    {"path": "./swim-graphics"},
+    {"path": "./swim-controller"},
+    {"path": "./main"}
+  ]
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Popover Placement</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-ux/dist/umd/swim-ux.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const sourceView = bodyView.appendChild("div").style.set({
+  position: "absolute",
+  left: Math.random() * window.innerWidth,
+  top: Math.random() * window.innerHeight,
+  width: 100,
+  height: 100,
+  borderRadius: 50,
+  backgroundColor: "#989898",
+});
+sourceView.addEventListener("click", function (event) {
+  bodyView.modal.toggle(popoverView);
+});
+
+const popoverView = swim.PopoverView.create().set({
+  style: {
+    minWidth: 240,
+    minHeight: 360,
+    borderRadius: 5,
+    backgroundColor: "#4a4a4a",
+  },
+  placement: ["top", "bottom", "right", "left", "below"],
+  source: sourceView,
+});
+popoverView.presence.dismiss(false);
+bodyView.modal.present(popoverView);
+
+//setInterval(function () {
+//  const timing = swim.Easing.linear.withDuration(1000);
+//  sourceView.style.set({
+//    left: Math.random() * window.innerWidth,
+//    top: Math.random() * window.innerHeight,
+//  }, timing);
+//}, 1000);
+
+window.addEventListener("mousemove", function (event) {
+  sourceView.style.set({
+    left: event.clientX - 50,
+    top: event.clientY - 50,
+  });
+});
+
+    </script>
+  </body>
+</html>

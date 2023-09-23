@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Pie Controller</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../node_modules/tslib/tslib.js"></script>
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-vis/dist/umd/swim-vis.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").style.set({
+  position: "relative",
+  width: "67%",
+  height: "67%",
+  touchAction: "none",
+  userSelect: "none",
+});
+
+const canvasView = containerView.appendChild(swim.CanvasView).set({
+  style: {
+    touchAction: "manipulation",
+  },
+  mouseEvents: true,
+  pointerEvents: true,
+  touchEvents: true,
+});
+
+class ExamplePieController extends swim.PieController {
+  constructor() {
+    super();
+    ExamplePieController.initFasteners(this);
+  }
+}
+ExamplePieController.defineField("pie", [swim.TraitViewRef({
+  extends: true,
+  initView(pieView) {
+    super.initView(pieView);
+    pieView.font.set("16px sans-serif");
+  },
+})]);
+ExamplePieController.defineField("slices", [swim.TraitViewControllerSet({
+  extends: true,
+  attachSliceView(sliceView, sliceController) {
+    super.attachSliceView(sliceView, sliceController);
+    sliceView.addEventListener("pointerenter", function (event) {
+      sliceView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+    });
+    sliceView.addEventListener("pointerleave", function (event) {
+      sliceView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+    });
+  },
+  controllerDidSetSliceValue(sliceValue, sliceController, pieController) {
+    super.controllerDidSetSliceValue(sliceValue, sliceController, pieController);
+    sliceController.slice.trait.set({
+      label: Math.round(100 * sliceValue).toString(),
+    });
+  },
+  attachSliceLabelView(labelView, sliceController) {
+    super.attachSliceLabelView(labelView, sliceController);
+    labelView.set({
+      textColor: swim.Look.backgroundColor,
+    });
+  },
+})]);
+
+const slice1Model = new swim.Model();
+const slice1Trait = new swim.SliceTrait().set({
+  value: 1,
+  legend: "Slice 1",
+});
+slice1Model.setTrait("slice", slice1Trait);
+
+const slice2Model = new swim.Model();
+const slice2Trait = new swim.SliceTrait().set({
+  value: 1,
+  legend: "Slice 2",
+});
+slice2Model.setTrait("slice", slice2Trait);
+
+const slice3Model = new swim.Model();
+const slice3Trait = new swim.SliceTrait().set({
+  value: 1,
+  legend: "Slice 3",
+});
+slice3Model.setTrait("slice", slice3Trait);
+
+const pieModel = new swim.Model();
+pieModel.mount();
+const pieTrait = new swim.PieTrait();
+pieModel.setTrait("pie", pieTrait);
+pieModel.appendChild(slice1Model);
+pieModel.appendChild(slice2Model);
+pieModel.appendChild(slice3Model);
+
+const pieController = new ExamplePieController();
+pieController.mount();
+pieController.pie.insertView(canvasView);
+pieController.pie.setTrait(pieTrait);
+
+setInterval(function () {
+  slice1Trait.value.set(0.1 + 0.9 * Math.random());
+  slice2Trait.value.set(0.1 + 0.9 * Math.random());
+  slice3Trait.value.set(0.1 + 0.9 * Math.random());
+}, 1000);
+
+setInterval(function () {
+  if (slice3Model.mounted) {
+    slice3Model.remove();
+  } else {
+    pieModel.appendChild(slice3Model);
+  }
+}, 2500);
+
+    </script>
+  </body>
+</html>

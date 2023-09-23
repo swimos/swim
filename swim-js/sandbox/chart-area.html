@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Area Chart</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; margin: 0; overflow: hidden;">
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-vis/dist/umd/swim-vis.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").style.set({
+  position: "relative",
+  width: "90%",
+  height: "90%",
+  touchAction: "none",
+  userSelect: "none",
+});
+
+const canvasView = swim.CanvasView.create().set({
+  style: {
+    touchAction: "manipulation",
+  },
+  wheelEvents: true,
+  mouseEvents: true,
+  pointerEvents: true,
+  touchEvents: true,
+});
+
+const chartView = canvasView.appendChild(swim.ChartView);
+const bottomAxisView = chartView.bottomAxis.insertView();
+const leftAxisView = chartView.leftAxis.insertView();
+
+chartView.set({
+  fitAspectRatio: 1,
+  font: "12px sans-serif",
+});
+chartView.preserveAspectRatio(true);
+chartView.domainTracking(true);
+chartView.scaleGestures(true);
+
+const graphView = chartView.graph.insertView();
+const plotView = graphView.appendChild(swim.AreaPlotView).set({
+  hitMode: "plot",
+});
+plotView.addEventListener("pointerenter", function (event) {
+  plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+});
+plotView.addEventListener("pointerleave", function (event) {
+  plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+});
+plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
+
+const cycles = 2;
+const samples = 100;
+for (let i = 0, n = cycles * samples; i <= n; i += 1) {
+  const x = i * 2 * Math.PI / samples;
+  const dataPointView = new swim.DataPointView().set({
+    x,
+    y: Math.sin(x) + 1,
+    y2: Math.sin(x) - 1,
+    opacity: i === 0 ? 0.75 : i === n ? 0.25 : void 0,
+  });
+  plotView.insertDataPoint(dataPointView);
+}
+
+containerView.appendChild(canvasView);
+
+    </script>
+  </body>
+</html>

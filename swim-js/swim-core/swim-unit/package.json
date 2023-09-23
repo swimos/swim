@@ -1,0 +1,41 @@
+{
+  "name": "@swim/unit",
+  "version": "4.0.0-dev.20230923",
+  "description": "Specializable unit testing framework",
+  "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-unit",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2023 Nstream, inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim-js.git",
+  "type": "module",
+  "main": "./dist/swim-unit.js",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-unit.js",
+      "types": "./dist/swim-unit.d.ts"
+    }
+  },
+  "types": "./dist/swim-unit.d.ts",
+  "sideEffects": false,
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20230923",
+    "@swim/codec": "4.0.0-dev.20230923",
+    "tslib": ">= 2.5"
+  },
+  "scripts": {
+    "main:compile": "tsc -b main && api-extractor run -l -c main/api-extractor.json",
+    "main:bundle": "cd main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "cli:compile": "tsc -b cli",
+    "cli:bundle": "cd cli && rollup -c",
+    "cli:build": "npm run cli:compile && npm run cli:bundle",
+    "compile": "npm run main:compile && npm run cli:compile",
+    "build": "npm run main:build && npm run cli:build",
+    "cli": "node dist/swim-unit-cli.js",
+    "doc": "npx typedoc",
+    "clean": "rm -rf lib dist"
+  },
+  "bin": {
+    "swim-unit": "./dist/swim-unit-cli.js"
+  }
+}

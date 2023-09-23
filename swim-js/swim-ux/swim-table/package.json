@@ -1,0 +1,52 @@
+{
+  "name": "@swim/table",
+  "version": "4.0.0-dev.20230923",
+  "description": "Tables, trees, lists, and other tabular views",
+  "homepage": "https://github.com/swimos/swim-js/tree/main/swim-ux/swim-table",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2023 Nstream, inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim-js.git",
+  "type": "module",
+  "main": "./dist/swim-table.js",
+  "types": "./dist/swim-table.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-table.js",
+      "types": "./dist/swim-table.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20230923",
+    "@swim/codec": "4.0.0-dev.20230923",
+    "@swim/component": "4.0.0-dev.20230923",
+    "@swim/collections": "4.0.0-dev.20230923",
+    "@swim/constraint": "4.0.0-dev.20230923",
+    "@swim/structure": "4.0.0-dev.20230923",
+    "@swim/recon": "4.0.0-dev.20230923",
+    "@swim/uri": "4.0.0-dev.20230923",
+    "@swim/math": "4.0.0-dev.20230923",
+    "@swim/time": "4.0.0-dev.20230923",
+    "@swim/warp": "4.0.0-dev.20230923",
+    "@swim/client": "4.0.0-dev.20230923",
+    "@swim/model": "4.0.0-dev.20230923",
+    "@swim/style": "4.0.0-dev.20230923",
+    "@swim/theme": "4.0.0-dev.20230923",
+    "@swim/view": "4.0.0-dev.20230923",
+    "@swim/dom": "4.0.0-dev.20230923",
+    "@swim/graphics": "4.0.0-dev.20230923",
+    "@swim/controller": "4.0.0-dev.20230923",
+    "@swim/button": "4.0.0-dev.20230923",
+    "tslib": ">= 2.5"
+  },
+  "scripts": {
+    "main:compile": "tsc -b main && api-extractor run -l -c main/api-extractor.json",
+    "main:bundle": "cd main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "compile": "npm run main:compile",
+    "build": "npm run main:build",
+    "doc": "npx typedoc",
+    "clean": "rm -rf lib dist"
+  }
+}

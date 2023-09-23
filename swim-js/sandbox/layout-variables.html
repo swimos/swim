@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Layout Variables</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="width: 100vw; height: 100vh; margin: 0;">
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const leftPaneWidth = bodyView.constraintVariable("leftPaneWidth");
+bodyView.constraint(leftPaneWidth.constrain(), "eq", bodyView.style.width.divide(4));
+
+const rightPaneWidth = bodyView.constraintVariable("rightPaneWidth");
+bodyView.constraint(rightPaneWidth.constrain(), "eq", bodyView.style.width.minus(leftPaneWidth));
+
+const sidebarView = bodyView.appendChild("div").style.set({
+  position: "absolute",
+  top: 0,
+  bottom: 0,
+  left: 0,
+  borderRightWidth: 1,
+  borderRightStyle: "solid",
+  borderRightColor: "#0000cc",
+});
+sidebarView.constraint(sidebarView.style.width.constrain(), "eq", leftPaneWidth);
+
+const circleView = bodyView.appendChild("div").style.set({
+  position: "absolute",
+  borderRadius: "50%",
+  backgroundColor: "#989898",
+});
+circleView.constraint(circleView.style.width.constrain(), "eq", circleView.style.height);
+circleView.constraint(circleView.style.height.constrain(), "eq", bodyView.style.height.divide(3));
+circleView.constraint(circleView.style.left.constrain(), "eq", leftPaneWidth.plus(rightPaneWidth.times(0.5)).minus(circleView.style.width.times(0.5)));
+circleView.constraint(circleView.style.top.constrain(), "eq", bodyView.style.height.times(0.5).minus(circleView.style.height.times(0.5)).plus(10));
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+  "extends": ["@microsoft/api-extractor/extends/tsdoc-base.json"],
+  "tagDefinitions": [
+    {
+      "tagName": "@abstract",
+      "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@protected",
+      "syntaxKind": "modifier"
+    }
+  ],
+  "supportForTags": {
+    "@abstract": true,
+    "@protected": true
+  }
+}

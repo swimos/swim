@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Pie</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-vis/dist/umd/swim-vis.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").style.set({
+  position: "relative",
+  width: "67%",
+  height: "67%",
+  touchAction: "none",
+  userSelect: "none",
+});
+
+const canvasView = swim.CanvasView.create().set({
+  style: {
+    touchAction: "manipulation",
+  },
+  mouseEvents: true,
+  pointerEvents: true,
+  touchEvents: true,
+});
+
+const pieView = canvasView.appendChild(swim.PieView).set({
+  font: "16px sans-serif",
+});
+
+const slice0View = pieView.appendChild(swim.SliceView).set({
+  value: 1,
+  label: "Label 0",
+  legend: "Legend 0",
+});
+slice0View.label.view.set({
+  font: "14px sans-serif",
+  textColor: swim.Look.backgroundColor,
+});
+slice0View.addEventListener("pointerenter", function (event) {
+  slice0View.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]], true);
+});
+slice0View.addEventListener("pointerleave", function (event) {
+  slice0View.modifyMood(swim.Feel.default, [[swim.Feel.primary, void 0]], true);
+});
+
+const slice1View = pieView.appendChild(swim.SliceView).set({
+  value: 2,
+  label: "Label 1",
+  legend: "Legend 1",
+});
+slice1View.label.view.set({
+  font: "14px sans-serif",
+  textColor: swim.Look.backgroundColor,
+});
+slice1View.addEventListener("pointerenter", function (event) {
+  slice1View.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+});
+slice1View.addEventListener("pointerleave", function (event) {
+  slice1View.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+});
+
+setInterval(function () {
+  const timing = swim.Easing.linear.withDuration(1000);
+  slice0View.set({
+    value: Math.random(),
+    outerRadius: swim.Length.pct(20 + 10 * Math.random()),
+  }, timing);
+  slice1View.set({
+    value: Math.random(),
+    outerRadius: swim.Length.pct(20 + 10 * Math.random()),
+  }, timing);
+}, 1000);
+
+containerView.appendChild(canvasView);
+
+    </script>
+  </body>
+</html>

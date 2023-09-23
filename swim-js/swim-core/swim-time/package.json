@@ -1,0 +1,39 @@
+{
+  "name": "@swim/time",
+  "version": "4.0.0-dev.20230923",
+  "description": "Date-time, time zone, and time interval data types, with strptime/strftime-style parsers and formatters",
+  "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-time",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2023 Nstream, inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim-js.git",
+  "type": "module",
+  "main": "./dist/swim-time.js",
+  "types": "./dist/swim-time.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-time.js",
+      "types": "./dist/swim-time.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20230923",
+    "@swim/codec": "4.0.0-dev.20230923",
+    "@swim/structure": "4.0.0-dev.20230923",
+    "tslib": ">= 2.5"
+  },
+  "scripts": {
+    "main:compile": "tsc -b main && api-extractor run -l -c main/api-extractor.json",
+    "main:bundle": "cd main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "test:compile": "tsc -b test",
+    "test:bundle": "cd test && rollup -c",
+    "test:build": "npm run test:compile && npm run test:bundle",
+    "compile": "npm run main:compile",
+    "build": "npm run main:build",
+    "test": "npx swim-unit -m dist/swim-time-test.js",
+    "doc": "npx typedoc",
+    "clean": "rm -rf lib dist"
+  }
+}

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Panel</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body swim-theme style="display: flex;">
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-ux/dist/umd/swim-ux.js"></script>
+    <script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const boardView = swim.BoardView.create().style.set({
+  width: "100%",
+});
+
+const panelView = boardView.appendChild(swim.PanelView).style.set({
+  margin: 6,
+});
+
+// Upper thirds
+
+(function () {
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  const subPanelView = panelView.appendChild(swim.PanelView).set({
+    paneLayout: "frame",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+})();
+
+(function () {
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  const subPanelView = panelView.appendChild(swim.PanelView).set({
+    paneLayout: "frame",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+})();
+
+(function () {
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  const subPanelView = panelView.appendChild(swim.PanelView).set({
+    paneLayout: "frame",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1,
+    unitHeight: 1 / 2,
+  });
+})();
+
+(function () {
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  const subPanelView = panelView.appendChild(swim.PanelView).set({
+    paneLayout: "frame",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1,
+    unitHeight: 1 / 2,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+})();
+
+// Lower thirds
+
+(function () {
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  const subPanelView = panelView.appendChild(swim.PanelView).set({
+    paneLayout: "frame",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+})();
+
+(function () {
+  const subPanelView = panelView.appendChild(swim.PanelView).set({
+    paneLayout: "frame",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+})();
+
+(function () {
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  const subPanelView = panelView.appendChild(swim.PanelView).set({
+    paneLayout: "frame",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1,
+    unitHeight: 1 / 2,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+})();
+
+(function () {
+  const subPanelView = panelView.appendChild(swim.PanelView).set({
+    paneLayout: "frame",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1,
+    unitHeight: 1 / 2,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 2,
+    unitHeight: 2 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 3,
+  });
+})();
+
+// Miscellaneous
+
+(function () {
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 9 / 24,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 9 / 24,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 9 / 24,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 3 / 24,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 3 / 24,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 3 / 24,
+  });
+  const subPanelView = panelView.appendChild(swim.PanelView).set({
+    unitWidth: 3 / 4,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 2 / 3,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 2 / 3,
+    unitHeight: 1 / 2,
+  });
+  subPanelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 3,
+    unitHeight: 1 / 2,
+  });
+  panelView.appendChild(swim.PanelView).set({
+    panelStyle: "card",
+    unitWidth: 1 / 4,
+    unitHeight: 1 / 2,
+    minPanelHeight: 360,
+  });
+})();
+
+bodyView.appendChild(boardView);
+
+    </script>
+  </body>
+</html>
