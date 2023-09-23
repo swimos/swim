@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Graph Controller</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; margin: 0; overflow: hidden;">
+    <script src="../../node_modules/tslib/tslib.js"></script>
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-vis/dist/umd/swim-vis.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").style.set({
+  display: "flex",
+  width: "90%",
+  height: "90%",
+  touchAction: "none",
+  userSelect: "none",
+});
+
+const canvasView = swim.CanvasView.create().set({
+  style: {
+    touchAction: "manipulation",
+  },
+  wheelEvents: true,
+  mouseEvents: true,
+  pointerEvents: true,
+  touchEvents: true,
+});
+
+class ExampleGraphController extends swim.GraphController {
+  constructor() {
+    super();
+    ExampleGraphController.initFasteners(this);
+  }
+}
+ExampleGraphController.defineField("graph", [swim.TraitViewRef({
+  extends: true,
+  initView(graphView) {
+    super.initView(graphView);
+    graphView.set({
+      xDomainPadding: [Math.PI, Math.PI],
+      yDomainPadding: [1, 1],
+      xRangePadding: [2, 2],
+      yRangePadding: [2, 2],
+      fitAspectRatio: -1 / 4,
+    });
+    graphView.preserveAspectRatio(true);
+    graphView.domainTracking(true);
+    graphView.xScaleGestures(true);
+    graphView.yScaleGestures(true);
+  },
+})]);
+ExampleGraphController.defineField("plots", [swim.TraitViewControllerSet({
+  extends: true,
+  attachPlotView(plotView, plotController) {
+    super.attachPlotView(plotView, plotController);
+    plotView.hitMode.set("plot");
+    plotView.addEventListener("pointerenter", function (event) {
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+    });
+    plotView.addEventListener("pointerleave", function (event) {
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+    });
+  },
+})]);
+
+const plot1Model = new swim.Model();
+const plot1Trait = new swim.LinePlotTrait().set({
+  stroke: swim.Look.accentColor,
+  strokeWidth: 4,
+});
+plot1Model.setTrait("plot", plot1Trait);
+
+const dataSet1Trait = new swim.DataSetTrait();
+const cycles = 4;
+const samplesPerCycle = 100;
+let i = 0;
+let n = cycles * samplesPerCycle
+while (i <= n) {
+  const x = i * 2 * Math.PI / samplesPerCycle;
+  const y = Math.sin(x) * x;
+  const dataPointModel = new swim.Model();
+  const dataPointTrait = new swim.DataPointTrait(x, y);
+  dataPointModel.setTrait("dataPoint", dataPointTrait);
+  plot1Model.appendChild(dataPointModel);
+  i += 1;
+}
+plot1Model.setTrait("dataSet", dataSet1Trait);
+
+const graphModel = new swim.Model();
+graphModel.mount();
+const graphTrait = new swim.GraphTrait();
+graphModel.setTrait("graph", graphTrait);
+graphModel.appendChild(plot1Model);
+
+const graphController = new ExampleGraphController();
+graphController.mount();
+graphController.graph.insertView(canvasView);
+graphController.graph.setTrait(graphTrait);
+
+containerView.appendChild(canvasView);
+
+    </script>
+  </body>
+</html>

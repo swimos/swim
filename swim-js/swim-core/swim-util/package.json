@@ -1,0 +1,36 @@
+{
+  "name": "@swim/util",
+  "version": "4.0.0-dev.20230923",
+  "description": "Interfaces for ordering, equality, hashing, type conversions, functional maps, interpolators, scales, iterators, builders, key-value maps, caches, and assertions",
+  "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-util",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2023 Nstream, inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim-js.git",
+  "type": "module",
+  "main": "./dist/swim-util.js",
+  "types": "./dist/swim-util.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-util.js",
+      "types": "./dist/swim-util.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "tslib": ">= 2.5"
+  },
+  "scripts": {
+    "main:compile": "tsc -b main && api-extractor run -l -c main/api-extractor.json",
+    "main:bundle": "cd main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "test:compile": "tsc -b test",
+    "test:bundle": "cd test && rollup -c",
+    "test:build": "npm run test:compile && npm run test:bundle",
+    "compile": "npm run main:compile",
+    "build": "npm run main:build",
+    "test": "npx swim-unit -m dist/swim-util-test.js",
+    "doc": "npx typedoc",
+    "clean": "rm -rf lib dist"
+  }
+}

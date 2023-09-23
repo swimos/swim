@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim GeoGrid</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css">
+  </head>
+  <body swim-theme style="width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../node_modules/tslib/tslib.js"></script>
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-maps/dist/umd/swim-maps.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <script>
+
+mapboxgl.accessToken = "pk.eyJ1Ijoic3dpbWl0IiwiYSI6ImNqY2c3NXZkYzFoa2QycXQ1eXl1Mnd6M3EifQ.qpRE7xC08AyZfxJ56LoN7w";
+
+const vehicleIcon = swim.VectorIcon.create(24, 24, "M20,6L20,17C20,17.87,19.57,18.46,19,19L19,21C19,21.56,18.56,22,18,22L17,22C16.44,22,16,21.56,16,21.02L16,20L8,20L8,21C8,21.56,7.56,22,7,22L6,22C5.44,22,5.05,21.56,5,21L5,19C4.43,18.46,4.05,17.87,4,17L4,6C4,3.54,5.89,2.56,8.54,2.2L9,2.14L9,2.14L9.47,2.1L9.47,2.1L9.96,2.06L9.96,2.06L10.45,2.03L10.45,2.03L11.22,2.01L11.22,2.01L12,2L12,2L12.52,2L13.04,2.01L13.04,2.01L13.55,2.02L13.55,2.02L14.04,2.05L14.04,2.05L14.53,2.08C14.61,2.09,14.69,2.1,14.77,2.1L15.24,2.15L15.24,2.15L15.69,2.22C18.22,2.6,20,3.61,20,6ZM7.5,14C6.67,14,6,14.67,6,15.5C6,16.33,6.67,17,7.5,17C8.33,17,9,16.33,9,15.5C9,14.67,8.33,14,7.5,14ZM16.5,14C15.67,14,15,14.67,15,15.5C15,16.33,15.67,17,16.5,17C17.33,17,18,16.33,18,15.5C18,14.67,17.33,14,16.5,14ZM18,6L6,6L6,11L18,11L18,6Z");
+
+class ExampleMapboxController extends swim.MapController {
+  constructor() {
+    super();
+    ExampleMapboxController.initFasteners(this);
+  }
+  createMapView(containerView) {
+    const map = new mapboxgl.Map({
+      container: containerView.node,
+      //style: "mapbox://styles/mapbox/dark-v10",
+      center: {lng: 0, lat: 0},
+      zoom: 1,
+    });
+    return new swim.MapboxView(map);
+  }
+}
+ExampleMapboxController.defineField("map", [swim.TraitViewRef({
+  extends: true,
+  initView(mapView) {
+    super.initView(mapView);
+    mapView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
+  },
+})]);
+ExampleMapboxController.defineField("canvas", [swim.ViewRef({
+  extends: true,
+  initView(canvasView) {
+    super.initView(canvasView);
+    canvasView.style.set({
+      touchAction: "manipulation",
+      pointerEvents: true,
+    });
+  },
+})]);
+ExampleMapboxController.defineField("layers", [swim.TraitViewControllerSet({
+  extends: true,
+  createController(layerTrait) {
+    if (layerTrait instanceof ExampleTileTrait) {
+      return new ExampleTileController(swim.GeoTile.root());
+    }
+    return super.createController(layerTrait);
+  },
+})]);
+
+class ExampleTileController extends swim.GeoTileController {
+  constructor(geoTile) {
+    super(geoTile);
+    ExampleTileController.initFasteners(this);
+    if (geoTile.z % 2 === 0) { // consume even zoom level tiles
+      this.visibleRange.set([geoTile.z, geoTile.z + 2]);
+      this.consumeRange.set([geoTile.z, geoTile.z + 2]);
+    } else { // disable auto-consumption of odd zoom level tiles
+      this.visibleRange.set([geoTile.z, geoTile.z]);
+      this.consumeRange.set([geoTile.z, geoTile.z]);
+    }
+  }
+}
+ExampleTileController.defineField("geo", [swim.TraitViewRef({
+  extends: true,
+  initView(tileView) {
+    super.initView(tileView);
+    tileView.geoBoundsColor.set("#008f11");
+  },
+})]);
+ExampleTileController.defineField("tiles", [swim.TraitViewControllerSet({
+  extends: true,
+  attachTileView(tileView, tileController) {
+    super.attachTileView(tileView, tileController);
+  },
+})]);
+
+class ExampleTileTrait extends swim.GeoTileTrait {
+  constructor(geoTile) {
+    super(geoTile);
+    ExampleTileTrait.initFasteners(this);
+    const tileId = geoTile.x + "," + geoTile.y + "," + geoTile.z;
+    this.nodeUri.set(swim.Uri.path(swim.UriPath.of("/", "map", "/", tileId)));
+  }
+  onStartConsuming() {
+    console.log("onStartConsuming " + this.geoTile);
+    super.onStartConsuming();
+  }
+  onStopConsuming() {
+    console.log("onStopConsuming " + this.geoTile);
+    super.onStopConsuming();
+    this.features.setModels({});
+  }
+}
+ExampleTileTrait.defineField("vehiclesDownlink", [swim.MapDownlink({
+  consumed: true,
+  laneUri: "vehicles",
+  didUpdate(key, value) {
+    console.log(this.getNodeUri() + " updateVehicle " + key.toLike() + ":", value.toLike());
+    const featureId = key.stringValue();
+    let featureModel = this.owner.getChild(featureId);
+    let featureTrait = featureModel !== null ? featureModel.getTrait(swim.GeoIconTrait) : null;
+    if (featureTrait === null) {
+      featureTrait = new swim.GeoIconTrait();
+      featureTrait.iconLayout.set({width: 16, height: 16})
+      featureTrait.graphics.set(vehicleIcon);
+      this.owner.features.insertTrait(void 0, featureTrait, void 0, featureId);
+      featureModel = featureTrait.model;
+    }
+    const lng = value.get("longitude").numberValue(NaN);
+    const lat = value.get("latitude").numberValue(NaN);
+    if (isFinite(lng) && isFinite(lat)) {
+      featureTrait.geoCenter.set([lng, lat]);
+    }
+  },
+})]);
+
+const layerModel = new swim.Model();
+const layerTrait = new ExampleTileTrait(swim.GeoTile.root());
+layerModel.setTrait("layer", layerTrait);
+
+const mapModel = new swim.Model();
+const mapTrait = new swim.MapTrait();
+mapTrait.hostUri.set("warps://transit.swim.services");
+mapModel.setTrait("map", mapTrait);
+mapModel.appendChild(layerModel, "layer");
+mapModel.mount();
+
+const mapController = new ExampleMapboxController();
+mapController.mount();
+mapController.map.setTrait(mapTrait);
+mapController.container.setView(swim.HtmlView.fromNode(document.body));
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "out": "lib/doc",
+  "categorizeByGroup": false,
+  "excludeInternal": true,
+  "entryPointStrategy": "packages",
+  "entryPoints": [
+    "swim-util",
+    "swim-codec",
+    "swim-component",
+    "swim-collections",
+    "swim-constraint",
+    "swim-structure",
+    "swim-recon",
+    "swim-uri",
+    "swim-math",
+    "swim-geo",
+    "swim-time"
+  ]
+}

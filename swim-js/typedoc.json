@@ -1,0 +1,50 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Swim",
+  "out": "lib/doc",
+  "categorizeByGroup": false,
+  "excludeInternal": true,
+  "entryPointStrategy": "packages",
+  "entryPoints": [
+    "swim-core/swim-util",
+    "swim-core/swim-codec",
+    "swim-core/swim-component",
+    "swim-core/swim-collections",
+    "swim-core/swim-constraint",
+    "swim-core/swim-structure",
+    "swim-core/swim-recon",
+    "swim-core/swim-uri",
+    "swim-core/swim-math",
+    "swim-core/swim-geo",
+    "swim-core/swim-time",
+
+    "swim-host/swim-warp",
+    "swim-host/swim-client",
+
+    "swim-ui/swim-model",
+    "swim-ui/swim-style",
+    "swim-ui/swim-theme",
+    "swim-ui/swim-view",
+    "swim-ui/swim-dom",
+    "swim-ui/swim-graphics",
+    "swim-ui/swim-controller",
+
+    "swim-ux/swim-button",
+    "swim-ux/swim-toolbar",
+    "swim-ux/swim-token",
+    "swim-ux/swim-table",
+    "swim-ux/swim-window",
+    "swim-ux/swim-sheet",
+    "swim-ux/swim-panel",
+
+    "swim-vis/swim-gauge",
+    "swim-vis/swim-pie",
+    "swim-vis/swim-chart",
+
+    "swim-maps/swim-map",
+    "swim-maps/swim-mapbox",
+    "swim-maps/swim-leaflet",
+    "swim-maps/swim-googlemap",
+    "swim-maps/swim-esrimap"
+  ]
+}

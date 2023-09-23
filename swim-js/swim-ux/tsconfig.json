@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {"path": "./swim-button"},
+    {"path": "./swim-toolbar"},
+    {"path": "./swim-token"},
+    {"path": "./swim-table"},
+    {"path": "./swim-window"},
+    {"path": "./swim-sheet"},
+    {"path": "./swim-panel"},
+    {"path": "./main"}
+  ]
+}

@@ -1,14 +1,14 @@
-# Ignore IDE cache
+# ignore IDE files
 .vscode
 
-# Ignore mac hidden files
+# ignore hidden macOS files
 .DS_Store
 *.DS_Store
 
-# Ignore folders
+# ignore folders
+dist
+lib
 node_modules
 
-# Ignore files
-.tsbuildinfo
+# ignore files
 package-lock.json
-yarn.lock

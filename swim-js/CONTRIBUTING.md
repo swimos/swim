@@ -1,14 +1,69 @@
-# <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/breach-marlin-blue-wide.svg"></a> Contributing to the Swim TypeScript SDK
+# [![Swim](https://docs.swimos.org/readme/breach-marlin-blue-wide.svg)](https://www.swimos.org) Swim Frontend Stack Contributing Guide
 
-The Swim TypeScript SDK comprises several substantial software frameworks, each
-implementing a different part of the frontend stack. Please see each individual
-subsystem for its particular contributing guidelines.
+The Swim frontend stack comprises multiple layers of frameworks,
+each implementing a different layer of the frontend stack.
 
-- **[Swim Runtime](swim-runtime-js)**
-  - [Core Framework](swim-runtime-js/swim-core-js)
-  - [Host Framework](swim-runtime-js/swim-host-js)
-- **[Swim Toolkit](swim-toolkit-js)**
-  - [UI Framework](swim-toolkit-js/swim-ui-js)
-  - [UX Framework](swim-toolkit-js/swim-ux-js)
-  - [Vis Framework](swim-toolkit-js/swim-vis-js)
-  - [Maps Framework](swim-toolkit-js/swim-maps-js)
+### Development environment
+
+To develop locally, clone this repository and install its build dependencies:
+
+```sh
+npm install
+```
+
+Next bootstrap the `swim-build` tool used to compile the 30+ libraries that
+comprise the Swim frontend stack.
+
+```sh
+npm run bootstrap
+```
+
+Run the build tool with `npx swim-build`:
+
+```sh
+npx swim-build help # prints swim-build usage instructions
+npx swim-build pkgs # lists buildable packages
+```
+
+### Compiling sources
+
+The `swim-build` command compiles, lints, api-extracts, and bundles
+TypeScript sources. To compile all packages, run:
+
+```sh
+npx swim-build
+```
+
+To compile a subset of packages, specify a `--pkgs` (`-p`) option followed
+by a comma-separated list of package names. For example, to compile the `ui`
+framework and its dependencies, run:
+
+```sh
+npx swim-build -p ui
+```
+
+### Running tests
+
+Pass the `--test` (`-t`) option to `swim-build` to run unit tests after
+compiling each package. For example, to compile and test the `core` package
+and its dependencies, run:
+
+```sh
+npx swim-build -p ui -t
+```
+
+The `test` sub-command reruns unit tests without rebuilding the package.
+For example, to test the `client` package, run:
+
+```sh
+npx swim-build test -p client
+```
+
+### Continuous development builds
+
+The `watch` sub-command automatically rebuilds packages when dependent files
+change. For example, to continuously build the `ux` package, run:
+
+```sh
+npx swim-build watch -p ux
+```

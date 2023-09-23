@@ -1,0 +1,9 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "out": "lib/doc",
+  "categorizeByGroup": false,
+  "excludeInternal": true,
+  "entryPoints": [
+    "./main/index.ts"
+  ]
+}

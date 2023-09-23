@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Chart Controller</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; margin: 0; overflow: hidden;">
+    <script src="../../node_modules/tslib/tslib.js"></script>
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-vis/dist/umd/swim-vis.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").style.set({
+  position: "relative",
+  width: "90%",
+  height: "90%",
+  touchAction: "none",
+  userSelect: "none",
+});
+
+const canvasView = swim.CanvasView.create().set({
+  style: {
+    touchAction: "manipulation",
+  },
+  wheelEvents: true,
+  mouseEvents: true,
+  pointerEvents: true,
+  touchEvents: true,
+});
+
+class ExampleChartController extends swim.ChartController {
+  constructor() {
+    super();
+    ExampleChartController.initFasteners(this);
+  }
+}
+ExampleChartController.defineField("chart", [swim.TraitViewRef({
+  extends: true,
+  initView(chartView) {
+    super.initView(chartView);
+    chartView.xDomainPadding.set([Math.PI, Math.PI]);
+    chartView.yDomainPadding.set([1, 1]);
+    //chartView.xRangePadding.set([2, 2]);
+    //chartView.yRangePadding.set([2, 2]);
+    chartView.fitAspectRatio.set(-1 / 4);
+    chartView.preserveAspectRatio(true);
+    chartView.domainTracking(true);
+    chartView.xScaleGestures(true);
+    chartView.yScaleGestures(true);
+    chartView.font.set("12px sans-serif");
+  },
+})]);
+ExampleChartController.defineField("plots", [swim.TraitViewControllerSet({
+  extends: true,
+  attachPlotView(plotView, plotController) {
+    super.attachPlotView(plotView, plotController);
+    plotView.set({
+      hitMode: "plot",
+    });
+    plotView.addEventListener("pointerenter", function (event) {
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+    });
+    plotView.addEventListener("pointerleave", function (event) {
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+    });
+  },
+})]);
+
+const plot1Model = new swim.Model();
+const plot1Trait = new swim.LinePlotTrait().set({
+  stroke: swim.Look.accentColor,
+  strokeWidth: 4,
+});
+plot1Model.setTrait("plot", plot1Trait);
+
+const dataSet1Trait = new swim.DataSetTrait();
+const cycles = 4;
+const samplesPerCycle = 100;
+let i = 0;
+let n = cycles * samplesPerCycle
+while (i <= n) {
+  const x = i * 2 * Math.PI / samplesPerCycle;
+  const y = Math.sin(x) * x;
+  const dataPointModel = new swim.Model();
+  const dataPointTrait = new swim.DataPointTrait(x, y);
+  dataPointModel.setTrait("dataPoint", dataPointTrait);
+  plot1Model.appendChild(dataPointModel);
+  i += 1;
+}
+plot1Model.setTrait("dataSet", dataSet1Trait);
+
+const chartModel = new swim.Model();
+chartModel.mount();
+const chartTrait = new swim.ChartTrait();
+chartModel.setTrait("chart", chartTrait);
+const graphTrait = new swim.GraphTrait();
+chartModel.setTrait("graph", graphTrait);
+//const topAxisTrait = new swim.TopAxisTrait();
+//chartModel.setTrait("topAxis", topAxisTrait);
+//const rightAxisTrait = new swim.RightAxisTrait();
+//chartModel.setTrait("rightAxis", rightAxisTrait);
+const bottomAxisTrait = new swim.BottomAxisTrait();
+chartModel.setTrait("bottomAxis", bottomAxisTrait);
+const leftAxisTrait = new swim.LeftAxisTrait();
+chartModel.setTrait("leftAxis", leftAxisTrait);
+chartModel.appendChild(plot1Model);
+
+const chartController = new ExampleChartController();
+chartController.mount();
+chartController.chart.insertView(canvasView);
+chartController.chart.setTrait(chartTrait);
+
+containerView.appendChild(canvasView);
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+.gitignore
+.npmignore
+cli/
+!dist
+dist/*-test.*
+doc/
+lib/
+main/
+test/
+tsconfig.json
+tsdoc.json
+typedoc.json
+webworker/
+worker/

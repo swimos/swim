@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Stack Controller</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body swim-theme style="display: flex;">
+    <script src="../../node_modules/tslib/tslib.js"></script>
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-ux/dist/umd/swim-ux.js"></script>
+    <script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+class ExampleStackController extends swim.StackController {
+  constructor() {
+    super();
+    ExampleStackController.initFasteners(this);
+  }
+}
+ExampleStackController.defineField("navBar", [swim.TraitViewControllerRef({
+  extends: true,
+  attachNavBarView(navBarView, navBarController) {
+    navBarView.barHeight.set(48);
+    super.attachNavBarView(navBarView, navBarController);
+  },
+  controllerDidPressSearchButton(input, event, navBarController) {
+    this.owner.front.controller.searching.set(true);
+    navBarController.searchInput.controller.input.view.node.focus();
+  },
+  controllerDidUpdateSearch(query, inputView, navBarController) {
+    // hook
+  },
+  controllerDidSubmitSearch(query, inputView, navBarController) {
+    // hook
+  },
+  controllerDidCancelSearch(inputView, navBarController) {
+    this.owner.front.controller.searching.set(false);
+  },
+})]);
+ExampleStackController.defineField("sheets", [swim.TraitViewControllerSet({
+  extends: true,
+  attachSheetView(sheetView, sheetController) {
+    super.attachSheetView(sheetView, sheetController);
+    const sheetTrait = sheetController.sheet.trait;
+    if (sheetTrait !== null) {
+      sheetView.appendChild("h2").set({
+        style: {
+          margin: 12,
+          cursor: "pointer",
+          userSelect: "none",
+        },
+        text: sheetTrait.title.value,
+      });
+    }
+  },
+})]);
+
+const stackController = new ExampleStackController();
+stackController.mount();
+stackController.stack.attachView().style.set({
+  flexGrow: 1,
+});
+
+const navBarController = stackController.navBar.insertController();
+navBarController.closeButton.insertController();
+navBarController.backButton.insertController();
+navBarController.searchButton.insertController();
+navBarController.searchInput.insertController();
+navBarController.cancelSearch.insertController();
+
+function createSheetController(i) {
+  const sheetTitle = "Sheet " + i;
+  const sheetController = new swim.SheetController().set({
+    title: sheetTitle,
+    searchable: i % 2 !== 0,
+  });
+  const sheetView = sheetController.sheet.attachView();
+  sheetView.dismiss(false);
+  const headerView = sheetView.appendChild("h2").set({
+    style: {
+      margin: 12,
+      cursor: "pointer",
+      userSelect: "none",
+    },
+    text: sheetTitle,
+  });
+  headerView.addEventListener("click", () => {
+    stackController.sheets.addController(createSheetController(i + 1));
+  });
+  return sheetController;
+}
+stackController.sheets.addController(createSheetController(1));
+
+stackController.stack.insertView(bodyView);
+
+    </script>
+  </body>
+</html>
