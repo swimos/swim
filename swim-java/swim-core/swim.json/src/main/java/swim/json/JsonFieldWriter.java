@@ -35,7 +35,7 @@ import swim.decl.FilterMode;
 import swim.util.Notation;
 import swim.util.PropertyGetter;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -174,7 +174,7 @@ public interface JsonFieldWriter<V, T> extends PropertyGetter<V, T> {
 
 }
 
-final class JsonFieldValueWriter<V, T> implements JsonFieldWriter<V, T>, ToSource {
+final class JsonFieldValueWriter<V, T> implements JsonFieldWriter<V, T>, WriteSource {
 
   final String key;
   final JsonWriter<String> keyWriter;
@@ -229,12 +229,12 @@ final class JsonFieldValueWriter<V, T> implements JsonFieldWriter<V, T>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonFieldKeyWriter<V, T extends Map<String, V>> implements JsonFieldWriter<V, T>, ToSource {
+final class JsonFieldKeyWriter<V, T extends Map<String, V>> implements JsonFieldWriter<V, T>, WriteSource {
 
   final String key;
   final JsonWriter<String> keyWriter;
@@ -287,12 +287,12 @@ final class JsonFieldKeyWriter<V, T extends Map<String, V>> implements JsonField
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonFieldIndexWriter<V, T> implements JsonFieldWriter<V, T>, ToSource {
+final class JsonFieldIndexWriter<V, T> implements JsonFieldWriter<V, T>, WriteSource {
 
   final String key;
   final JsonWriter<String> keyWriter;
@@ -350,7 +350,7 @@ final class JsonFieldIndexWriter<V, T> implements JsonFieldWriter<V, T>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   /**
@@ -365,7 +365,7 @@ final class JsonFieldIndexWriter<V, T> implements JsonFieldWriter<V, T>, ToSourc
 
 }
 
-final class JsonFieldHandleWriter<V, T> implements JsonFieldWriter<V, T>, ToSource {
+final class JsonFieldHandleWriter<V, T> implements JsonFieldWriter<V, T>, WriteSource {
 
   final String key;
   final JsonWriter<String> keyWriter;
@@ -420,12 +420,12 @@ final class JsonFieldHandleWriter<V, T> implements JsonFieldWriter<V, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonFieldGetterWriter<V, T> implements JsonFieldWriter<V, T>, ToSource {
+final class JsonFieldGetterWriter<V, T> implements JsonFieldWriter<V, T>, WriteSource {
 
   final String key;
   final JsonWriter<String> keyWriter;
@@ -485,7 +485,7 @@ final class JsonFieldGetterWriter<V, T> implements JsonFieldWriter<V, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

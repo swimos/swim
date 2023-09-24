@@ -21,11 +21,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.term.Term;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class Attr implements Term, Map.Entry<String, Repr>, ToSource {
+public final class Attr implements Term, Map.Entry<String, Repr>, WriteSource {
 
   int flags;
 
@@ -136,7 +136,7 @@ public final class Attr implements Term, Map.Entry<String, Repr>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final int IMMUTABLE_FLAG = 1 << 0;

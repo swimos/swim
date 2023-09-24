@@ -21,9 +21,9 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 /**
  * Description of a source position, identified by byte offset, line,
@@ -31,7 +31,7 @@ import swim.util.ToString;
  */
 @Public
 @Since("5.0")
-public final class SourcePosition extends SourceLocation implements Comparable<SourcePosition>, ToMarkup, ToSource, ToString {
+public final class SourcePosition extends SourceLocation implements Comparable<SourcePosition>, WriteMarkup, WriteSource, WriteString {
 
   final @Nullable String name;
   final long offset;
@@ -248,7 +248,7 @@ public final class SourcePosition extends SourceLocation implements Comparable<S
 
   @Override
   public String toString() {
-    return this.toString(null);
+    return WriteString.toString(this);
   }
 
   /**

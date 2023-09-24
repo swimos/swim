@@ -25,12 +25,12 @@ import swim.annotations.Since;
 import swim.collections.HashTrieMap;
 import swim.util.Notation;
 import swim.util.Severity;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public class Logger implements LogPublisher, ToMarkup, ToSource {
+public class Logger implements LogPublisher, WriteMarkup, WriteSource {
 
   final String topic;
 
@@ -641,7 +641,7 @@ public class Logger implements LogPublisher, ToMarkup, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final int BUBBLES_FLAG = 1 << 0;

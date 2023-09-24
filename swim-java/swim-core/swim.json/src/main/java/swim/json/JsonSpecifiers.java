@@ -24,11 +24,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.json.decl.JsonClassFormat;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class JsonSpecifiers implements JsonProvider, ToSource {
+public final class JsonSpecifiers implements JsonProvider, WriteSource {
 
   final JsonMetaCodec metaCodec;
   final int priority;
@@ -79,7 +79,7 @@ public final class JsonSpecifiers implements JsonProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static JsonSpecifiers provider(JsonMetaCodec metaCodec, int priority) {

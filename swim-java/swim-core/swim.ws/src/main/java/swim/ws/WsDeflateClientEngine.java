@@ -15,9 +15,9 @@
 package swim.ws;
 
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
-final class WsDeflateClientEngine extends WsDeflateEngine implements ToSource {
+final class WsDeflateClientEngine extends WsDeflateEngine implements WriteSource {
 
   WsDeflateClientEngine(WsOptions options) {
     super(options);
@@ -61,7 +61,7 @@ final class WsDeflateClientEngine extends WsDeflateEngine implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

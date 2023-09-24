@@ -17,11 +17,11 @@ package swim.ws;
 import java.io.IOException;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public enum WsOpcode implements ToSource {
+public enum WsOpcode implements WriteSource {
 
   CONTINUATION(0x0, "continuation"),
   TEXT(0x1, "text"),

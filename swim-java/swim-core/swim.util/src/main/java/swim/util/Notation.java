@@ -272,16 +272,16 @@ public class Notation implements Appendable {
 
   /**
    * Appends a source code string representation of the given {@code object}.
-   * Delegates to {@link ToSource#writeSource(Appendable)}, if {@code object}
-   * implements {@code ToSource}; appends a Java source code literal,
+   * Delegates to {@link WriteSource#writeSource(Appendable)}, if {@code object}
+   * implements {@code WriteSource}; appends a Java source code literal,
    * if {@code object} is a {@code String} or boxed primitive; otherwise
    * appends the {@code toString} representation of {@code object}.
    */
   public Notation appendSource(@Nullable Object object) {
-    if (object instanceof ToSource) {
+    if (object instanceof WriteSource) {
       if (this.error == null) {
         try {
-          ((ToSource) object).writeSource(this);
+          ((WriteSource) object).writeSource(this);
         } catch (IOException cause) {
           this.error = cause;
         }
@@ -586,10 +586,10 @@ public class Notation implements Appendable {
   }
 
   public Notation appendMarkup(@Nullable Object object) {
-    if (object instanceof ToMarkup) {
+    if (object instanceof WriteMarkup) {
       if (this.error == null) {
         try {
-          ((ToMarkup) object).writeMarkup(this);
+          ((WriteMarkup) object).writeMarkup(this);
         } catch (IOException cause) {
           this.error = cause;
         }
@@ -677,15 +677,15 @@ public class Notation implements Appendable {
 
   /**
    * Appends a human readable string representation of the given {@code object}.
-   * Delegates to {@link ToString#writeString(Appendable)}, if {@code object}
-   * implements {@code ToString}; otherwise appends the {@code toString}
+   * Delegates to {@link WriteString#writeString(Appendable)}, if {@code object}
+   * implements {@code WriteString}; otherwise appends the {@code toString}
    * representation of {@code object}.
    */
   public Notation appendString(@Nullable Object object) {
-    if (object instanceof ToString) {
+    if (object instanceof WriteString) {
       if (this.error == null) {
         try {
-          ((ToString) object).writeString(this);
+          ((WriteString) object).writeString(this);
         } catch (IOException cause) {
           this.error = cause;
         }

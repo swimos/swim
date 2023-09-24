@@ -34,7 +34,7 @@ import swim.term.TermWriterOptions;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * A writer of values to WAML.
@@ -185,7 +185,7 @@ public interface WamlWriter<@Contravariant T> extends TermWriter<T> {
 
 }
 
-final class WamlWriterUnmapper<T, U> implements WamlWriter<T>, ToSource {
+final class WamlWriterUnmapper<T, U> implements WamlWriter<T>, WriteSource {
 
   final WamlWriter<U> writer;
   final Function<? super T, ? extends U> unmapper;
@@ -311,12 +311,12 @@ final class WamlWriterUnmapper<T, U> implements WamlWriter<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlWriterUnsupported implements WamlWriter<Object>, ToSource {
+final class WamlWriterUnsupported implements WamlWriter<Object>, WriteSource {
 
   private WamlWriterUnsupported() {
     // singleton
@@ -372,7 +372,7 @@ final class WamlWriterUnsupported implements WamlWriter<Object>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlWriterUnsupported INSTANCE = new WamlWriterUnsupported();

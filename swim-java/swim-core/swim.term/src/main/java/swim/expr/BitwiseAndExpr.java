@@ -27,11 +27,11 @@ import swim.term.TermParserOptions;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class BitwiseAndExpr extends InfixExpr implements ToSource {
+public final class BitwiseAndExpr extends InfixExpr implements WriteSource {
 
   public BitwiseAndExpr(Term lhs, Term rhs) {
     super(lhs, rhs);
@@ -83,7 +83,7 @@ public final class BitwiseAndExpr extends InfixExpr implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static BitwiseAndExpr of(Term lhs, Term rhs) {

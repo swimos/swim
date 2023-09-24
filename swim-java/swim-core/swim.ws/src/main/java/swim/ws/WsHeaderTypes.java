@@ -20,7 +20,7 @@ import swim.annotations.Since;
 import swim.http.HttpHeaderProvider;
 import swim.http.HttpHeaderRegistry;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 import swim.ws.header.SecWebSocketAcceptHeader;
 import swim.ws.header.SecWebSocketExtensionsHeader;
 import swim.ws.header.SecWebSocketKeyHeader;
@@ -29,7 +29,7 @@ import swim.ws.header.SecWebSocketVersionHeader;
 
 @Public
 @Since("5.0")
-public final class WsHeaderTypes implements HttpHeaderProvider, ToSource {
+public final class WsHeaderTypes implements HttpHeaderProvider, WriteSource {
 
   @Internal
   public WsHeaderTypes() {
@@ -53,7 +53,7 @@ public final class WsHeaderTypes implements HttpHeaderProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WsHeaderTypes PROVIDER = new WsHeaderTypes();

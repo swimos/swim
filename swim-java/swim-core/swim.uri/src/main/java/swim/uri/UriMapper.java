@@ -29,11 +29,11 @@ import swim.uri.mapper.EmptyUriMapping;
 import swim.uri.mapper.UriSchemeMapper;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<Uri, T>, ToSource {
+public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<Uri, T>, WriteSource {
 
   @Internal
   protected UriMapper() {
@@ -140,7 +140,7 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final UriMapper<Object> EMPTY = new EmptyUriMapping<Object>();

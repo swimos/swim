@@ -29,7 +29,7 @@ import swim.http.HttpHeaderType;
 import swim.http.HttpStatus;
 import swim.http.HttpTransferCoding;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -153,7 +153,7 @@ public final class TransferEncodingHeader extends HttpHeader {
 
 }
 
-final class TransferEncodingHeaderType implements HttpHeaderType<TransferEncodingHeader, FingerTrieList<HttpTransferCoding>>, ToSource {
+final class TransferEncodingHeaderType implements HttpHeaderType<TransferEncodingHeader, FingerTrieList<HttpTransferCoding>>, WriteSource {
 
   @Override
   public String name() {
@@ -192,7 +192,7 @@ final class TransferEncodingHeaderType implements HttpHeaderType<TransferEncodin
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

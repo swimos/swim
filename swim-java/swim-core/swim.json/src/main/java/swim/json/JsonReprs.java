@@ -49,11 +49,11 @@ import swim.util.Assume;
 import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class JsonReprs implements JsonProvider, ToSource {
+public final class JsonReprs implements JsonProvider, WriteSource {
 
   final int priority;
 
@@ -109,7 +109,7 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonReprs PROVIDER = new JsonReprs(BUILTIN_PRIORITY);
@@ -200,7 +200,7 @@ public final class JsonReprs implements JsonProvider, ToSource {
     return value;
   }
 
-  static final class UndefinedFormat implements JsonFormat<UndefinedRepr>, JsonIdentifierParser<UndefinedRepr>, JsonIdentifierWriter<UndefinedRepr>, ToSource {
+  static final class UndefinedFormat implements JsonFormat<UndefinedRepr>, JsonIdentifierParser<UndefinedRepr>, JsonIdentifierWriter<UndefinedRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -250,14 +250,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final UndefinedFormat INSTANCE = new UndefinedFormat();
 
   }
 
-  static final class UnitFormat implements JsonFormat<UnitRepr>, JsonIdentifierParser<UnitRepr>, JsonIdentifierWriter<UnitRepr>, ToSource {
+  static final class UnitFormat implements JsonFormat<UnitRepr>, JsonIdentifierParser<UnitRepr>, JsonIdentifierWriter<UnitRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -307,14 +307,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final UnitFormat INSTANCE = new UnitFormat();
 
   }
 
-  static final class IdentifierFormat implements JsonFormat<Repr>, JsonIdentifierParser<Repr>, JsonIdentifierWriter<Repr>, ToSource {
+  static final class IdentifierFormat implements JsonFormat<Repr>, JsonIdentifierParser<Repr>, JsonIdentifierWriter<Repr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -385,14 +385,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final IdentifierFormat INSTANCE = new IdentifierFormat();
 
   }
 
-  static final class BooleanFormat implements JsonFormat<BooleanRepr>, JsonIdentifierParser<BooleanRepr>, JsonIdentifierWriter<BooleanRepr>, ToSource {
+  static final class BooleanFormat implements JsonFormat<BooleanRepr>, JsonIdentifierParser<BooleanRepr>, JsonIdentifierWriter<BooleanRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -444,14 +444,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final BooleanFormat INSTANCE = new BooleanFormat();
 
   }
 
-  static final class NumberFormat implements JsonFormat<NumberRepr>, JsonNumberParser<NumberRepr>, JsonNumberWriter<NumberRepr>, ToSource {
+  static final class NumberFormat implements JsonFormat<NumberRepr>, JsonNumberParser<NumberRepr>, JsonNumberWriter<NumberRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -539,14 +539,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final NumberFormat INSTANCE = new NumberFormat();
 
   }
 
-  static final class StringFormat implements JsonFormat<StringRepr>, JsonStringParser<StringBuilder, StringRepr>, JsonStringWriter<StringRepr>, ToSource {
+  static final class StringFormat implements JsonFormat<StringRepr>, JsonStringParser<StringBuilder, StringRepr>, JsonStringWriter<StringRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -603,14 +603,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final StringFormat INSTANCE = new StringFormat();
 
   }
 
-  static final class BlobFormat implements JsonFormat<BlobRepr>, JsonStringParser<Output<BlobRepr>, BlobRepr>, JsonStringWriter<BlobRepr>, ToSource {
+  static final class BlobFormat implements JsonFormat<BlobRepr>, JsonStringParser<Output<BlobRepr>, BlobRepr>, JsonStringWriter<BlobRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -674,14 +674,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final BlobFormat INSTANCE = new BlobFormat();
 
   }
 
-  static final class TermFormat implements JsonFormat<Repr>, ToSource {
+  static final class TermFormat implements JsonFormat<Repr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -730,14 +730,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final TermFormat INSTANCE = new TermFormat();
 
   }
 
-  static final class ArrayFormat implements JsonFormat<ArrayRepr>, JsonArrayParser<Repr, ArrayRepr, ArrayRepr>, JsonArrayWriter<Repr, ArrayRepr>, ToSource {
+  static final class ArrayFormat implements JsonFormat<ArrayRepr>, JsonArrayParser<Repr, ArrayRepr, ArrayRepr>, JsonArrayWriter<Repr, ArrayRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -806,14 +806,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ArrayFormat INSTANCE = new ArrayFormat();
 
   }
 
-  static final class ObjectFormat implements JsonFormat<ObjectRepr>, JsonObjectFormat<Repr, ObjectRepr, ObjectRepr>, ToSource {
+  static final class ObjectFormat implements JsonFormat<ObjectRepr>, JsonObjectFormat<Repr, ObjectRepr, ObjectRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -900,14 +900,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ObjectFormat INSTANCE = new ObjectFormat();
 
   }
 
-  static final class TupleFormat implements JsonFormat<TupleRepr>, JsonObjectParser<Repr, TupleRepr, TupleRepr>, JsonObjectWriter<Repr, TupleRepr>, JsonArrayWriter<Repr, TupleRepr>, ToSource {
+  static final class TupleFormat implements JsonFormat<TupleRepr>, JsonObjectParser<Repr, TupleRepr, TupleRepr>, JsonObjectWriter<Repr, TupleRepr>, JsonArrayWriter<Repr, TupleRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -998,14 +998,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final TupleFormat INSTANCE = new TupleFormat();
 
   }
 
-  static final class TupleArrayParser implements JsonArrayParser<Repr, TupleRepr, TupleRepr>, ToSource {
+  static final class TupleArrayParser implements JsonArrayParser<Repr, TupleRepr, TupleRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1048,14 +1048,14 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final TupleArrayParser INSTANCE = new TupleArrayParser();
 
   }
 
-  static final class ValueFormat implements JsonFormat<Repr>, ToSource {
+  static final class ValueFormat implements JsonFormat<Repr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1147,7 +1147,7 @@ public final class JsonReprs implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ValueFormat INSTANCE = new ValueFormat();

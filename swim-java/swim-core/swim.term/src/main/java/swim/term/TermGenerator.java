@@ -19,7 +19,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.ArrayBuilder;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -62,7 +62,7 @@ public interface TermGenerator {
 
 }
 
-final class GenerateTerm implements TermGenerator, ToSource {
+final class GenerateTerm implements TermGenerator, WriteSource {
 
   @Nullable Term term;
 
@@ -94,7 +94,7 @@ final class GenerateTerm implements TermGenerator, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final GenerateTerm EMPTY = new GenerateTerm(null);

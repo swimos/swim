@@ -26,13 +26,13 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
 import swim.util.UpdatableSet;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class ArraySet<T> implements UpdatableSet<T>, ToMarkup, ToSource {
+public final class ArraySet<T> implements UpdatableSet<T>, WriteMarkup, WriteSource {
 
   final Object[] slots;
 
@@ -266,7 +266,7 @@ public final class ArraySet<T> implements UpdatableSet<T>, ToMarkup, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final ArraySet<Object> EMPTY = new ArraySet<Object>(new Object[0]);

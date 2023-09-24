@@ -32,11 +32,11 @@ import swim.codec.Utf8EncodedOutput;
 import swim.codec.Write;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
+public final class BlobRepr implements Repr, Comparable<BlobRepr>, WriteSource {
 
   int flags;
   Attrs attrs;
@@ -406,7 +406,7 @@ public final class BlobRepr implements Repr, Comparable<BlobRepr>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final int IMMUTABLE_FLAG = 1 << 0;

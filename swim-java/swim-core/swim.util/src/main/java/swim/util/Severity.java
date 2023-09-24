@@ -26,7 +26,7 @@ import swim.decl.Unmarshal;
  */
 @Public
 @Since("5.0")
-public final class Severity implements Comparable<Severity>, ToMarkup, ToSource {
+public final class Severity implements Comparable<Severity>, WriteMarkup, WriteSource {
 
   final int value;
   final String label;

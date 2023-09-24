@@ -19,14 +19,14 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * {@link TransportDriver} configuration options.
  */
 @Public
 @Since("5.0")
-public class TransportOptions implements ToSource {
+public class TransportOptions implements WriteSource {
 
   protected final long idleInterval;
   protected final long idleTimeout;
@@ -114,7 +114,7 @@ public class TransportOptions implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   private static @Nullable TransportOptions standard;

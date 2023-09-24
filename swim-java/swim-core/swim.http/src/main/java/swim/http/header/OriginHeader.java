@@ -34,7 +34,7 @@ import swim.uri.UriHost;
 import swim.uri.UriPort;
 import swim.uri.UriScheme;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -197,7 +197,7 @@ public final class OriginHeader extends HttpHeader {
 
 }
 
-final class OriginHeaderType implements HttpHeaderType<OriginHeader, FingerTrieList<Uri>>, ToSource {
+final class OriginHeaderType implements HttpHeaderType<OriginHeader, FingerTrieList<Uri>>, WriteSource {
 
   @Override
   public String name() {
@@ -236,7 +236,7 @@ final class OriginHeaderType implements HttpHeaderType<OriginHeader, FingerTrieL
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

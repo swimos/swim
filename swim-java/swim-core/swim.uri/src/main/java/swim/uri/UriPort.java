@@ -30,12 +30,12 @@ import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public final class UriPort implements Comparable<UriPort>, ToSource, ToString {
+public final class UriPort implements Comparable<UriPort>, WriteSource, WriteString {
 
   final int number;
 

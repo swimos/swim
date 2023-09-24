@@ -36,13 +36,13 @@ import swim.term.TermForm;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.Severity;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
 @Include(FilterMode.DISTINCT)
 @AutoDetect(Visibility.NONE)
-public class LogEvent implements Term, ToSource {
+public class LogEvent implements Term, WriteSource {
 
   protected final long seq;
 
@@ -246,7 +246,7 @@ public class LogEvent implements Term, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static LogEvent of(String topic, String focus, LogScope scope,

@@ -23,11 +23,11 @@ import swim.annotations.Since;
 import swim.collections.UniformMap;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class WamlThrowables implements WamlProvider, ToSource {
+public final class WamlThrowables implements WamlProvider, WriteSource {
 
   final int priority;
 
@@ -65,7 +65,7 @@ public final class WamlThrowables implements WamlProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlThrowables PROVIDER = new WamlThrowables(GENERIC_PRIORITY);
@@ -91,7 +91,7 @@ public final class WamlThrowables implements WamlProvider, ToSource {
 
 }
 
-final class WamlStackTraceElementFormat implements WamlFormat<StackTraceElement>, WamlObjectParser<Object, WamlStackTraceElementBuilder, StackTraceElement>, WamlObjectWriter<Object, StackTraceElement>, ToSource {
+final class WamlStackTraceElementFormat implements WamlFormat<StackTraceElement>, WamlObjectParser<Object, WamlStackTraceElementBuilder, StackTraceElement>, WamlObjectWriter<Object, StackTraceElement>, WriteSource {
 
   @Override
   public @Nullable String typeName() {
@@ -153,7 +153,7 @@ final class WamlStackTraceElementFormat implements WamlFormat<StackTraceElement>
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   @SuppressWarnings("SameNameButDifferent")
@@ -496,7 +496,7 @@ final class WamlStackTraceElementBuilder {
 
 }
 
-final class WamlThrowableFormat implements WamlFormat<Throwable>, WamlObjectParser<Object, WamlThrowableBuilder, Throwable>, WamlObjectWriter<Object, Throwable>, ToSource {
+final class WamlThrowableFormat implements WamlFormat<Throwable>, WamlObjectParser<Object, WamlThrowableBuilder, Throwable>, WamlObjectWriter<Object, Throwable>, WriteSource {
 
   @Override
   public @Nullable String typeName() {
@@ -603,7 +603,7 @@ final class WamlThrowableFormat implements WamlFormat<Throwable>, WamlObjectPars
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   @SuppressWarnings("SameNameButDifferent")

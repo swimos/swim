@@ -31,7 +31,7 @@ import swim.term.TermParserOptions;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * A parser of values from WAML.
@@ -282,7 +282,7 @@ public interface WamlParser<@Covariant T> extends TermParser<T> {
 
 }
 
-final class WamlParserMapper<S, T> implements WamlParser<T>, ToSource {
+final class WamlParserMapper<S, T> implements WamlParser<T>, WriteSource {
 
   final WamlParser<S> parser;
   final Function<? super S, ? extends T> mapper;
@@ -385,12 +385,12 @@ final class WamlParserMapper<S, T> implements WamlParser<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlDummyParser<T> implements WamlParser<T>, ToSource {
+final class WamlDummyParser<T> implements WamlParser<T>, WriteSource {
 
   private WamlDummyParser() {
     // singleton
@@ -459,14 +459,14 @@ final class WamlDummyParser<T> implements WamlParser<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlDummyParser<Object> INSTANCE = new WamlDummyParser<Object>();
 
 }
 
-final class WamlUnsupportedParser<T> implements WamlParser<T>, ToSource {
+final class WamlUnsupportedParser<T> implements WamlParser<T>, WriteSource {
 
   final Class<?> classType;
 
@@ -526,7 +526,7 @@ final class WamlUnsupportedParser<T> implements WamlParser<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

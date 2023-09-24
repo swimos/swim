@@ -41,11 +41,11 @@ import swim.util.ArrayIterator;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class FormatExpr implements Expr, ToSource {
+public final class FormatExpr implements Expr, WriteSource {
 
   final Object[] parts; // (String | Term)[]
 
@@ -125,7 +125,7 @@ public final class FormatExpr implements Expr, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static FormatExpr of(Object/*String | Term*/... parts) {

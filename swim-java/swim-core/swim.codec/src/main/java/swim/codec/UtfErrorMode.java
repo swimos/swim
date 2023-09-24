@@ -19,14 +19,14 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * Unicode transformation format error handling mode.
  */
 @Public
 @Since("5.0")
-public abstract class UtfErrorMode implements ToSource {
+public abstract class UtfErrorMode implements WriteSource {
 
   UtfErrorMode() {
     // sealed
@@ -70,7 +70,7 @@ public abstract class UtfErrorMode implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final UtfErrorMode FATAL = new UtfFatalErrorMode(false);

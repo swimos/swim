@@ -19,12 +19,12 @@ import swim.annotations.Since;
 import swim.codec.Output;
 import swim.codec.Write;
 import swim.http.header.ConnectionHeader;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public abstract class HttpMessage<T> implements ToSource, ToString {
+public abstract class HttpMessage<T> implements WriteSource, WriteString {
 
   HttpMessage() {
     // sealed

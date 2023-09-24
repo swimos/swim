@@ -30,7 +30,7 @@ import swim.http.HttpStatus;
 import swim.http.HttpUpgrade;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -170,7 +170,7 @@ public final class UpgradeHeader extends HttpHeader {
 
 }
 
-final class UpgradeHeaderType implements HttpHeaderType<UpgradeHeader, FingerTrieList<HttpUpgrade>>, ToSource {
+final class UpgradeHeaderType implements HttpHeaderType<UpgradeHeader, FingerTrieList<HttpUpgrade>>, WriteSource {
 
   @Override
   public String name() {
@@ -209,7 +209,7 @@ final class UpgradeHeaderType implements HttpHeaderType<UpgradeHeader, FingerTri
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

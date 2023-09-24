@@ -31,8 +31,8 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
 import swim.util.UpdatableMap;
+import swim.util.WriteSource;
 
 /**
  * A space-optimized map with insertion order iteration. {@code UniformMap}
@@ -51,7 +51,7 @@ import swim.util.UpdatableMap;
  */
 @Public
 @Since("5.0")
-public final class UniformMap<K, V> implements UpdatableMap<K, V>, Iterable<Map.Entry<K, V>>, ToSource {
+public final class UniformMap<K, V> implements UpdatableMap<K, V>, Iterable<Map.Entry<K, V>>, WriteSource {
 
   int flags;
   int size;
@@ -1175,7 +1175,7 @@ public final class UniformMap<K, V> implements UpdatableMap<K, V>, Iterable<Map.
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final int IMMUTABLE_FLAG = 1 << 0;

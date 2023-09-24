@@ -20,11 +20,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class LongTerm implements Term, ToSource {
+public final class LongTerm implements Term, WriteSource {
 
   final long value;
 
@@ -424,7 +424,7 @@ public final class LongTerm implements Term, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static LongTerm of(long value) {

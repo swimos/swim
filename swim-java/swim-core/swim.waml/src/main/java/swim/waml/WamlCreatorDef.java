@@ -23,10 +23,10 @@ import swim.collections.HashTrieMap;
 import swim.collections.UniformMap;
 import swim.decl.Property;
 import swim.util.Notation;
-import swim.util.ToMarkup;
+import swim.util.WriteMarkup;
 import swim.waml.decl.WamlProperty;
 
-final class WamlCreatorDef<T> implements ToMarkup {
+final class WamlCreatorDef<T> implements WriteMarkup {
 
   final WamlClassDef<T> classDef;
   final Executable executable;
@@ -140,7 +140,7 @@ final class WamlCreatorDef<T> implements ToMarkup {
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
 }

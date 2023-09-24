@@ -25,7 +25,7 @@ import swim.codec.Write;
 import swim.collections.UniformMap;
 import swim.decl.FilterMode;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -58,7 +58,7 @@ public interface JsonObjectFormat<V, B, T> extends JsonFormat<T>, JsonObjectPars
 
 }
 
-final class JsonCombiningObjectFormat<V, B, T> implements JsonObjectFormat<V, B, T>, ToSource {
+final class JsonCombiningObjectFormat<V, B, T> implements JsonObjectFormat<V, B, T>, WriteSource {
 
   @Nullable String typeName;
   final JsonObjectParser<V, B, T> objectParser;
@@ -198,7 +198,7 @@ final class JsonCombiningObjectFormat<V, B, T> implements JsonObjectFormat<V, B,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

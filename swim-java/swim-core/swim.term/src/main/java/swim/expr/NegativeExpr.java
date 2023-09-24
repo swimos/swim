@@ -21,11 +21,11 @@ import swim.term.Evaluator;
 import swim.term.Term;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class NegativeExpr extends PrefixExpr implements ToSource {
+public final class NegativeExpr extends PrefixExpr implements WriteSource {
 
   public NegativeExpr(Term rhs) {
     super(rhs);
@@ -74,7 +74,7 @@ public final class NegativeExpr extends PrefixExpr implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static NegativeExpr of(Term rhs) {

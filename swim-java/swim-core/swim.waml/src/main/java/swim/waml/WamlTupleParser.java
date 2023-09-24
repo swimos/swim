@@ -26,7 +26,7 @@ import swim.term.TermParserOptions;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -86,7 +86,7 @@ public interface WamlTupleParser<V, B, @Covariant T> extends WamlParser<T> {
 
 }
 
-final class WamlTupleParserMapper<V, B, S, T> implements WamlTupleParser<V, B, T>, ToSource {
+final class WamlTupleParserMapper<V, B, S, T> implements WamlTupleParser<V, B, T>, WriteSource {
 
   final WamlTupleParser<V, B, S> parser;
   final Function<? super S, ? extends T> mapper;
@@ -240,12 +240,12 @@ final class WamlTupleParserMapper<V, B, S, T> implements WamlTupleParser<V, B, T
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlDummyTupleParser<V, B, T> implements WamlTupleParser<V, B, T>, ToSource {
+final class WamlDummyTupleParser<V, B, T> implements WamlTupleParser<V, B, T>, WriteSource {
 
   private WamlDummyTupleParser() {
     // singleton
@@ -307,7 +307,7 @@ final class WamlDummyTupleParser<V, B, T> implements WamlTupleParser<V, B, T>, T
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlDummyTupleParser<Object, Object, Object> INSTANCE =

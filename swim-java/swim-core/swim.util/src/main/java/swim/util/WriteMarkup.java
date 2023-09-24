@@ -20,11 +20,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * An object with a markup string representation.
+ * An object that can write a markup string representation.
  */
 @Public
 @Since("5.0")
-public interface ToMarkup {
+public interface WriteMarkup {
 
   /**
    * Appends a markup string representation of this object
@@ -33,10 +33,16 @@ public interface ToMarkup {
   void writeMarkup(Appendable output) throws IOException;
 
   /**
-   * Returns a markup string representation of this object,
+   * Returns a markup string representation of the given {@code object},
    * formatted using the provided {@code options}.
    */
-  default String toMarkup(@Nullable NotationOptions options) {
+  static String toString(@Nullable Object object, @Nullable NotationOptions options) {
+    if (object == null) {
+      return "null";
+    } else if (!(object instanceof WriteMarkup)) {
+      return object.toString();
+    }
+
     final Appendable output;
     if (options != null) {
       output = new Notation(options);
@@ -44,7 +50,7 @@ public interface ToMarkup {
       output = new StringBuilder();
     }
     try {
-      this.writeMarkup(output);
+      ((WriteMarkup) object).writeMarkup(output);
     } catch (IOException cause) {
       throw new RuntimeException(cause); // never actually throws
     }
@@ -52,10 +58,10 @@ public interface ToMarkup {
   }
 
   /**
-   * Returns a markup string representation of this object.
+   * Returns a markup string representation of the given {@code object}.
    */
-  default String toMarkup() {
-    return this.toMarkup(null);
+  static String toString(@Nullable Object object) {
+    return WriteMarkup.toString(object, null);
   }
 
 }

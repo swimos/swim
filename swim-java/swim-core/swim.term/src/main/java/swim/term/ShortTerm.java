@@ -19,11 +19,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class ShortTerm implements Term, ToSource {
+public final class ShortTerm implements Term, WriteSource {
 
   final short value;
 
@@ -196,7 +196,7 @@ public final class ShortTerm implements Term, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static ShortTerm of(short value) {

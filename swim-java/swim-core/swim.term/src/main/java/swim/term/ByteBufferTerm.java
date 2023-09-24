@@ -19,11 +19,11 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class ByteBufferTerm implements Term, ToSource {
+public final class ByteBufferTerm implements Term, WriteSource {
 
   final ByteBuffer value;
 
@@ -71,7 +71,7 @@ public final class ByteBufferTerm implements Term, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static ByteBufferTerm of(ByteBuffer value) {

@@ -21,14 +21,14 @@ import swim.annotations.Since;
 import swim.collections.HashTrieSet;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * Term writer configuration options.
  */
 @Public
 @Since("5.0")
-public class TermWriterOptions implements ToSource {
+public class TermWriterOptions implements WriteSource {
 
   protected final TermRegistry termRegistry;
   protected final boolean implicitContext;
@@ -186,7 +186,7 @@ public class TermWriterOptions implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   private static final HashTrieSet<String> KEYWORDS =

@@ -27,11 +27,11 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class LangReprs implements ReprProvider, ToSource {
+public final class LangReprs implements ReprProvider, WriteSource {
 
   final int priority;
 
@@ -95,7 +95,7 @@ public final class LangReprs implements ReprProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final LangReprs PROVIDER = new LangReprs(BUILTIN_PRIORITY);
@@ -175,7 +175,7 @@ public final class LangReprs implements ReprProvider, ToSource {
     return InetSocketAddressForm.INSTANCE;
   }
 
-  static final class NullForm implements ReprForm<Object>, ToSource {
+  static final class NullForm implements ReprForm<Object>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Object value) {
@@ -200,14 +200,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final NullForm INSTANCE = new NullForm();
 
   }
 
-  static final class BooleanForm implements ReprForm<Boolean>, ToSource {
+  static final class BooleanForm implements ReprForm<Boolean>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Boolean value) {
@@ -238,14 +238,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final BooleanForm INSTANCE = new BooleanForm();
 
   }
 
-  static final class ByteForm implements ReprForm<Byte>, ToSource {
+  static final class ByteForm implements ReprForm<Byte>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Byte value) {
@@ -276,14 +276,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ByteForm INSTANCE = new ByteForm();
 
   }
 
-  static final class CharForm implements ReprForm<Character>, ToSource {
+  static final class CharForm implements ReprForm<Character>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Character value) {
@@ -314,14 +314,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final CharForm INSTANCE = new CharForm();
 
   }
 
-  static final class ShortForm implements ReprForm<Short>, ToSource {
+  static final class ShortForm implements ReprForm<Short>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Short value) {
@@ -352,14 +352,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ShortForm INSTANCE = new ShortForm();
 
   }
 
-  static final class IntForm implements ReprForm<Integer>, ToSource {
+  static final class IntForm implements ReprForm<Integer>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Integer value) {
@@ -390,14 +390,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final IntForm INSTANCE = new IntForm();
 
   }
 
-  static final class LongForm implements ReprForm<Long>, ToSource {
+  static final class LongForm implements ReprForm<Long>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Long value) {
@@ -428,14 +428,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final LongForm INSTANCE = new LongForm();
 
   }
 
-  static final class FloatForm implements ReprForm<Float>, ToSource {
+  static final class FloatForm implements ReprForm<Float>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Float value) {
@@ -466,14 +466,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final FloatForm INSTANCE = new FloatForm();
 
   }
 
-  static final class DoubleForm implements ReprForm<Double>, ToSource {
+  static final class DoubleForm implements ReprForm<Double>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Double value) {
@@ -504,14 +504,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final DoubleForm INSTANCE = new DoubleForm();
 
   }
 
-  static final class BigIntegerForm implements ReprForm<BigInteger>, ToSource {
+  static final class BigIntegerForm implements ReprForm<BigInteger>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable BigInteger value) {
@@ -542,14 +542,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final BigIntegerForm INSTANCE = new BigIntegerForm();
 
   }
 
-  static final class NumberForm implements ReprForm<Number>, ToSource {
+  static final class NumberForm implements ReprForm<Number>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Number value) throws ReprException {
@@ -590,14 +590,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final NumberForm INSTANCE = new NumberForm();
 
   }
 
-  static final class StringForm implements ReprForm<String>, ToSource {
+  static final class StringForm implements ReprForm<String>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable String value) {
@@ -628,14 +628,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final StringForm INSTANCE = new StringForm();
 
   }
 
-  static final class ByteBufferForm implements ReprForm<ByteBuffer>, ToSource {
+  static final class ByteBufferForm implements ReprForm<ByteBuffer>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable ByteBuffer value) {
@@ -666,14 +666,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ByteBufferForm INSTANCE = new ByteBufferForm();
 
   }
 
-  static final class InstantForm implements ReprForm<Instant>, ToSource {
+  static final class InstantForm implements ReprForm<Instant>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable Instant value) {
@@ -710,14 +710,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final InstantForm INSTANCE = new InstantForm();
 
   }
 
-  static final class InetAddressForm implements ReprForm<InetAddress>, ToSource {
+  static final class InetAddressForm implements ReprForm<InetAddress>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable InetAddress value) {
@@ -758,14 +758,14 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final InetAddressForm INSTANCE = new InetAddressForm();
 
   }
 
-  static final class InetSocketAddressForm implements ReprForm<InetSocketAddress>, ToSource {
+  static final class InetSocketAddressForm implements ReprForm<InetSocketAddress>, WriteSource {
 
     @Override
     public Repr intoRepr(@Nullable InetSocketAddress value) {
@@ -818,7 +818,7 @@ public final class LangReprs implements ReprProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final InetSocketAddressForm INSTANCE = new InetSocketAddressForm();

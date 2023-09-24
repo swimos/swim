@@ -50,11 +50,11 @@ import swim.util.Assume;
 import swim.util.CacheSet;
 import swim.util.LruCacheSet;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class JsonLang implements JsonProvider, ToSource {
+public final class JsonLang implements JsonProvider, WriteSource {
 
   final JsonMetaCodec metaCodec;
   final int priority;
@@ -125,7 +125,7 @@ public final class JsonLang implements JsonProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static JsonLang provider(JsonMetaCodec metaCodec, int priority) {
@@ -273,7 +273,7 @@ public final class JsonLang implements JsonProvider, ToSource {
     return keyCache;
   }
 
-  static final class VoidFormat implements JsonFormat<Void>, JsonIdentifierParser<Void>, JsonIdentifierWriter<Void>, ToSource {
+  static final class VoidFormat implements JsonFormat<Void>, JsonIdentifierParser<Void>, JsonIdentifierWriter<Void>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -318,14 +318,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final VoidFormat INSTANCE = new VoidFormat();
 
   }
 
-  static final class NullFormat implements JsonFormat<Object>, JsonIdentifierParser<Object>, JsonIdentifierWriter<Object>, ToSource {
+  static final class NullFormat implements JsonFormat<Object>, JsonIdentifierParser<Object>, JsonIdentifierWriter<Object>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -370,14 +370,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final NullFormat INSTANCE = new NullFormat();
 
   }
 
-  static final class IdentifierFormat implements JsonFormat<Object>, JsonIdentifierParser<Object>, JsonIdentifierWriter<Object>, ToSource {
+  static final class IdentifierFormat implements JsonFormat<Object>, JsonIdentifierParser<Object>, JsonIdentifierWriter<Object>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -440,14 +440,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final IdentifierFormat INSTANCE = new IdentifierFormat();
 
   }
 
-  static final class BooleanFormat implements JsonFormat<Boolean>, JsonIdentifierParser<Boolean>, JsonIdentifierWriter<Boolean>, ToSource {
+  static final class BooleanFormat implements JsonFormat<Boolean>, JsonIdentifierParser<Boolean>, JsonIdentifierWriter<Boolean>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -497,14 +497,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final BooleanFormat INSTANCE = new BooleanFormat();
 
   }
 
-  static final class ByteFormat implements JsonFormat<Byte>, JsonNumberParser<Byte>, JsonNumberWriter<Byte>, ToSource {
+  static final class ByteFormat implements JsonFormat<Byte>, JsonNumberParser<Byte>, JsonNumberWriter<Byte>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -570,14 +570,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ByteFormat INSTANCE = new ByteFormat();
 
   }
 
-  static final class CharFormat implements JsonFormat<Character>, JsonNumberParser<Character>, JsonNumberWriter<Character>, ToSource {
+  static final class CharFormat implements JsonFormat<Character>, JsonNumberParser<Character>, JsonNumberWriter<Character>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -646,14 +646,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final CharFormat INSTANCE = new CharFormat();
 
   }
 
-  static final class ShortFormat implements JsonFormat<Short>, JsonNumberParser<Short>, JsonNumberWriter<Short>, ToSource {
+  static final class ShortFormat implements JsonFormat<Short>, JsonNumberParser<Short>, JsonNumberWriter<Short>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -719,14 +719,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ShortFormat INSTANCE = new ShortFormat();
 
   }
 
-  static final class IntFormat implements JsonFormat<Integer>, JsonNumberParser<Integer>, JsonNumberWriter<Integer>, ToSource {
+  static final class IntFormat implements JsonFormat<Integer>, JsonNumberParser<Integer>, JsonNumberWriter<Integer>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -792,14 +792,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final IntFormat INSTANCE = new IntFormat();
 
   }
 
-  static final class LongFormat implements JsonFormat<Long>, JsonNumberParser<Long>, JsonNumberWriter<Long>, ToSource {
+  static final class LongFormat implements JsonFormat<Long>, JsonNumberParser<Long>, JsonNumberWriter<Long>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -865,14 +865,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final LongFormat INSTANCE = new LongFormat();
 
   }
 
-  static final class FloatFormat implements JsonFormat<Float>, JsonNumberParser<Float>, JsonNumberWriter<Float>, ToSource {
+  static final class FloatFormat implements JsonFormat<Float>, JsonNumberParser<Float>, JsonNumberWriter<Float>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -942,14 +942,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final FloatFormat INSTANCE = new FloatFormat();
 
   }
 
-  static final class DoubleFormat implements JsonFormat<Double>, JsonNumberParser<Double>, JsonNumberWriter<Double>, ToSource {
+  static final class DoubleFormat implements JsonFormat<Double>, JsonNumberParser<Double>, JsonNumberWriter<Double>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1019,14 +1019,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final DoubleFormat INSTANCE = new DoubleFormat();
 
   }
 
-  static final class NumberFormat implements JsonFormat<Number>, JsonNumberParser<Number>, JsonNumberWriter<Number>, ToSource {
+  static final class NumberFormat implements JsonFormat<Number>, JsonNumberParser<Number>, JsonNumberWriter<Number>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1132,14 +1132,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final NumberFormat INSTANCE = new NumberFormat();
 
   }
 
-  static final class StringFormat implements JsonFormat<String>, JsonStringParser<StringBuilder, String>, JsonStringWriter<String>, ToSource {
+  static final class StringFormat implements JsonFormat<String>, JsonStringParser<StringBuilder, String>, JsonStringWriter<String>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1192,14 +1192,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final StringFormat INSTANCE = new StringFormat();
 
   }
 
-  static final class KeyFormat implements JsonFormat<String>, JsonIdentifierParser<String>, JsonIdentifierWriter<String>, JsonStringWriter<String>, ToSource {
+  static final class KeyFormat implements JsonFormat<String>, JsonIdentifierParser<String>, JsonIdentifierWriter<String>, JsonStringWriter<String>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1266,14 +1266,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final KeyFormat INSTANCE = new KeyFormat();
 
   }
 
-  static final class KeyStringParser implements JsonStringParser<StringBuilder, String>, ToSource {
+  static final class KeyStringParser implements JsonStringParser<StringBuilder, String>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1309,14 +1309,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final KeyStringParser INSTANCE = new KeyStringParser();
 
   }
 
-  static final class ByteBufferFormat implements JsonFormat<ByteBuffer>, JsonStringParser<Output<ByteBuffer>, ByteBuffer>, JsonStringWriter<ByteBuffer>, ToSource {
+  static final class ByteBufferFormat implements JsonFormat<ByteBuffer>, JsonStringParser<Output<ByteBuffer>, ByteBuffer>, JsonStringWriter<ByteBuffer>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1381,14 +1381,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ByteBufferFormat INSTANCE = new ByteBufferFormat();
 
   }
 
-  static final class InstantFormat implements JsonFormat<Instant>, JsonStringParser<StringBuilder, Instant>, JsonStringWriter<Instant>, ToSource {
+  static final class InstantFormat implements JsonFormat<Instant>, JsonStringParser<StringBuilder, Instant>, JsonStringWriter<Instant>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1448,14 +1448,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final InstantFormat INSTANCE = new InstantFormat();
 
   }
 
-  static final class InetAddressFormat implements JsonFormat<InetAddress>, JsonStringParser<StringBuilder, InetAddress>, JsonStringWriter<InetAddress>, ToSource {
+  static final class InetAddressFormat implements JsonFormat<InetAddress>, JsonStringParser<StringBuilder, InetAddress>, JsonStringWriter<InetAddress>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1502,14 +1502,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final InetAddressFormat INSTANCE = new InetAddressFormat();
 
   }
 
-  static final class InetSocketAddressFormat implements JsonFormat<InetSocketAddress>, JsonStringParser<StringBuilder, InetSocketAddress>, JsonStringWriter<InetSocketAddress>, ToSource {
+  static final class InetSocketAddressFormat implements JsonFormat<InetSocketAddress>, JsonStringParser<StringBuilder, InetSocketAddress>, JsonStringWriter<InetSocketAddress>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1575,14 +1575,14 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final InetSocketAddressFormat INSTANCE = new InetSocketAddressFormat();
 
   }
 
-  static final class ArrayFormat<E, T> implements JsonFormat<T>, JsonArrayParser<E, ArrayBuilder<E, T>, T>, JsonArrayWriter<E, T>, ToSource {
+  static final class ArrayFormat<E, T> implements JsonFormat<T>, JsonArrayParser<E, ArrayBuilder<E, T>, T>, JsonArrayWriter<E, T>, WriteSource {
 
     final Class<?> componentClass;
     final JsonFormat<E> componentFormat;
@@ -1660,7 +1660,7 @@ public final class JsonLang implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
   }

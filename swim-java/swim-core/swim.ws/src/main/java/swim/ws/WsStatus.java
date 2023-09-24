@@ -32,11 +32,11 @@ import swim.codec.Text;
 import swim.codec.Utf8DecodedOutput;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class WsStatus implements ToSource {
+public final class WsStatus implements WriteSource {
 
   final int code;
   final String reason;
@@ -91,7 +91,7 @@ public final class WsStatus implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static WsStatus of(int code, @Nullable String reason) {
@@ -118,7 +118,7 @@ public final class WsStatus implements ToSource {
 
 }
 
-final class WsStatusCodec implements Codec<WsStatus>, ToSource {
+final class WsStatusCodec implements Codec<WsStatus>, WriteSource {
 
   @Override
   public MediaType mediaType() {
@@ -159,7 +159,7 @@ final class WsStatusCodec implements Codec<WsStatus>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

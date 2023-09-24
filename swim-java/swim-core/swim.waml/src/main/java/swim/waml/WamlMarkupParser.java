@@ -28,7 +28,7 @@ import swim.term.TermParserOptions;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -74,7 +74,7 @@ public interface WamlMarkupParser<N, B, @Covariant T> extends WamlParser<T> {
 
 }
 
-final class WamlMarkupParserMapper<N, B, S, T> implements WamlMarkupParser<N, B, T>, ToSource {
+final class WamlMarkupParserMapper<N, B, S, T> implements WamlMarkupParser<N, B, T>, WriteSource {
 
   final WamlMarkupParser<N, B, S> parser;
   final Function<? super S, ? extends T> mapper;
@@ -213,12 +213,12 @@ final class WamlMarkupParserMapper<N, B, S, T> implements WamlMarkupParser<N, B,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlDummyMarkupParser<N, B, T> implements WamlMarkupParser<N, B, T>, ToSource {
+final class WamlDummyMarkupParser<N, B, T> implements WamlMarkupParser<N, B, T>, WriteSource {
 
   private WamlDummyMarkupParser() {
     // singleton
@@ -270,7 +270,7 @@ final class WamlDummyMarkupParser<N, B, T> implements WamlMarkupParser<N, B, T>,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlDummyMarkupParser<Object, Object, Object> INSTANCE =

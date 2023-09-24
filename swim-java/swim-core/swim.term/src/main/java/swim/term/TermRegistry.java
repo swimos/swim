@@ -30,11 +30,11 @@ import swim.collections.FingerTrieList;
 import swim.collections.HashTrieMap;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public class TermRegistry implements TermForm<Object>, ToSource {
+public class TermRegistry implements TermForm<Object>, WriteSource {
 
   TermProvider[] providers;
 
@@ -241,7 +241,7 @@ public class TermRegistry implements TermForm<Object>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   /**

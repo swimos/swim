@@ -32,12 +32,12 @@ import swim.decl.Unmarshal;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public final class UriUser implements ToSource, ToString {
+public final class UriUser implements WriteSource, WriteString {
 
   final @Nullable String name;
 
@@ -142,7 +142,7 @@ public final class UriUser implements ToSource, ToString {
   @Marshal
   @Override
   public String toString() {
-    return this.toString(null);
+    return WriteString.toString(this);
   }
 
   static final UriUser UNDEFINED = new UriUser(null, null);

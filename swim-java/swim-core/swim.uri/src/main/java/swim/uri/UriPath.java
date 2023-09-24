@@ -40,12 +40,12 @@ import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public abstract class UriPath extends UriPart implements Collection<String>, Comparable<UriPath>, ToSource, ToString {
+public abstract class UriPath extends UriPart implements Collection<String>, Comparable<UriPath>, WriteSource, WriteString {
 
   UriPath() {
     // sealed
@@ -726,7 +726,7 @@ final class UriPathSegment extends UriPath {
   @Override
   public String toString() {
     if (this.string == null) {
-      this.string = this.toString(null);
+      this.string = WriteString.toString(this);
     }
     return this.string;
   }
@@ -846,7 +846,7 @@ final class UriPathSlash extends UriPath {
   @Override
   public String toString() {
     if (this.string == null) {
-      this.string = this.toString(null);
+      this.string = WriteString.toString(this);
     }
     return this.string;
   }

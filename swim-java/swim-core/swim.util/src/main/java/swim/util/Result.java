@@ -89,7 +89,7 @@ import swim.annotations.Since;
  */
 @Public
 @Since("5.0")
-public final class Result<T> implements ToMarkup, ToSource {
+public final class Result<T> implements WriteMarkup, WriteSource {
 
   /**
    * Either the nullable resulting value of type {@code T}
@@ -516,7 +516,7 @@ public final class Result<T> implements ToMarkup, ToSource {
    */
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   /**

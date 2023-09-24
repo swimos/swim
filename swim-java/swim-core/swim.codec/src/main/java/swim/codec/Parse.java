@@ -28,7 +28,7 @@ import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * The state of an interruptible parse operation. A {@code Parse} instance
@@ -709,7 +709,7 @@ public abstract class Parse<@Covariant T> extends Decode<T> {
 
 }
 
-final class ParseDone<@Covariant T> extends Parse<T> implements ToSource {
+final class ParseDone<@Covariant T> extends Parse<T> implements WriteSource {
 
   final @Nullable T value;
 
@@ -869,12 +869,12 @@ final class ParseDone<@Covariant T> extends Parse<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class ParseError<@Covariant T> extends Parse<T> implements ToSource {
+final class ParseError<@Covariant T> extends Parse<T> implements WriteSource {
 
   final Throwable error;
 
@@ -1037,12 +1037,12 @@ final class ParseError<@Covariant T> extends Parse<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class ParseMapper<S, T> extends Parse<T> implements ToSource {
+final class ParseMapper<S, T> extends Parse<T> implements WriteSource {
 
   final Parse<S> parse;
   final Function<? super S, ? extends T> mapper;
@@ -1074,7 +1074,7 @@ final class ParseMapper<S, T> extends Parse<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

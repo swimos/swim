@@ -43,11 +43,11 @@ import swim.decl.FilterMode;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class WamlCollections implements WamlProvider, ToSource {
+public final class WamlCollections implements WamlProvider, WriteSource {
 
   final WamlMetaCodec metaCodec;
   final int priority;
@@ -100,7 +100,7 @@ public final class WamlCollections implements WamlProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static WamlCollections provider(WamlMetaCodec metaCodec, int priority) {
@@ -383,7 +383,7 @@ public final class WamlCollections implements WamlProvider, ToSource {
     return new MapFieldFormatIterator<V, T>(keys, keyWriter, valueWriter, filterMode);
   }
 
-  static final class ListFormat<E, T extends List<E>> implements WamlFormat<T>, WamlArrayParser<E, T, T>, WamlArrayWriter<E, T>, ToSource {
+  static final class ListFormat<E, T extends List<E>> implements WamlFormat<T>, WamlArrayParser<E, T, T>, WamlArrayWriter<E, T>, WriteSource {
 
     final Supplier<T> creator;
     final WamlFormat<E> elementFormat;
@@ -471,12 +471,12 @@ public final class WamlCollections implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
   }
 
-  static final class MapFormat<V, T extends Map<String, V>> implements WamlFormat<T>, WamlObjectFormat<V, T, T>, ToSource {
+  static final class MapFormat<V, T extends Map<String, V>> implements WamlFormat<T>, WamlObjectFormat<V, T, T>, WriteSource {
 
     final Supplier<T> creator;
     final WamlFormat<String> keyFormat;
@@ -595,7 +595,7 @@ public final class WamlCollections implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
   }

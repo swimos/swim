@@ -33,7 +33,7 @@ import swim.util.Notation;
 import swim.util.PropertySetter;
 import swim.util.PropertyUpdater;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 import swim.util.UpdatableMap;
 
 @Public
@@ -197,7 +197,7 @@ public interface WamlFieldParser<V, T> extends PropertyUpdater<V, T> {
 
 }
 
-final class WamlDummyFieldParser<V, T> implements WamlFieldParser<V, T>, ToSource {
+final class WamlDummyFieldParser<V, T> implements WamlFieldParser<V, T>, WriteSource {
 
   @Override
   public WamlParser<V> valueParser() {
@@ -217,14 +217,14 @@ final class WamlDummyFieldParser<V, T> implements WamlFieldParser<V, T>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlDummyFieldParser<Object, Object> INSTANCE = new WamlDummyFieldParser<Object, Object>();
 
 }
 
-final class WamlFieldKeyParser<V, T extends Map<String, V>> implements WamlFieldParser<V, T>, ToSource {
+final class WamlFieldKeyParser<V, T extends Map<String, V>> implements WamlFieldParser<V, T>, WriteSource {
 
   final String key;
   final WamlParser<V> valueParser;
@@ -264,12 +264,12 @@ final class WamlFieldKeyParser<V, T extends Map<String, V>> implements WamlField
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlFieldIndexParser<V, T> implements WamlFieldParser<V, T>, ToSource {
+final class WamlFieldIndexParser<V, T> implements WamlFieldParser<V, T>, WriteSource {
 
   final VarHandle arrayHandle;
   final int index;
@@ -304,7 +304,7 @@ final class WamlFieldIndexParser<V, T> implements WamlFieldParser<V, T>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   /**
@@ -319,7 +319,7 @@ final class WamlFieldIndexParser<V, T> implements WamlFieldParser<V, T>, ToSourc
 
 }
 
-final class WamlFieldHandleParser<V, T> implements WamlFieldParser<V, T>, ToSource {
+final class WamlFieldHandleParser<V, T> implements WamlFieldParser<V, T>, WriteSource {
 
   final VarHandle fieldHandle;
   final WamlParser<V> valueParser;
@@ -351,12 +351,12 @@ final class WamlFieldHandleParser<V, T> implements WamlFieldParser<V, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlFieldUpdaterParser<V, T> implements WamlFieldParser<V, T>, ToSource {
+final class WamlFieldUpdaterParser<V, T> implements WamlFieldParser<V, T>, WriteSource {
 
   final PropertyUpdater<V, T> updater;
   final WamlParser<V> valueParser;
@@ -392,12 +392,12 @@ final class WamlFieldUpdaterParser<V, T> implements WamlFieldParser<V, T>, ToSou
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlFieldSetterParser<V, T> implements WamlFieldParser<V, T>, ToSource {
+final class WamlFieldSetterParser<V, T> implements WamlFieldParser<V, T>, WriteSource {
 
   final PropertySetter<V, T> setter;
   final WamlParser<V> valueParser;
@@ -434,7 +434,7 @@ final class WamlFieldSetterParser<V, T> implements WamlFieldParser<V, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

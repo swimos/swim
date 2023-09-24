@@ -30,12 +30,12 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToMarkup;
 import swim.util.UpdatableMap;
+import swim.util.WriteMarkup;
 
 @Public
 @Since("5.0")
-public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, UpdatableMap<String, V>, ToMarkup {
+public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, UpdatableMap<String, V>, WriteMarkup {
 
   final long branchMap0;
   final long branchMap1;
@@ -809,7 +809,7 @@ public final class StringTrieMap<V> implements Iterable<Map.Entry<String, V>>, U
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
   static final int DEFINED_FLAG = 1 << 0;

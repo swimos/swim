@@ -27,12 +27,12 @@ import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public final class MediaRange implements ToSource, ToString {
+public final class MediaRange implements WriteSource, WriteString {
 
   final String type;
   final String subtype;

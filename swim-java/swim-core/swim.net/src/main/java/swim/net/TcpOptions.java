@@ -21,14 +21,14 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * TCP configuration options.
  */
 @Public
 @Since("5.0")
-public class TcpOptions implements ToSource {
+public class TcpOptions implements WriteSource {
 
   protected final int backlog;
   protected final int recvBufferSize;
@@ -199,7 +199,7 @@ public class TcpOptions implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   private static @Nullable TcpOptions standard;

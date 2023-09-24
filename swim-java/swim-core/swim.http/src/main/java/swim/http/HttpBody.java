@@ -29,11 +29,11 @@ import swim.http.header.ContentLengthHeader;
 import swim.http.header.ContentTypeHeader;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
+public final class HttpBody<T> extends HttpPayload<T> implements WriteSource {
 
   final @Nullable T value;
   final Codec<T> codec;
@@ -127,7 +127,7 @@ public final class HttpBody<T> extends HttpPayload<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static <T> HttpBody<T> of(@Nullable T value, Codec<T> codec, long contentLength) {

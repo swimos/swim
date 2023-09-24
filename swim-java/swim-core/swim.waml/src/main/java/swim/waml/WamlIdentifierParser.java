@@ -27,7 +27,7 @@ import swim.term.TermParserOptions;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -61,7 +61,7 @@ public interface WamlIdentifierParser<@Covariant T> extends WamlParser<T> {
 
 }
 
-final class WamlIdentifierParserMapper<S, T> implements WamlIdentifierParser<T>, ToSource {
+final class WamlIdentifierParserMapper<S, T> implements WamlIdentifierParser<T>, WriteSource {
 
   final WamlIdentifierParser<S> parser;
   final Function<? super S, ? extends T> mapper;
@@ -175,12 +175,12 @@ final class WamlIdentifierParserMapper<S, T> implements WamlIdentifierParser<T>,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlDummyIdentifierParser<T> implements WamlIdentifierParser<T>, ToSource {
+final class WamlDummyIdentifierParser<T> implements WamlIdentifierParser<T>, WriteSource {
 
   private WamlDummyIdentifierParser() {
     // singleton
@@ -209,7 +209,7 @@ final class WamlDummyIdentifierParser<T> implements WamlIdentifierParser<T>, ToS
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlDummyIdentifierParser<Object> INSTANCE =

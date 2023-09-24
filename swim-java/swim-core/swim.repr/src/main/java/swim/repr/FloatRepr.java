@@ -21,11 +21,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class FloatRepr implements NumberRepr, ToSource {
+public final class FloatRepr implements NumberRepr, WriteSource {
 
   final Attrs attrs;
   final float value;
@@ -344,7 +344,7 @@ public final class FloatRepr implements NumberRepr, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final FloatRepr POSITIVE_ZERO = new FloatRepr(Attrs.empty(), 0.0f);

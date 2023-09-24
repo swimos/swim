@@ -26,11 +26,11 @@ import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class HttpEmpty<T> extends HttpPayload<T> implements ToSource {
+public final class HttpEmpty<T> extends HttpPayload<T> implements WriteSource {
 
   private HttpEmpty() {
     // singleton
@@ -79,7 +79,7 @@ public final class HttpEmpty<T> extends HttpPayload<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final HttpEmpty<?> PAYLOAD = new HttpEmpty<Object>();

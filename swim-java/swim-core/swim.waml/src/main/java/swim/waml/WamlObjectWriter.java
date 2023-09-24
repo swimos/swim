@@ -27,7 +27,7 @@ import swim.decl.FilterMode;
 import swim.util.Assume;
 import swim.util.Iterators;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -66,7 +66,7 @@ public interface WamlObjectWriter<V, @Contravariant T> extends WamlWriter<T> {
 
 }
 
-final class WamlObjectSerializer<V, T> implements WamlObjectWriter<V, T>, ToSource {
+final class WamlObjectSerializer<V, T> implements WamlObjectWriter<V, T>, WriteSource {
 
   final @Nullable String typeName;
   final UniformMap<String, WamlFieldWriter<? extends V, T>> fieldWriters;
@@ -150,7 +150,7 @@ final class WamlObjectSerializer<V, T> implements WamlObjectWriter<V, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final class AnnexedFieldIterator<V, W extends V, T> implements Iterator<WamlFieldFormat<W, T>> {

@@ -26,7 +26,7 @@ import swim.collections.UniformMap;
 import swim.decl.FilterMode;
 import swim.term.Term;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -59,7 +59,7 @@ public interface WamlObjectFormat<V, B, T> extends WamlFormat<T>, WamlObjectPars
 
 }
 
-final class WamlCombiningObjectFormat<V, B, T> implements WamlObjectFormat<V, B, T>, ToSource {
+final class WamlCombiningObjectFormat<V, B, T> implements WamlObjectFormat<V, B, T>, WriteSource {
 
   @Nullable String typeName;
   final WamlObjectParser<V, B, T> objectParser;
@@ -284,7 +284,7 @@ final class WamlCombiningObjectFormat<V, B, T> implements WamlObjectFormat<V, B,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

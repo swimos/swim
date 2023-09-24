@@ -28,7 +28,7 @@ import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
 import swim.http.HttpStatus;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 import swim.ws.WsExtension;
 
 @Public
@@ -151,7 +151,7 @@ public final class SecWebSocketExtensionsHeader extends HttpHeader {
 
 }
 
-final class SecWebSocketExtensionsHeaderType implements HttpHeaderType<SecWebSocketExtensionsHeader, FingerTrieList<WsExtension>>, ToSource {
+final class SecWebSocketExtensionsHeaderType implements HttpHeaderType<SecWebSocketExtensionsHeader, FingerTrieList<WsExtension>>, WriteSource {
 
   @Override
   public String name() {
@@ -190,7 +190,7 @@ final class SecWebSocketExtensionsHeaderType implements HttpHeaderType<SecWebSoc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

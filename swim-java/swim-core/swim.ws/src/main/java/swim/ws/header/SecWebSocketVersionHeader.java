@@ -30,7 +30,7 @@ import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
 import swim.http.HttpStatus;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -182,7 +182,7 @@ public final class SecWebSocketVersionHeader extends HttpHeader {
 
 }
 
-final class SecWebSocketVersionHeaderType implements HttpHeaderType<SecWebSocketVersionHeader, FingerTrieList<Integer>>, ToSource {
+final class SecWebSocketVersionHeaderType implements HttpHeaderType<SecWebSocketVersionHeader, FingerTrieList<Integer>>, WriteSource {
 
   @Override
   public String name() {
@@ -221,7 +221,7 @@ final class SecWebSocketVersionHeaderType implements HttpHeaderType<SecWebSocket
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

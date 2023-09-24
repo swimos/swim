@@ -25,8 +25,8 @@ import swim.decl.FilterMode;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
 import swim.util.UpdatableMap;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -90,7 +90,7 @@ public interface JsonFieldFormat<V, T> extends JsonFieldParser<V, T>, JsonFieldW
 
 }
 
-final class JsonFieldKeyFormat<V, T extends Map<String, V>> implements JsonFieldFormat<V, T>, ToSource {
+final class JsonFieldKeyFormat<V, T extends Map<String, V>> implements JsonFieldFormat<V, T>, WriteSource {
 
   final String key;
   final JsonFormat<String> keyFormat;
@@ -167,12 +167,12 @@ final class JsonFieldKeyFormat<V, T extends Map<String, V>> implements JsonField
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonFieldIndexFormat<V, T> implements JsonFieldFormat<V, T>, ToSource {
+final class JsonFieldIndexFormat<V, T> implements JsonFieldFormat<V, T>, WriteSource {
 
   final String key;
   final JsonFormat<String> keyFormat;
@@ -246,7 +246,7 @@ final class JsonFieldIndexFormat<V, T> implements JsonFieldFormat<V, T>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   /**
@@ -261,7 +261,7 @@ final class JsonFieldIndexFormat<V, T> implements JsonFieldFormat<V, T>, ToSourc
 
 }
 
-class JsonCombiningFieldFormat<V, T> implements JsonFieldFormat<V, T>, ToSource {
+class JsonCombiningFieldFormat<V, T> implements JsonFieldFormat<V, T>, WriteSource {
 
   final JsonFormat<V> valueFormat;
   final JsonFieldParser<V, T> fieldParser;
@@ -344,7 +344,7 @@ class JsonCombiningFieldFormat<V, T> implements JsonFieldFormat<V, T>, ToSource 
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
@@ -375,7 +375,7 @@ class JsonMergingFieldFormat<V, T> extends JsonCombiningFieldFormat<V, T> {
 
 }
 
-final class JsonFlattenedFieldFormat<V, W extends V, T> implements JsonFieldFormat<W, T>, ToSource {
+final class JsonFlattenedFieldFormat<V, W extends V, T> implements JsonFieldFormat<W, T>, WriteSource {
 
   final String key;
   final JsonFieldFormat<V, T> outerFieldFormat;
@@ -466,7 +466,7 @@ final class JsonFlattenedFieldFormat<V, W extends V, T> implements JsonFieldForm
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

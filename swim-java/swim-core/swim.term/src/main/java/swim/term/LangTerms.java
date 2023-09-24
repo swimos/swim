@@ -23,11 +23,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Notation;
 import swim.util.Severity;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class LangTerms implements TermProvider, ToSource {
+public final class LangTerms implements TermProvider, WriteSource {
 
   final int priority;
 
@@ -91,7 +91,7 @@ public final class LangTerms implements TermProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final LangTerms PROVIDER = new LangTerms(BUILTIN_PRIORITY);
@@ -171,7 +171,7 @@ public final class LangTerms implements TermProvider, ToSource {
     return SeverityForm.INSTANCE;
   }
 
-  static final class NullForm implements TermForm<Object>, ToSource {
+  static final class NullForm implements TermForm<Object>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Object value) {
@@ -196,14 +196,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final NullForm INSTANCE = new NullForm();
 
   }
 
-  static final class BooleanForm implements TermForm<Boolean>, ToSource {
+  static final class BooleanForm implements TermForm<Boolean>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Boolean value) {
@@ -234,14 +234,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final BooleanForm INSTANCE = new BooleanForm();
 
   }
 
-  static final class ByteForm implements TermForm<Byte>, ToSource {
+  static final class ByteForm implements TermForm<Byte>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Byte value) {
@@ -272,14 +272,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ByteForm INSTANCE = new ByteForm();
 
   }
 
-  static final class CharForm implements TermForm<Character>, ToSource {
+  static final class CharForm implements TermForm<Character>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Character value) {
@@ -310,14 +310,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final CharForm INSTANCE = new CharForm();
 
   }
 
-  static final class ShortForm implements TermForm<Short>, ToSource {
+  static final class ShortForm implements TermForm<Short>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Short value) {
@@ -348,14 +348,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ShortForm INSTANCE = new ShortForm();
 
   }
 
-  static final class IntForm implements TermForm<Integer>, ToSource {
+  static final class IntForm implements TermForm<Integer>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Integer value) {
@@ -386,14 +386,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final IntForm INSTANCE = new IntForm();
 
   }
 
-  static final class LongForm implements TermForm<Long>, ToSource {
+  static final class LongForm implements TermForm<Long>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Long value) {
@@ -424,14 +424,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final LongForm INSTANCE = new LongForm();
 
   }
 
-  static final class FloatForm implements TermForm<Float>, ToSource {
+  static final class FloatForm implements TermForm<Float>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Float value) {
@@ -462,14 +462,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final FloatForm INSTANCE = new FloatForm();
 
   }
 
-  static final class DoubleForm implements TermForm<Double>, ToSource {
+  static final class DoubleForm implements TermForm<Double>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Double value) {
@@ -500,14 +500,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final DoubleForm INSTANCE = new DoubleForm();
 
   }
 
-  static final class BigIntegerForm implements TermForm<BigInteger>, ToSource {
+  static final class BigIntegerForm implements TermForm<BigInteger>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable BigInteger value) {
@@ -538,14 +538,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final BigIntegerForm INSTANCE = new BigIntegerForm();
 
   }
 
-  static final class NumberForm implements TermForm<Number>, ToSource {
+  static final class NumberForm implements TermForm<Number>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Number value) throws TermException {
@@ -590,14 +590,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final NumberForm INSTANCE = new NumberForm();
 
   }
 
-  static final class StringForm implements TermForm<String>, ToSource {
+  static final class StringForm implements TermForm<String>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable String value) {
@@ -628,14 +628,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final StringForm INSTANCE = new StringForm();
 
   }
 
-  static final class ByteBufferForm implements TermForm<ByteBuffer>, ToSource {
+  static final class ByteBufferForm implements TermForm<ByteBuffer>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable ByteBuffer value) {
@@ -663,14 +663,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ByteBufferForm INSTANCE = new ByteBufferForm();
 
   }
 
-  static final class InstantForm implements TermForm<Instant>, ToSource {
+  static final class InstantForm implements TermForm<Instant>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Instant value) {
@@ -698,14 +698,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final InstantForm INSTANCE = new InstantForm();
 
   }
 
-  static final class ThrowableForm implements TermForm<Throwable>, ToSource {
+  static final class ThrowableForm implements TermForm<Throwable>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Throwable value) {
@@ -733,14 +733,14 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ThrowableForm INSTANCE = new ThrowableForm();
 
   }
 
-  static final class SeverityForm implements TermForm<Severity>, ToSource {
+  static final class SeverityForm implements TermForm<Severity>, WriteSource {
 
     @Override
     public Term intoTerm(@Nullable Severity value) {
@@ -768,7 +768,7 @@ public final class LangTerms implements TermProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final SeverityForm INSTANCE = new SeverityForm();

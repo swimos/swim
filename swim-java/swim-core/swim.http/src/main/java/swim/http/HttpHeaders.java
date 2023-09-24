@@ -38,13 +38,13 @@ import swim.codec.WriteException;
 import swim.collections.StringTrieMap;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
 import swim.util.UpdatableMap;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public final class HttpHeaders implements UpdatableMap<String, String>, Iterable<HttpHeader>, ToSource, ToString {
+public final class HttpHeaders implements UpdatableMap<String, String>, Iterable<HttpHeader>, WriteSource, WriteString {
 
   int flags;
   int size;

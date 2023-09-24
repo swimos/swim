@@ -20,7 +20,7 @@ import swim.annotations.Since;
 import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -57,7 +57,7 @@ public final class ExpectHeader extends HttpHeader {
 
 }
 
-final class ExpectHeaderType implements HttpHeaderType<ExpectHeader, String>, ToSource {
+final class ExpectHeaderType implements HttpHeaderType<ExpectHeader, String>, WriteSource {
 
   @Override
   public String name() {
@@ -96,7 +96,7 @@ final class ExpectHeaderType implements HttpHeaderType<ExpectHeader, String>, To
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

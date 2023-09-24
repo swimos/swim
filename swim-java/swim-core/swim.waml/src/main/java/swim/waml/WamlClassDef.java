@@ -53,8 +53,8 @@ import swim.term.Term;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
 import swim.waml.decl.WamlAutoDetect;
 import swim.waml.decl.WamlCreator;
 import swim.waml.decl.WamlGetter;
@@ -69,7 +69,7 @@ import swim.waml.decl.WamlTypeName;
 import swim.waml.decl.WamlUnmarshal;
 import swim.waml.decl.WamlUpdater;
 
-final class WamlClassDef<T> implements ToMarkup {
+final class WamlClassDef<T> implements WriteMarkup {
 
   final WamlMetaCodec metaCodec;
   final Class<T> classType;
@@ -950,7 +950,7 @@ final class WamlClassDef<T> implements ToMarkup {
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
   static final FilterMode INCLUDE_DEFAULT = FilterMode.DEFAULT;
@@ -1043,7 +1043,7 @@ final class WamlClassDef<T> implements ToMarkup {
 
 }
 
-final class WamlClassIntializer<T> implements Supplier<T>, ToSource {
+final class WamlClassIntializer<T> implements Supplier<T>, WriteSource {
 
   final @Nullable T value;
 
@@ -1066,7 +1066,7 @@ final class WamlClassIntializer<T> implements Supplier<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlClassIntializer<Object> NULL = new WamlClassIntializer<Object>(null);

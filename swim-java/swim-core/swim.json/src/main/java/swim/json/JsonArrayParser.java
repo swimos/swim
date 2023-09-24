@@ -27,7 +27,7 @@ import swim.term.TermParserOptions;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -66,7 +66,7 @@ public interface JsonArrayParser<E, B, @Covariant T> extends JsonParser<T> {
 
 }
 
-final class JsonArrayParserMapper<E, B, S, T> implements JsonArrayParser<E, B, T>, ToSource {
+final class JsonArrayParserMapper<E, B, S, T> implements JsonArrayParser<E, B, T>, WriteSource {
 
   final JsonArrayParser<E, B, S> parser;
   final Function<? super S, ? extends T> mapper;
@@ -167,12 +167,12 @@ final class JsonArrayParserMapper<E, B, S, T> implements JsonArrayParser<E, B, T
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonDummyArrayParser<E, B, T> implements JsonArrayParser<E, B, T>, ToSource {
+final class JsonDummyArrayParser<E, B, T> implements JsonArrayParser<E, B, T>, WriteSource {
 
   private JsonDummyArrayParser() {
     // singleton
@@ -218,7 +218,7 @@ final class JsonDummyArrayParser<E, B, T> implements JsonArrayParser<E, B, T>, T
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonDummyArrayParser<Object, Object, Object> INSTANCE =

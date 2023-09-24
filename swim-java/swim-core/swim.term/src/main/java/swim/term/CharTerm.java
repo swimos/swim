@@ -19,11 +19,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class CharTerm implements Term, ToSource {
+public final class CharTerm implements Term, WriteSource {
 
   final char value;
 
@@ -226,7 +226,7 @@ public final class CharTerm implements Term, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static CharTerm of(char value) {

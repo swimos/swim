@@ -21,14 +21,14 @@ import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Severity;
-import swim.util.ToString;
+import swim.util.WriteString;
 
 /**
  * Informational message attached to an input location.
  */
 @Public
 @Since("5.0")
-public final class Diagnostic implements ToString {
+public final class Diagnostic implements WriteString {
 
   final Input input;
   final SourceLocation location;
@@ -430,7 +430,7 @@ public final class Diagnostic implements ToString {
 
   @Override
   public String toString() {
-    return this.toString(null);
+    return WriteString.toString(this);
   }
 
   static final int CONTEXT_LINES = 2;

@@ -20,11 +20,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class LongRepr implements NumberRepr, ToSource {
+public final class LongRepr implements NumberRepr, WriteSource {
 
   final Attrs attrs;
   final long value;
@@ -347,7 +347,7 @@ public final class LongRepr implements NumberRepr, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final LongRepr ZERO = new LongRepr(Attrs.empty(), 0L);

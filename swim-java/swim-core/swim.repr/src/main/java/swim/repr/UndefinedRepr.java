@@ -19,11 +19,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class UndefinedRepr implements Repr, ToSource {
+public final class UndefinedRepr implements Repr, WriteSource {
 
   final Attrs attrs;
 
@@ -152,7 +152,7 @@ public final class UndefinedRepr implements Repr, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final UndefinedRepr UNDEFINED = new UndefinedRepr(Attrs.empty());

@@ -21,11 +21,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class DoubleRepr implements NumberRepr, ToSource {
+public final class DoubleRepr implements NumberRepr, WriteSource {
 
   final Attrs attrs;
   final double value;
@@ -344,7 +344,7 @@ public final class DoubleRepr implements NumberRepr, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final DoubleRepr POSITIVE_ZERO = new DoubleRepr(Attrs.empty(), 0.0);

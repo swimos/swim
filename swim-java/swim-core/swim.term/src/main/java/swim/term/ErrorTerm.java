@@ -17,11 +17,11 @@ package swim.term;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class ErrorTerm implements Term, ToSource {
+public final class ErrorTerm implements Term, WriteSource {
 
   private ErrorTerm() {
     // singleton
@@ -50,7 +50,7 @@ public final class ErrorTerm implements Term, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final ErrorTerm INSTANCE = new ErrorTerm();

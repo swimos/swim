@@ -28,12 +28,12 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
 import swim.util.UpdatableList;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
+public final class ArrayRepr implements Repr, UpdatableList<Repr>, WriteSource {
 
   int flags;
   int size;
@@ -623,7 +623,7 @@ public final class ArrayRepr implements Repr, UpdatableList<Repr>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final int IMMUTABLE_FLAG = 1 << 0;

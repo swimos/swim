@@ -30,13 +30,13 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
 import swim.util.UpdatableMap;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, UpdatableMap<K, V>, ToMarkup, ToSource {
+public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, UpdatableMap<K, V>, WriteMarkup, WriteSource {
 
   final int nodeMap;
   final int leafMap;
@@ -885,7 +885,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Updat
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final int VOID = 0;

@@ -27,11 +27,11 @@ import swim.collections.UniformMap;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class ReflectionTerms implements TermProvider, ToSource {
+public final class ReflectionTerms implements TermProvider, WriteSource {
 
   final TermRegistry registry;
   final int priority;
@@ -78,7 +78,7 @@ public final class ReflectionTerms implements TermProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static ReflectionTerms provider(TermRegistry registry, int priority) {
@@ -134,7 +134,7 @@ public final class ReflectionTerms implements TermProvider, ToSource {
 
 }
 
-final class ReflectionTermForm<T> implements TermForm<T>, ToSource {
+final class ReflectionTermForm<T> implements TermForm<T>, WriteSource {
 
   final Class<?> classType;
   final UniformMap<String, ReflectionTermMember> members;
@@ -175,7 +175,7 @@ final class ReflectionTermForm<T> implements TermForm<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
@@ -192,7 +192,7 @@ final class ReflectionTermMember {
 
 }
 
-final class ReflectionTerm<T> implements Term, ToSource {
+final class ReflectionTerm<T> implements Term, WriteSource {
 
   final ReflectionTermForm<T> form;
   final @Nullable T object;
@@ -292,7 +292,7 @@ final class ReflectionTerm<T> implements Term, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final class ChildGenerator implements TermGenerator {

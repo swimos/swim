@@ -23,7 +23,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -101,7 +101,7 @@ public final class Binary {
 
 }
 
-final class BlankCodec<T> implements Format<T>, ToSource {
+final class BlankCodec<T> implements Format<T>, WriteSource {
 
   final MediaType mediaType;
 
@@ -171,14 +171,14 @@ final class BlankCodec<T> implements Format<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final BlankCodec<?> INSTANCE = new BlankCodec<Object>(Binary.APPLICATION_OCTET_STREAM);
 
 }
 
-final class ByteArrayCodec implements Format<byte[]>, ToSource {
+final class ByteArrayCodec implements Format<byte[]>, WriteSource {
 
   final MediaType mediaType;
 
@@ -237,14 +237,14 @@ final class ByteArrayCodec implements Format<byte[]>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final ByteArrayCodec INSTANCE = new ByteArrayCodec(Binary.APPLICATION_OCTET_STREAM);
 
 }
 
-final class ByteBufferCodec implements Format<ByteBuffer>, ToSource {
+final class ByteBufferCodec implements Format<ByteBuffer>, WriteSource {
 
   final MediaType mediaType;
 
@@ -303,14 +303,14 @@ final class ByteBufferCodec implements Format<ByteBuffer>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final ByteBufferCodec INSTANCE = new ByteBufferCodec(Binary.APPLICATION_OCTET_STREAM);
 
 }
 
-final class BinaryMetaCodec implements MetaFormat, ToSource {
+final class BinaryMetaCodec implements MetaFormat, WriteSource {
 
   final MediaType mediaType;
 
@@ -348,7 +348,7 @@ final class BinaryMetaCodec implements MetaFormat, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final BinaryMetaCodec INSTANCE = new BinaryMetaCodec(Binary.APPLICATION_OCTET_STREAM);

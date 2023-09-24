@@ -20,11 +20,11 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class WamlReflections implements WamlProvider, ToSource {
+public final class WamlReflections implements WamlProvider, WriteSource {
 
   final WamlMetaCodec metaCodec;
   final int priority;
@@ -71,7 +71,7 @@ public final class WamlReflections implements WamlProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static WamlReflections provider(WamlMetaCodec metaCodec, int priority) {

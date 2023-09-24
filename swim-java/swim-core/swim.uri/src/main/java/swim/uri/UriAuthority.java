@@ -31,12 +31,12 @@ import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public final class UriAuthority extends UriPart implements Comparable<UriAuthority>, ToSource, ToString {
+public final class UriAuthority extends UriPart implements Comparable<UriAuthority>, WriteSource, WriteString {
 
   final UriUser user;
 
@@ -273,7 +273,7 @@ public final class UriAuthority extends UriPart implements Comparable<UriAuthori
   @Override
   public String toString() {
     if (this.string == null) {
-      this.string = this.toString(null);
+      this.string = WriteString.toString(this);
     }
     return this.string;
   }

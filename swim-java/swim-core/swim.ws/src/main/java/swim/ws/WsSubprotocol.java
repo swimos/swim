@@ -22,7 +22,7 @@ import swim.codec.Codec;
 import swim.codec.Text;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -88,7 +88,7 @@ public interface WsSubprotocol<T> {
 
 }
 
-final class WsTextSubprotocol<T> implements WsSubprotocol<T>, ToSource {
+final class WsTextSubprotocol<T> implements WsSubprotocol<T>, WriteSource {
 
   final Codec<? extends T> textCodec;
 
@@ -111,7 +111,7 @@ final class WsTextSubprotocol<T> implements WsSubprotocol<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WsTextSubprotocol<String> DEFAULT =
@@ -119,7 +119,7 @@ final class WsTextSubprotocol<T> implements WsSubprotocol<T>, ToSource {
 
 }
 
-final class WsBinarySubprotocol<T> implements WsSubprotocol<T>, ToSource {
+final class WsBinarySubprotocol<T> implements WsSubprotocol<T>, WriteSource {
 
   final Codec<? extends T> binaryCodec;
 
@@ -142,7 +142,7 @@ final class WsBinarySubprotocol<T> implements WsSubprotocol<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WsBinarySubprotocol<ByteBuffer> DEFAULT =
@@ -150,7 +150,7 @@ final class WsBinarySubprotocol<T> implements WsSubprotocol<T>, ToSource {
 
 }
 
-final class WsGenericSubprotocol<T> implements WsSubprotocol<T>, ToSource {
+final class WsGenericSubprotocol<T> implements WsSubprotocol<T>, WriteSource {
 
   final Codec<? extends T> textCodec;
   final Codec<? extends T> binaryCodec;
@@ -181,7 +181,7 @@ final class WsGenericSubprotocol<T> implements WsSubprotocol<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WsGenericSubprotocol<Object> DEFAULT =

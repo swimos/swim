@@ -19,14 +19,14 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * Term parser configuration options.
  */
 @Public
 @Since("5.0")
-public class TermParserOptions implements ToSource {
+public class TermParserOptions implements WriteSource {
 
   protected final TermRegistry termRegistry;
 
@@ -94,7 +94,7 @@ public class TermParserOptions implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   private static final TermParserOptions STANDARD = new TermParserOptions(Term.registry());

@@ -19,11 +19,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class BooleanTerm implements Term, ToSource {
+public final class BooleanTerm implements Term, WriteSource {
 
   final boolean value;
 
@@ -129,7 +129,7 @@ public final class BooleanTerm implements Term, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final BooleanTerm TRUE = new BooleanTerm(true);

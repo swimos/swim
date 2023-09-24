@@ -23,12 +23,12 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class UniformShape<K, V> implements ToMarkup, ToSource {
+public final class UniformShape<K, V> implements WriteMarkup, WriteSource {
 
   final int size;
   final @Nullable K key;
@@ -241,7 +241,7 @@ public final class UniformShape<K, V> implements ToMarkup, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static <K, V> UniformShape<K, V> empty() {

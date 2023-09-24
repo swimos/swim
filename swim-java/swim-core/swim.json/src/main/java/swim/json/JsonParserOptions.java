@@ -22,14 +22,14 @@ import swim.term.TermParserOptions;
 import swim.term.TermRegistry;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * JSON parser configuration options.
  */
 @Public
 @Since("5.0")
-public class JsonParserOptions extends TermParserOptions implements ToSource {
+public class JsonParserOptions extends TermParserOptions implements WriteSource {
 
   protected final boolean exprsEnabled;
 

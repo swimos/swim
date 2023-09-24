@@ -23,14 +23,14 @@ import swim.http.HttpException;
 import swim.http.HttpStatus;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * WebSocket engine configuration options.
  */
 @Public
 @Since("5.0")
-public class WsOptions implements ToSource {
+public class WsOptions implements WriteSource {
 
   protected final int maxFrameSize;
   protected final int maxMessageSize;
@@ -321,7 +321,7 @@ public class WsOptions implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   private static @Nullable WsOptions standard;

@@ -26,11 +26,11 @@ import swim.annotations.Since;
 import swim.collections.FingerTrieList;
 import swim.collections.StringTrieMap;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public class HttpHeaderRegistry implements ToSource {
+public class HttpHeaderRegistry implements WriteSource {
 
   HttpHeaderProvider[] providers;
 
@@ -156,7 +156,7 @@ public class HttpHeaderRegistry implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final HttpHeaderRegistry REGISTRY;

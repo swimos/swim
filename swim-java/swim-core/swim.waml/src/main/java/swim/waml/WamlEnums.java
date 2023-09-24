@@ -29,13 +29,13 @@ import swim.decl.Initializer;
 import swim.decl.TypeName;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 import swim.waml.decl.WamlInitializer;
 import swim.waml.decl.WamlTypeName;
 
 @Public
 @Since("5.0")
-public final class WamlEnums implements WamlProvider, ToSource {
+public final class WamlEnums implements WamlProvider, WriteSource {
 
   final int priority;
 
@@ -83,7 +83,7 @@ public final class WamlEnums implements WamlProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlEnums PROVIDER = new WamlEnums(GENERIC_PRIORITY);
@@ -174,7 +174,7 @@ public final class WamlEnums implements WamlProvider, ToSource {
 
 }
 
-final class WamlEnumFormat<T extends Enum<T>> implements WamlFormat<T>, WamlStringParser<StringBuilder, T>, WamlStringWriter<T>, ToSource {
+final class WamlEnumFormat<T extends Enum<T>> implements WamlFormat<T>, WamlStringParser<StringBuilder, T>, WamlStringWriter<T>, WriteSource {
 
   final Class<T> enumClass;
   final @Nullable String typeName;
@@ -231,7 +231,7 @@ final class WamlEnumFormat<T extends Enum<T>> implements WamlFormat<T>, WamlStri
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

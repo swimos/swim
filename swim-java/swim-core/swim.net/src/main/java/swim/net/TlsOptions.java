@@ -36,14 +36,14 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * TLS configuration options.
  */
 @Public
 @Since("5.0")
-public class TlsOptions implements ToSource {
+public class TlsOptions implements WriteSource {
 
   protected final SSLContext sslContext;
   protected final TlsClientAuth clientAuth;
@@ -202,7 +202,7 @@ public class TlsOptions implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   private static @Nullable TlsOptions standard;

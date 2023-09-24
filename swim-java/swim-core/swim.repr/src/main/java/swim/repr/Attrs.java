@@ -32,12 +32,12 @@ import swim.annotations.Since;
 import swim.term.Term;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
 import swim.util.UpdatableMap;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<Map.Entry<String, Repr>>, /*Comparable<Attrs>,*/ ToSource {
+public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<Map.Entry<String, Repr>>, /*Comparable<Attrs>,*/ WriteSource {
 
   int flags;
   int size;
@@ -1226,7 +1226,7 @@ public final class Attrs implements Term, UpdatableMap<String, Repr>, Iterable<M
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static final int MAX_INLINE_SIZE = 3;

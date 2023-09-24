@@ -33,7 +33,7 @@ import swim.term.TermWriterOptions;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * A writer of values to JSON.
@@ -122,7 +122,7 @@ public interface JsonWriter<@Contravariant T> extends TermWriter<T> {
 
 }
 
-final class JsonWriterUnmapper<T, U> implements JsonWriter<T>, ToSource {
+final class JsonWriterUnmapper<T, U> implements JsonWriter<T>, WriteSource {
 
   final JsonWriter<U> writer;
   final Function<? super T, ? extends U> unmapper;
@@ -173,12 +173,12 @@ final class JsonWriterUnmapper<T, U> implements JsonWriter<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonWriterUnsupported implements JsonWriter<Object>, ToSource {
+final class JsonWriterUnsupported implements JsonWriter<Object>, WriteSource {
 
   private JsonWriterUnsupported() {
     // singleton
@@ -207,7 +207,7 @@ final class JsonWriterUnsupported implements JsonWriter<Object>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonWriterUnsupported INSTANCE = new JsonWriterUnsupported();

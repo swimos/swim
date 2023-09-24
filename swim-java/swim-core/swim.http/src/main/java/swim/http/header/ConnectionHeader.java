@@ -27,7 +27,7 @@ import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
 import swim.http.HttpStatus;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -182,7 +182,7 @@ public final class ConnectionHeader extends HttpHeader {
 
 }
 
-final class ConnectionHeaderType implements HttpHeaderType<ConnectionHeader, FingerTrieList<String>>, ToSource {
+final class ConnectionHeaderType implements HttpHeaderType<ConnectionHeader, FingerTrieList<String>>, WriteSource {
 
   @Override
   public String name() {
@@ -221,7 +221,7 @@ final class ConnectionHeaderType implements HttpHeaderType<ConnectionHeader, Fin
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

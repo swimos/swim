@@ -28,11 +28,11 @@ import swim.term.TermWriter;
 import swim.term.TermWriterOptions;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class InvokeExpr extends SelectorExpr implements ToSource {
+public final class InvokeExpr extends SelectorExpr implements WriteSource {
 
   final Term scope;
   final Term[] args;
@@ -111,7 +111,7 @@ public final class InvokeExpr extends SelectorExpr implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final Term[] EMPTY_ARGS = new Term[0];

@@ -46,12 +46,12 @@ import swim.term.TermException;
 import swim.term.TermWriterOptions;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
 @CodecType("application/x-waml")
-public class WamlMetaCodec implements MetaFormat, WamlFormat<Object>, ToSource {
+public class WamlMetaCodec implements MetaFormat, WamlFormat<Object>, WriteSource {
 
   WamlProvider[] providers;
 
@@ -664,7 +664,7 @@ public class WamlMetaCodec implements MetaFormat, WamlFormat<Object>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlMetaCodec INSTANCE;

@@ -18,11 +18,11 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class BooleanRepr implements Repr, Comparable<BooleanRepr>, ToSource {
+public final class BooleanRepr implements Repr, Comparable<BooleanRepr>, WriteSource {
 
   final Attrs attrs;
   final boolean value;
@@ -173,7 +173,7 @@ public final class BooleanRepr implements Repr, Comparable<BooleanRepr>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final BooleanRepr TRUE = new BooleanRepr(Attrs.empty(), true);

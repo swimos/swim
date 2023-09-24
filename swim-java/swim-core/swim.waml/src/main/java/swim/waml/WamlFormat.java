@@ -28,7 +28,7 @@ import swim.term.Term;
 import swim.term.TermFormat;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * A transcoder of values from/to WAML.
@@ -73,7 +73,7 @@ public interface WamlFormat<T> extends TermFormat<T>, WamlParser<T>, WamlWriter<
 
 }
 
-final class WamlCombiningFormat<T> implements WamlFormat<T>, ToSource {
+final class WamlCombiningFormat<T> implements WamlFormat<T>, WriteSource {
 
   @Nullable String typeName;
   final WamlParser<T> parser;
@@ -242,7 +242,7 @@ final class WamlCombiningFormat<T> implements WamlFormat<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

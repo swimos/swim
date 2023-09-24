@@ -19,14 +19,14 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * HTTP configuration options.
  */
 @Public
 @Since("5.0")
-public class HttpOptions implements ToSource {
+public class HttpOptions implements WriteSource {
 
   protected final int maxMessageSize;
   protected final int clientRequestBufferSize;
@@ -215,7 +215,7 @@ public class HttpOptions implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   private static @Nullable HttpOptions standard;

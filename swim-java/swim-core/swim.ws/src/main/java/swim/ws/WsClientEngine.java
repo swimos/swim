@@ -15,9 +15,9 @@
 package swim.ws;
 
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
-final class WsClientEngine extends WsEngine implements ToSource {
+final class WsClientEngine extends WsEngine implements WriteSource {
 
   WsClientEngine(WsOptions options) {
     super(options);
@@ -41,7 +41,7 @@ final class WsClientEngine extends WsEngine implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WsClientEngine ENGINE = new WsClientEngine(WsOptions.noCompression());

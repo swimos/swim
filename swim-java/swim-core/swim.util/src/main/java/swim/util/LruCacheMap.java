@@ -22,7 +22,7 @@ import swim.annotations.Since;
 
 @Public
 @Since("5.0")
-public class LruCacheMap<K, V> extends CacheMap<K, V> implements ToMarkup {
+public class LruCacheMap<K, V> extends CacheMap<K, V> implements WriteMarkup {
 
   final int capacity;
   int size;
@@ -245,7 +245,7 @@ public class LruCacheMap<K, V> extends CacheMap<K, V> implements ToMarkup {
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
   static int expand(int n) {
@@ -260,7 +260,7 @@ public class LruCacheMap<K, V> extends CacheMap<K, V> implements ToMarkup {
 
 }
 
-final class LruCacheMapEntry<K, V> implements ToMarkup {
+final class LruCacheMapEntry<K, V> implements WriteMarkup {
 
   int hash;
   @Nullable K key;
@@ -303,7 +303,7 @@ final class LruCacheMapEntry<K, V> implements ToMarkup {
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
 }

@@ -27,13 +27,13 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
 import swim.util.UpdatableList;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class FingerTrieList<T> implements UpdatableList<T>, ToMarkup, ToSource {
+public final class FingerTrieList<T> implements UpdatableList<T>, WriteMarkup, WriteSource {
 
   final int size;
   final Object[] prefix;
@@ -574,7 +574,7 @@ public final class FingerTrieList<T> implements UpdatableList<T>, ToMarkup, ToSo
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final Object[] EMPTY_LEAF = new Object[0];

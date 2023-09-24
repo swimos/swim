@@ -28,7 +28,7 @@ import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * The state of an interruptible decode operation. A {@code Decode} instance
@@ -584,7 +584,7 @@ public abstract class Decode<@Covariant T> {
 
 }
 
-final class DecodeDone<@Covariant T> extends Decode<T> implements ToSource {
+final class DecodeDone<@Covariant T> extends Decode<T> implements WriteSource {
 
   final @Nullable T value;
 
@@ -744,12 +744,12 @@ final class DecodeDone<@Covariant T> extends Decode<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class DecodeError<@Covariant T> extends Decode<T> implements ToSource {
+final class DecodeError<@Covariant T> extends Decode<T> implements WriteSource {
 
   final Throwable error;
 
@@ -912,12 +912,12 @@ final class DecodeError<@Covariant T> extends Decode<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class DecodeMapper<S, T> extends Decode<T> implements ToSource {
+final class DecodeMapper<S, T> extends Decode<T> implements WriteSource {
 
   final Decode<S> decode;
   final Function<? super S, ? extends T> mapper;
@@ -948,7 +948,7 @@ final class DecodeMapper<S, T> extends Decode<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

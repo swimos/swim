@@ -25,7 +25,7 @@ import swim.decl.FilterMode;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 import swim.util.UpdatableMap;
 
 @Public
@@ -90,7 +90,7 @@ public interface WamlFieldFormat<V, T> extends WamlFieldParser<V, T>, WamlFieldW
 
 }
 
-final class WamlFieldKeyFormat<V, T extends Map<String, V>> implements WamlFieldFormat<V, T>, ToSource {
+final class WamlFieldKeyFormat<V, T extends Map<String, V>> implements WamlFieldFormat<V, T>, WriteSource {
 
   final String key;
   final WamlFormat<String> keyFormat;
@@ -167,12 +167,12 @@ final class WamlFieldKeyFormat<V, T extends Map<String, V>> implements WamlField
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlFieldIndexFormat<V, T> implements WamlFieldFormat<V, T>, ToSource {
+final class WamlFieldIndexFormat<V, T> implements WamlFieldFormat<V, T>, WriteSource {
 
   final String key;
   final WamlFormat<String> keyFormat;
@@ -246,7 +246,7 @@ final class WamlFieldIndexFormat<V, T> implements WamlFieldFormat<V, T>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   /**
@@ -261,7 +261,7 @@ final class WamlFieldIndexFormat<V, T> implements WamlFieldFormat<V, T>, ToSourc
 
 }
 
-class WamlCombiningFieldFormat<V, T> implements WamlFieldFormat<V, T>, ToSource {
+class WamlCombiningFieldFormat<V, T> implements WamlFieldFormat<V, T>, WriteSource {
 
   final WamlFormat<V> valueFormat;
   final WamlFieldParser<V, T> fieldParser;
@@ -344,7 +344,7 @@ class WamlCombiningFieldFormat<V, T> implements WamlFieldFormat<V, T>, ToSource 
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
@@ -375,7 +375,7 @@ class WamlMergingFieldFormat<V, T> extends WamlCombiningFieldFormat<V, T> {
 
 }
 
-final class WamlFlattenedFieldFormat<V, W extends V, T> implements WamlFieldFormat<W, T>, ToSource {
+final class WamlFlattenedFieldFormat<V, W extends V, T> implements WamlFieldFormat<W, T>, WriteSource {
 
   final String key;
   final WamlFieldFormat<V, T> outerFieldFormat;
@@ -466,7 +466,7 @@ final class WamlFlattenedFieldFormat<V, W extends V, T> implements WamlFieldForm
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

@@ -28,12 +28,12 @@ import swim.decl.Marshal;
 import swim.decl.Unmarshal;
 import swim.term.Term;
 import swim.util.Notation;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class LogScope implements Term, ToMarkup, ToSource {
+public final class LogScope implements Term, WriteMarkup, WriteSource {
 
   final int depth;
   final @Nullable String key;

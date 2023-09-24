@@ -26,13 +26,13 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
 import swim.util.UpdatableSet;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource {
+public final class HashTrieSet<T> implements UpdatableSet<T>, WriteMarkup, WriteSource {
 
   final int nodeMap;
   final int leafMap;
@@ -611,7 +611,7 @@ public final class HashTrieSet<T> implements UpdatableSet<T>, ToMarkup, ToSource
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final int VOID = 0;

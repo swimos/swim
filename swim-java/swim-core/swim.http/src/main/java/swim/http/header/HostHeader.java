@@ -28,7 +28,7 @@ import swim.uri.UriAuthority;
 import swim.uri.UriHost;
 import swim.uri.UriPort;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -123,7 +123,7 @@ public final class HostHeader extends HttpHeader {
 
 }
 
-final class HostHeaderType implements HttpHeaderType<HostHeader, UriAuthority>, ToSource {
+final class HostHeaderType implements HttpHeaderType<HostHeader, UriAuthority>, WriteSource {
 
   @Override
   public String name() {
@@ -162,7 +162,7 @@ final class HostHeaderType implements HttpHeaderType<HostHeader, UriAuthority>, 
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

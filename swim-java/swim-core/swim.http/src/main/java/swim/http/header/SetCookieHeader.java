@@ -25,7 +25,7 @@ import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
 import swim.http.HttpStatus;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -93,7 +93,7 @@ public final class SetCookieHeader extends HttpHeader {
 
 }
 
-final class SetCookieHeaderType implements HttpHeaderType<SetCookieHeader, HttpCookieState>, ToSource {
+final class SetCookieHeaderType implements HttpHeaderType<SetCookieHeader, HttpCookieState>, WriteSource {
 
   @Override
   public String name() {
@@ -132,7 +132,7 @@ final class SetCookieHeaderType implements HttpHeaderType<SetCookieHeader, HttpC
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

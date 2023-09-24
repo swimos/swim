@@ -35,7 +35,7 @@ import swim.decl.FilterMode;
 import swim.util.Notation;
 import swim.util.PropertyGetter;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -174,7 +174,7 @@ public interface WamlFieldWriter<V, T> extends PropertyGetter<V, T> {
 
 }
 
-final class WamlFieldValueWriter<V, T> implements WamlFieldWriter<V, T>, ToSource {
+final class WamlFieldValueWriter<V, T> implements WamlFieldWriter<V, T>, WriteSource {
 
   final String key;
   final WamlWriter<String> keyWriter;
@@ -229,12 +229,12 @@ final class WamlFieldValueWriter<V, T> implements WamlFieldWriter<V, T>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlFieldKeyWriter<V, T extends Map<String, V>> implements WamlFieldWriter<V, T>, ToSource {
+final class WamlFieldKeyWriter<V, T extends Map<String, V>> implements WamlFieldWriter<V, T>, WriteSource {
 
   final String key;
   final WamlWriter<String> keyWriter;
@@ -287,12 +287,12 @@ final class WamlFieldKeyWriter<V, T extends Map<String, V>> implements WamlField
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlFieldIndexWriter<V, T> implements WamlFieldWriter<V, T>, ToSource {
+final class WamlFieldIndexWriter<V, T> implements WamlFieldWriter<V, T>, WriteSource {
 
   final String key;
   final WamlWriter<String> keyWriter;
@@ -350,7 +350,7 @@ final class WamlFieldIndexWriter<V, T> implements WamlFieldWriter<V, T>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   /**
@@ -365,7 +365,7 @@ final class WamlFieldIndexWriter<V, T> implements WamlFieldWriter<V, T>, ToSourc
 
 }
 
-final class WamlFieldHandleWriter<V, T> implements WamlFieldWriter<V, T>, ToSource {
+final class WamlFieldHandleWriter<V, T> implements WamlFieldWriter<V, T>, WriteSource {
 
   final String key;
   final WamlWriter<String> keyWriter;
@@ -420,12 +420,12 @@ final class WamlFieldHandleWriter<V, T> implements WamlFieldWriter<V, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlFieldGetterWriter<V, T> implements WamlFieldWriter<V, T>, ToSource {
+final class WamlFieldGetterWriter<V, T> implements WamlFieldWriter<V, T>, WriteSource {
 
   final String key;
   final WamlWriter<String> keyWriter;
@@ -485,7 +485,7 @@ final class WamlFieldGetterWriter<V, T> implements WamlFieldWriter<V, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

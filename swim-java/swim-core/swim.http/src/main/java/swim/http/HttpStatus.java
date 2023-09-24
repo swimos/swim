@@ -32,12 +32,12 @@ import swim.collections.StringTrieMap;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public final class HttpStatus implements ToSource, ToString {
+public final class HttpStatus implements WriteSource, WriteString {
 
   final int code;
   final String phrase;

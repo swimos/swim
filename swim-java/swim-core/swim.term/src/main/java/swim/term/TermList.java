@@ -18,11 +18,11 @@ import swim.annotations.Nullable;
 import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-final class TermList implements Term, ToSource {
+final class TermList implements Term, WriteSource {
 
   final Term[] terms;
 
@@ -64,7 +64,7 @@ final class TermList implements Term, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static TermList of(Term... terms) {

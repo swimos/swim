@@ -27,7 +27,7 @@ import swim.decl.FilterMode;
 import swim.util.Assume;
 import swim.util.Iterators;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -70,7 +70,7 @@ public interface JsonObjectWriter<V, @Contravariant T> extends JsonWriter<T> {
 
 }
 
-final class JsonObjectSerializer<V, T> implements JsonObjectWriter<V, T>, ToSource {
+final class JsonObjectSerializer<V, T> implements JsonObjectWriter<V, T>, WriteSource {
 
   final @Nullable String typeName;
   final UniformMap<String, JsonFieldWriter<? extends V, T>> fieldWriters;
@@ -154,7 +154,7 @@ final class JsonObjectSerializer<V, T> implements JsonObjectWriter<V, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final class AnnexedFieldIterator<V, W extends V, T> implements Iterator<JsonFieldFormat<W, T>> {
@@ -183,7 +183,7 @@ final class JsonObjectSerializer<V, T> implements JsonObjectWriter<V, T>, ToSour
 
 }
 
-final class JsonObjectPrefixer<V, T> implements JsonObjectWriter<V, T>, ToSource {
+final class JsonObjectPrefixer<V, T> implements JsonObjectWriter<V, T>, WriteSource {
 
   final @Nullable String typeName;
   final JsonFieldWriter<? extends V, T> prefixWriter;
@@ -226,7 +226,7 @@ final class JsonObjectPrefixer<V, T> implements JsonObjectWriter<V, T>, ToSource
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

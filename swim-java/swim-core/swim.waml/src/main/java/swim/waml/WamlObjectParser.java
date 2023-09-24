@@ -40,7 +40,7 @@ import swim.term.TermParserOptions;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -217,7 +217,7 @@ public interface WamlObjectParser<V, B, @Covariant T> extends WamlParser<T> {
 
 }
 
-final class WamlObjectParserMapper<V, B, S, T> implements WamlObjectParser<V, B, T>, ToSource {
+final class WamlObjectParserMapper<V, B, S, T> implements WamlObjectParser<V, B, T>, WriteSource {
 
   final WamlObjectParser<V, B, S> parser;
   final Function<? super S, ? extends T> mapper;
@@ -346,12 +346,12 @@ final class WamlObjectParserMapper<V, B, S, T> implements WamlObjectParser<V, B,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlDummyObjectParser<V, B, T> implements WamlObjectParser<V, B, T>, ToSource {
+final class WamlDummyObjectParser<V, B, T> implements WamlObjectParser<V, B, T>, WriteSource {
 
   private WamlDummyObjectParser() {
     // singleton
@@ -391,7 +391,7 @@ final class WamlDummyObjectParser<V, B, T> implements WamlObjectParser<V, B, T>,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlDummyObjectParser<Object, Object, Object> INSTANCE =
@@ -399,7 +399,7 @@ final class WamlDummyObjectParser<V, B, T> implements WamlObjectParser<V, B, T>,
 
 }
 
-final class WamlObjectMutator<V, T> implements WamlObjectParser<V, T, T>, ToSource {
+final class WamlObjectMutator<V, T> implements WamlObjectParser<V, T, T>, WriteSource {
 
   final @Nullable String typeName;
   final Supplier<T> creator;
@@ -501,12 +501,12 @@ final class WamlObjectMutator<V, T> implements WamlObjectParser<V, T, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WamlObjectCreator<V, T> implements WamlObjectParser<V, Object[], T>, ToSource {
+final class WamlObjectCreator<V, T> implements WamlObjectParser<V, Object[], T>, WriteSource {
 
   final @Nullable String typeName;
   final MethodHandle creatorHandle;
@@ -614,7 +614,7 @@ final class WamlObjectCreator<V, T> implements WamlObjectParser<V, Object[], T>,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

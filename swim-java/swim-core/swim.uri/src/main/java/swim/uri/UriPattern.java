@@ -28,12 +28,12 @@ import swim.uri.pattern.TerminalUriPattern;
 import swim.uri.pattern.UriSchemePattern;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public abstract class UriPattern implements ToSource, ToString {
+public abstract class UriPattern implements WriteSource, WriteString {
 
   @Internal
   protected UriPattern() {

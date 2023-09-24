@@ -20,11 +20,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class BigIntegerRepr implements NumberRepr, ToSource {
+public final class BigIntegerRepr implements NumberRepr, WriteSource {
 
   final Attrs attrs;
   final BigInteger value;

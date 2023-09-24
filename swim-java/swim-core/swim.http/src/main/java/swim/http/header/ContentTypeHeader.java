@@ -25,7 +25,7 @@ import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
 import swim.http.HttpStatus;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -93,7 +93,7 @@ public final class ContentTypeHeader extends HttpHeader {
 
 }
 
-final class ContentTypeHeaderType implements HttpHeaderType<ContentTypeHeader, MediaType>, ToSource {
+final class ContentTypeHeaderType implements HttpHeaderType<ContentTypeHeader, MediaType>, WriteSource {
 
   @Override
   public String name() {
@@ -132,7 +132,7 @@ final class ContentTypeHeaderType implements HttpHeaderType<ContentTypeHeader, M
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

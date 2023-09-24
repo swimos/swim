@@ -28,7 +28,7 @@ import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * The state of an interruptible encode operation. An {@code Encode} instance
@@ -556,7 +556,7 @@ public abstract class Encode<@Covariant T> {
 
 }
 
-final class EncodeDone<@Covariant T> extends Encode<T> implements ToSource {
+final class EncodeDone<@Covariant T> extends Encode<T> implements WriteSource {
 
   private final @Nullable T value;
 
@@ -711,12 +711,12 @@ final class EncodeDone<@Covariant T> extends Encode<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class EncodeError<@Covariant T> extends Encode<T> implements ToSource {
+final class EncodeError<@Covariant T> extends Encode<T> implements WriteSource {
 
   private final Throwable error;
 
@@ -880,12 +880,12 @@ final class EncodeError<@Covariant T> extends Encode<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class EncodeAndThen<@Covariant T> extends Encode<T> implements ToSource {
+final class EncodeAndThen<@Covariant T> extends Encode<T> implements WriteSource {
 
   private final Encode<?> head;
   private final Encode<T> tail;
@@ -940,12 +940,12 @@ final class EncodeAndThen<@Covariant T> extends Encode<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class EncodeMapper<S, T> extends Encode<T> implements ToSource {
+final class EncodeMapper<S, T> extends Encode<T> implements WriteSource {
 
   final Encode<S> encode;
   final Function<? super S, ? extends T> mapper;
@@ -976,7 +976,7 @@ final class EncodeMapper<S, T> extends Encode<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

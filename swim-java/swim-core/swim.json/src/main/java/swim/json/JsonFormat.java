@@ -27,7 +27,7 @@ import swim.decl.FilterMode;
 import swim.term.TermFormat;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * A transcoder of values from/to JSON.
@@ -72,7 +72,7 @@ public interface JsonFormat<T> extends TermFormat<T>, JsonParser<T>, JsonWriter<
 
 }
 
-final class JsonCombiningFormat<T> implements JsonFormat<T>, ToSource {
+final class JsonCombiningFormat<T> implements JsonFormat<T>, WriteSource {
 
   @Nullable String typeName;
   final JsonParser<T> parser;
@@ -156,7 +156,7 @@ final class JsonCombiningFormat<T> implements JsonFormat<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

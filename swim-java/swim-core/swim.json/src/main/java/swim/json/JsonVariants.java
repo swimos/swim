@@ -36,11 +36,11 @@ import swim.json.decl.JsonTypeInfo;
 import swim.json.decl.JsonTypeName;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class JsonVariants implements JsonProvider, ToSource {
+public final class JsonVariants implements JsonProvider, WriteSource {
 
   final JsonMetaCodec metaCodec;
   final int priority;
@@ -87,7 +87,7 @@ public final class JsonVariants implements JsonProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static JsonVariants provider(JsonMetaCodec metaCodec, int priority) {
@@ -207,7 +207,7 @@ public final class JsonVariants implements JsonProvider, ToSource {
 
 }
 
-final class JsonVariantFormat<T> implements JsonFormat<T>, JsonObjectParser<Object, JsonVariantBuilder<T>, T>, ToSource {
+final class JsonVariantFormat<T> implements JsonFormat<T>, JsonObjectParser<Object, JsonVariantBuilder<T>, T>, WriteSource {
 
   String typeKey;
   final HashTrieMap<String, JsonVariant<? extends T>> namedVariants;
@@ -278,7 +278,7 @@ final class JsonVariantFormat<T> implements JsonFormat<T>, JsonObjectParser<Obje
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

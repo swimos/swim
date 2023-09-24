@@ -31,12 +31,12 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
 import swim.util.UpdatableMap;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Iterable<Map.Entry<String, Repr>>, ToSource {
+public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Iterable<Map.Entry<String, Repr>>, WriteSource {
 
   int flags;
   int size;
@@ -1276,7 +1276,7 @@ public final class ObjectRepr implements Repr, UpdatableMap<String, Repr>, Itera
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final int IMMUTABLE_FLAG = 1 << 0;

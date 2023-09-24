@@ -21,11 +21,11 @@ import swim.term.Evaluator;
 import swim.term.Term;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class PlusExpr extends AdditiveExpr implements ToSource {
+public final class PlusExpr extends AdditiveExpr implements WriteSource {
 
   public PlusExpr(Term lhs, Term rhs) {
     super(lhs, rhs);
@@ -72,7 +72,7 @@ public final class PlusExpr extends AdditiveExpr implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static PlusExpr of(Term lhs, Term rhs) {

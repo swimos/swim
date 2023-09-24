@@ -26,11 +26,11 @@ import swim.repr.Repr;
 import swim.term.Term;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class JsonTerms implements JsonProvider, ToSource {
+public final class JsonTerms implements JsonProvider, WriteSource {
 
   final int priority;
 
@@ -66,7 +66,7 @@ public final class JsonTerms implements JsonProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonTerms PROVIDER = new JsonTerms(BUILTIN_PRIORITY);
@@ -86,7 +86,7 @@ public final class JsonTerms implements JsonProvider, ToSource {
     return TermFormat.INSTANCE;
   }
 
-  static final class TermFormat implements JsonFormat<Term>, ToSource {
+  static final class TermFormat implements JsonFormat<Term>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -146,7 +146,7 @@ public final class JsonTerms implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final TermFormat INSTANCE = new TermFormat();

@@ -20,23 +20,29 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 
 /**
- * An object with a human readable string representation.
+ * An object that can write a source code string representation.
  */
 @Public
 @Since("5.0")
-public interface ToString {
+public interface WriteSource {
 
   /**
-   * Appends a human readable string representation of this object
+   * Appends a source code string representation of this object
    * to the given {@code output}.
    */
-  void writeString(Appendable output) throws IOException;
+  void writeSource(Appendable output) throws IOException;
 
   /**
-   * Returns a human readable string representation of this object,
+   * Returns a source code string representation of the given {@code object},
    * formatted using the provided {@code options}.
    */
-  default String toString(@Nullable NotationOptions options) {
+  static String toString(@Nullable Object object, @Nullable NotationOptions options) {
+    if (object == null) {
+      return "null";
+    } else if (!(object instanceof WriteSource)) {
+      return object.toString();
+    }
+
     final Appendable output;
     if (options != null) {
       output = new Notation(options);
@@ -44,11 +50,18 @@ public interface ToString {
       output = new StringBuilder();
     }
     try {
-      this.writeString(output);
+      ((WriteSource) object).writeSource(output);
     } catch (IOException cause) {
       throw new RuntimeException(cause); // never actually throws
     }
     return output.toString();
+  }
+
+  /**
+   * Returns a source code string representation of the given {@code object}.
+   */
+  static String toString(@Nullable Object object) {
+    return WriteSource.toString(object, null);
   }
 
 }

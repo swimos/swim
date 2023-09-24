@@ -20,7 +20,7 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -201,7 +201,7 @@ public final class Text {
 
 }
 
-final class StringCodec implements Format<String>, ToSource {
+final class StringCodec implements Format<String>, WriteSource {
 
   final MediaType mediaType;
 
@@ -279,14 +279,14 @@ final class StringCodec implements Format<String>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final StringCodec INSTANCE = new StringCodec(Text.TEXT_PLAIN_UTF8, UtfErrorMode.fatal());
 
 }
 
-final class TextMetaCodec implements MetaFormat, ToSource {
+final class TextMetaCodec implements MetaFormat, WriteSource {
 
   final Format<String> stringCodec;
 
@@ -322,7 +322,7 @@ final class TextMetaCodec implements MetaFormat, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final TextMetaCodec INSTANCE = new TextMetaCodec(StringCodec.INSTANCE);

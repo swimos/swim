@@ -36,7 +36,7 @@ import swim.repr.Attrs;
 import swim.repr.Repr;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 import swim.waml.decl.WamlSubType;
 import swim.waml.decl.WamlSubTypes;
 import swim.waml.decl.WamlTypeInfo;
@@ -44,7 +44,7 @@ import swim.waml.decl.WamlTypeName;
 
 @Public
 @Since("5.0")
-public final class WamlVariants implements WamlProvider, ToSource {
+public final class WamlVariants implements WamlProvider, WriteSource {
 
   final WamlMetaCodec metaCodec;
   final int priority;
@@ -91,7 +91,7 @@ public final class WamlVariants implements WamlProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static WamlVariants provider(WamlMetaCodec metaCodec, int priority) {
@@ -202,7 +202,7 @@ public final class WamlVariants implements WamlProvider, ToSource {
 
 }
 
-final class WamlVariantFormat<T> implements WamlFormat<T>, ToSource {
+final class WamlVariantFormat<T> implements WamlFormat<T>, WriteSource {
 
   final HashTrieMap<String, WamlVariant<? extends T>> namedVariants;
   final HashTrieMap<Class<?>, WamlVariant<? extends T>> classVariants;
@@ -351,7 +351,7 @@ final class WamlVariantFormat<T> implements WamlFormat<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

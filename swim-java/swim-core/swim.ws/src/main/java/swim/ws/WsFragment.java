@@ -21,11 +21,11 @@ import swim.codec.Codec;
 import swim.codec.Decode;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class WsFragment<T> extends WsFrame<T> implements ToSource {
+public final class WsFragment<T> extends WsFrame<T> implements WriteSource {
 
   final WsOpcode frameType;
   final Codec<T> codec;
@@ -99,7 +99,7 @@ public final class WsFragment<T> extends WsFrame<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static <T> WsFragment<T> of(WsOpcode frameType, Codec<T> codec,

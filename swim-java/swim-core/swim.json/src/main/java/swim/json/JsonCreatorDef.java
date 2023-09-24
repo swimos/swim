@@ -24,9 +24,9 @@ import swim.collections.UniformMap;
 import swim.decl.Property;
 import swim.json.decl.JsonProperty;
 import swim.util.Notation;
-import swim.util.ToMarkup;
+import swim.util.WriteMarkup;
 
-final class JsonCreatorDef<T> implements ToMarkup {
+final class JsonCreatorDef<T> implements WriteMarkup {
 
   final JsonClassDef<T> classDef;
   final Executable executable;
@@ -140,7 +140,7 @@ final class JsonCreatorDef<T> implements ToMarkup {
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
 }

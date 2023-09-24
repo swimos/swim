@@ -21,11 +21,11 @@ import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class JsonVariant<T> implements ToSource {
+public final class JsonVariant<T> implements WriteSource {
 
   final @Nullable String typeName;
   final Class<?> classType;
@@ -91,7 +91,7 @@ public final class JsonVariant<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static <T> JsonVariant<T> of(@Nullable String typeName, Class<?> classType,

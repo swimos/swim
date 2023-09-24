@@ -29,12 +29,12 @@ import swim.codec.WriteException;
 import swim.collections.StringTrieMap;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHeader>, ToSource, ToString {
+public class HttpHeader implements Map.Entry<String, String>, Comparable<HttpHeader>, WriteSource, WriteString {
 
   protected final String name;
 

@@ -40,7 +40,7 @@ import swim.term.TermParserOptions;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -216,7 +216,7 @@ public interface JsonObjectParser<V, B, @Covariant T> extends JsonParser<T> {
 
 }
 
-final class JsonObjectParserMapper<V, B, S, T> implements JsonObjectParser<V, B, T>, ToSource {
+final class JsonObjectParserMapper<V, B, S, T> implements JsonObjectParser<V, B, T>, WriteSource {
 
   final JsonObjectParser<V, B, S> parser;
   final Function<? super S, ? extends T> mapper;
@@ -317,12 +317,12 @@ final class JsonObjectParserMapper<V, B, S, T> implements JsonObjectParser<V, B,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonDummyObjectParser<V, B, T> implements JsonObjectParser<V, B, T>, ToSource {
+final class JsonDummyObjectParser<V, B, T> implements JsonObjectParser<V, B, T>, WriteSource {
 
   private JsonDummyObjectParser() {
     // singleton
@@ -362,7 +362,7 @@ final class JsonDummyObjectParser<V, B, T> implements JsonObjectParser<V, B, T>,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonDummyObjectParser<Object, Object, Object> INSTANCE =
@@ -370,7 +370,7 @@ final class JsonDummyObjectParser<V, B, T> implements JsonObjectParser<V, B, T>,
 
 }
 
-final class JsonObjectMutator<V, T> implements JsonObjectParser<V, T, T>, ToSource {
+final class JsonObjectMutator<V, T> implements JsonObjectParser<V, T, T>, WriteSource {
 
   final @Nullable String typeName;
   final Supplier<T> creator;
@@ -472,12 +472,12 @@ final class JsonObjectMutator<V, T> implements JsonObjectParser<V, T, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonObjectCreator<V, T> implements JsonObjectParser<V, Object[], T>, ToSource {
+final class JsonObjectCreator<V, T> implements JsonObjectParser<V, Object[], T>, WriteSource {
 
   final @Nullable String typeName;
   final MethodHandle creatorHandle;
@@ -585,7 +585,7 @@ final class JsonObjectCreator<V, T> implements JsonObjectParser<V, Object[], T>,
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

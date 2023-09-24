@@ -39,12 +39,12 @@ import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public abstract class UriHost implements Comparable<UriHost>, ToSource, ToString {
+public abstract class UriHost implements Comparable<UriHost>, WriteSource, WriteString {
 
   UriHost() {
     // sealed
@@ -219,7 +219,7 @@ final class UriHostName extends UriHost {
 
   @Override
   public String toString() {
-    return this.toString(null);
+    return WriteString.toString(this);
   }
 
 }
@@ -265,7 +265,7 @@ final class UriHostIPv4 extends UriHost {
 
   @Override
   public String toString() {
-    return this.toString(null);
+    return WriteString.toString(this);
   }
 
 }
@@ -313,7 +313,7 @@ final class UriHostIPv6 extends UriHost {
 
   @Override
   public String toString() {
-    return this.toString(null);
+    return WriteString.toString(this);
   }
 
 }

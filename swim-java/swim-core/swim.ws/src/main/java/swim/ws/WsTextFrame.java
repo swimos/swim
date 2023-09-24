@@ -22,11 +22,11 @@ import swim.codec.Codec;
 import swim.codec.Text;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class WsTextFrame<T> extends WsDataFrame<T> implements ToSource {
+public final class WsTextFrame<T> extends WsDataFrame<T> implements WriteSource {
 
   final @Nullable T payload;
   final Codec<T> codec;
@@ -87,7 +87,7 @@ public final class WsTextFrame<T> extends WsDataFrame<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static <T> WsTextFrame<T> of(@Nullable T payload, Codec<T> codec) {

@@ -21,9 +21,9 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 /**
  * Description of a source range, identified by a closed interval between
@@ -31,7 +31,7 @@ import swim.util.ToString;
  */
 @Public
 @Since("5.0")
-public final class SourceRange extends SourceLocation implements ToMarkup, ToSource, ToString {
+public final class SourceRange extends SourceLocation implements WriteMarkup, WriteSource, WriteString {
 
   final SourcePosition start;
   final SourcePosition end;
@@ -161,7 +161,7 @@ public final class SourceRange extends SourceLocation implements ToMarkup, ToSou
 
   @Override
   public String toString() {
-    return this.toString(null);
+    return WriteString.toString(this);
   }
 
   /**

@@ -18,14 +18,14 @@ import java.io.IOException;
 import javax.net.ssl.SSLEngine;
 import swim.annotations.Public;
 import swim.annotations.Since;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * Transport-layer security client authentication configuration.
  */
 @Public
 @Since("5.0")
-public enum TlsClientAuth implements ToSource {
+public enum TlsClientAuth implements WriteSource {
 
   /**
    * Client authentication disabled.
@@ -59,7 +59,7 @@ public enum TlsClientAuth implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static TlsClientAuth from(SSLEngine sslEngine) {

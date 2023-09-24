@@ -19,9 +19,9 @@ import swim.annotations.Nullable;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.Severity;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
-final class LogFocus implements Log, ToSource {
+final class LogFocus implements Log, WriteSource {
 
   final Log log;
   final String focus;
@@ -90,7 +90,7 @@ final class LogFocus implements Log, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

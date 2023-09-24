@@ -35,7 +35,7 @@ import swim.decl.Merge;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToMarkup;
+import swim.util.WriteMarkup;
 import swim.waml.decl.WamlAlias;
 import swim.waml.decl.WamlAnnex;
 import swim.waml.decl.WamlFlatten;
@@ -43,7 +43,7 @@ import swim.waml.decl.WamlIgnore;
 import swim.waml.decl.WamlInclude;
 import swim.waml.decl.WamlMerge;
 
-final class WamlPropertyDef<T> implements ToMarkup {
+final class WamlPropertyDef<T> implements WriteMarkup {
 
   final WamlClassDef<T> classDef;
   final String name;
@@ -513,7 +513,7 @@ final class WamlPropertyDef<T> implements ToMarkup {
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
 }

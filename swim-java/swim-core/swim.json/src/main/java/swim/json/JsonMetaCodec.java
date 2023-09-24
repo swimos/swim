@@ -45,12 +45,12 @@ import swim.term.TermException;
 import swim.term.TermWriterOptions;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
 @CodecType({"application/json", "text/json"})
-public class JsonMetaCodec implements MetaFormat, JsonFormat<Object>, ToSource {
+public class JsonMetaCodec implements MetaFormat, JsonFormat<Object>, WriteSource {
 
   JsonProvider[] providers;
 
@@ -470,7 +470,7 @@ public class JsonMetaCodec implements MetaFormat, JsonFormat<Object>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonMetaCodec INSTANCE;

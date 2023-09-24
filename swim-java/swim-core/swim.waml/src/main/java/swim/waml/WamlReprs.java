@@ -53,11 +53,11 @@ import swim.util.CacheMap;
 import swim.util.Iterators;
 import swim.util.LruCacheMap;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class WamlReprs implements WamlProvider, ToSource {
+public final class WamlReprs implements WamlProvider, WriteSource {
 
   final int priority;
 
@@ -113,7 +113,7 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlReprs PROVIDER = new WamlReprs(BUILTIN_PRIORITY);
@@ -216,7 +216,7 @@ public final class WamlReprs implements WamlProvider, ToSource {
     return value;
   }
 
-  static final class AttrsFormat implements WamlAttrsParser<Repr, Attrs, Object>, WamlAttrsWriter<Repr, Object>, ToSource {
+  static final class AttrsFormat implements WamlAttrsParser<Repr, Attrs, Object>, WamlAttrsWriter<Repr, Object>, WriteSource {
 
     @Override
     public WamlParser<Repr> getAttrValueParser(@Nullable String name) throws WamlException {
@@ -290,14 +290,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final AttrsFormat INSTANCE = new AttrsFormat();
 
   }
 
-  static final class UndefinedFormat implements WamlFormat<UndefinedRepr>, WamlIdentifierParser<UndefinedRepr>, WamlIdentifierWriter<UndefinedRepr>, ToSource {
+  static final class UndefinedFormat implements WamlFormat<UndefinedRepr>, WamlIdentifierParser<UndefinedRepr>, WamlIdentifierWriter<UndefinedRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -369,14 +369,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final UndefinedFormat INSTANCE = new UndefinedFormat();
 
   }
 
-  static final class UnitFormat implements WamlFormat<UnitRepr>, WamlTupleParser<Repr, UnitRepr, UnitRepr>, WamlTupleWriter<Repr, UnitRepr>, ToSource {
+  static final class UnitFormat implements WamlFormat<UnitRepr>, WamlTupleParser<Repr, UnitRepr, UnitRepr>, WamlTupleWriter<Repr, UnitRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -491,14 +491,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final UnitFormat INSTANCE = new UnitFormat();
 
   }
 
-  static final class IdentifierFormat implements WamlFormat<Repr>, WamlIdentifierParser<Repr>, WamlIdentifierWriter<Repr>, ToSource {
+  static final class IdentifierFormat implements WamlFormat<Repr>, WamlIdentifierParser<Repr>, WamlIdentifierWriter<Repr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -583,14 +583,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final IdentifierFormat INSTANCE = new IdentifierFormat();
 
   }
 
-  static final class BooleanFormat implements WamlFormat<BooleanRepr>, WamlIdentifierParser<BooleanRepr>, WamlIdentifierWriter<BooleanRepr>, ToSource {
+  static final class BooleanFormat implements WamlFormat<BooleanRepr>, WamlIdentifierParser<BooleanRepr>, WamlIdentifierWriter<BooleanRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -656,14 +656,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final BooleanFormat INSTANCE = new BooleanFormat();
 
   }
 
-  static final class NumberFormat implements WamlFormat<NumberRepr>, WamlNumberParser<NumberRepr>, WamlNumberWriter<NumberRepr>, ToSource {
+  static final class NumberFormat implements WamlFormat<NumberRepr>, WamlNumberParser<NumberRepr>, WamlNumberWriter<NumberRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -775,14 +775,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final NumberFormat INSTANCE = new NumberFormat();
 
   }
 
-  static final class StringFormat implements WamlFormat<StringRepr>, WamlStringParser<StringBuilder, StringRepr>, WamlStringWriter<StringRepr>, ToSource {
+  static final class StringFormat implements WamlFormat<StringRepr>, WamlStringParser<StringBuilder, StringRepr>, WamlStringWriter<StringRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -853,14 +853,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final StringFormat INSTANCE = new StringFormat();
 
   }
 
-  static final class BlobFormat implements WamlFormat<BlobRepr>, WamlStringParser<Output<BlobRepr>, BlobRepr>, WamlStringWriter<BlobRepr>, ToSource {
+  static final class BlobFormat implements WamlFormat<BlobRepr>, WamlStringParser<Output<BlobRepr>, BlobRepr>, WamlStringWriter<BlobRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -940,14 +940,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final BlobFormat INSTANCE = new BlobFormat();
 
   }
 
-  static final class TermFormat implements WamlFormat<Repr>, ToSource {
+  static final class TermFormat implements WamlFormat<Repr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1014,14 +1014,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final TermFormat INSTANCE = new TermFormat();
 
   }
 
-  static final class MarkupFormat implements WamlFormat<ArrayRepr>, WamlMarkupParser<Repr, ArrayRepr, ArrayRepr>, WamlMarkupWriter<Repr, ArrayRepr>, ToSource {
+  static final class MarkupFormat implements WamlFormat<ArrayRepr>, WamlMarkupParser<Repr, ArrayRepr, ArrayRepr>, WamlMarkupWriter<Repr, ArrayRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1123,14 +1123,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final MarkupFormat INSTANCE = new MarkupFormat();
 
   }
 
-  static final class ArrayFormat implements WamlFormat<ArrayRepr>, WamlArrayParser<Repr, ArrayRepr, ArrayRepr>, WamlArrayWriter<Repr, ArrayRepr>, WamlMarkupWriter<Repr, ArrayRepr>, ToSource {
+  static final class ArrayFormat implements WamlFormat<ArrayRepr>, WamlArrayParser<Repr, ArrayRepr, ArrayRepr>, WamlArrayWriter<Repr, ArrayRepr>, WamlMarkupWriter<Repr, ArrayRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1258,14 +1258,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ArrayFormat INSTANCE = new ArrayFormat();
 
   }
 
-  static final class ObjectFormat implements WamlFormat<ObjectRepr>, WamlObjectFormat<Repr, ObjectRepr, ObjectRepr>, ToSource {
+  static final class ObjectFormat implements WamlFormat<ObjectRepr>, WamlObjectFormat<Repr, ObjectRepr, ObjectRepr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1366,14 +1366,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ObjectFormat INSTANCE = new ObjectFormat();
 
   }
 
-  static final class TupleFormat implements WamlFormat<Repr>, WamlTupleParser<Repr, TupleRepr, Repr>, WamlTupleWriter<Repr, Repr>, ToSource {
+  static final class TupleFormat implements WamlFormat<Repr>, WamlTupleParser<Repr, TupleRepr, Repr>, WamlTupleWriter<Repr, Repr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1517,14 +1517,14 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final TupleFormat INSTANCE = new TupleFormat();
 
   }
 
-  static final class ValueFormat implements WamlFormat<Repr>, ToSource {
+  static final class ValueFormat implements WamlFormat<Repr>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -1716,7 +1716,7 @@ public final class WamlReprs implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final ValueFormat INSTANCE = new ValueFormat();

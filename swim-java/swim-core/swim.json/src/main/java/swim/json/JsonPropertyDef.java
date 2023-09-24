@@ -41,9 +41,9 @@ import swim.json.decl.JsonMerge;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToMarkup;
+import swim.util.WriteMarkup;
 
-final class JsonPropertyDef<T> implements ToMarkup {
+final class JsonPropertyDef<T> implements WriteMarkup {
 
   final JsonClassDef<T> classDef;
   final String name;
@@ -513,7 +513,7 @@ final class JsonPropertyDef<T> implements ToMarkup {
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
 }

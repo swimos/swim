@@ -29,7 +29,7 @@ import swim.http.HttpHeaderType;
 import swim.http.HttpProduct;
 import swim.http.HttpStatus;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -137,7 +137,7 @@ public final class UserAgentHeader extends HttpHeader {
 
 }
 
-final class UserAgentHeaderType implements HttpHeaderType<UserAgentHeader, FingerTrieList<HttpProduct>>, ToSource {
+final class UserAgentHeaderType implements HttpHeaderType<UserAgentHeader, FingerTrieList<HttpProduct>>, WriteSource {
 
   @Override
   public String name() {
@@ -176,7 +176,7 @@ final class UserAgentHeaderType implements HttpHeaderType<UserAgentHeader, Finge
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

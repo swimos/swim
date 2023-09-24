@@ -22,11 +22,11 @@ import swim.codec.Binary;
 import swim.codec.Codec;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class WsCloseFrame<T> extends WsControlFrame<T> implements ToSource {
+public final class WsCloseFrame<T> extends WsControlFrame<T> implements WriteSource {
 
   final @Nullable T payload;
   final Codec<T> codec;
@@ -87,7 +87,7 @@ public final class WsCloseFrame<T> extends WsControlFrame<T> implements ToSource
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static <T> WsCloseFrame<T> empty() {

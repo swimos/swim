@@ -23,11 +23,11 @@ import swim.annotations.Since;
 import swim.collections.UniformMap;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class JsonThrowables implements JsonProvider, ToSource {
+public final class JsonThrowables implements JsonProvider, WriteSource {
 
   final int priority;
 
@@ -65,7 +65,7 @@ public final class JsonThrowables implements JsonProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonThrowables PROVIDER = new JsonThrowables(GENERIC_PRIORITY);
@@ -91,7 +91,7 @@ public final class JsonThrowables implements JsonProvider, ToSource {
 
 }
 
-final class JsonStackTraceElementFormat implements JsonFormat<StackTraceElement>, JsonObjectParser<Object, JsonStackTraceElementBuilder, StackTraceElement>, JsonObjectWriter<Object, StackTraceElement>, ToSource {
+final class JsonStackTraceElementFormat implements JsonFormat<StackTraceElement>, JsonObjectParser<Object, JsonStackTraceElementBuilder, StackTraceElement>, JsonObjectWriter<Object, StackTraceElement>, WriteSource {
 
   @Override
   public @Nullable String typeName() {
@@ -153,7 +153,7 @@ final class JsonStackTraceElementFormat implements JsonFormat<StackTraceElement>
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   @SuppressWarnings("SameNameButDifferent")
@@ -496,7 +496,7 @@ final class JsonStackTraceElementBuilder {
 
 }
 
-final class JsonThrowableFormat implements JsonFormat<Throwable>, JsonObjectParser<Object, JsonThrowableBuilder, Throwable>, JsonObjectWriter<Object, Throwable>, ToSource {
+final class JsonThrowableFormat implements JsonFormat<Throwable>, JsonObjectParser<Object, JsonThrowableBuilder, Throwable>, JsonObjectWriter<Object, Throwable>, WriteSource {
 
   @Override
   public @Nullable String typeName() {
@@ -603,7 +603,7 @@ final class JsonThrowableFormat implements JsonFormat<Throwable>, JsonObjectPars
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   @SuppressWarnings("SameNameButDifferent")

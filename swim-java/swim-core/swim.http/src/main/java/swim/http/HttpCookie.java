@@ -28,12 +28,12 @@ import swim.codec.WriteException;
 import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public final class HttpCookie implements ToSource, ToString {
+public final class HttpCookie implements WriteSource, WriteString {
 
   final String name;
   final String value;

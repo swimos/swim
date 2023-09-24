@@ -33,11 +33,11 @@ import swim.http.header.TransferEncodingHeader;
 import swim.http.header.UpgradeHeader;
 import swim.http.header.UserAgentHeader;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class HttpHeaderTypes implements HttpHeaderProvider, ToSource {
+public final class HttpHeaderTypes implements HttpHeaderProvider, WriteSource {
 
   @Internal
   public HttpHeaderTypes() {
@@ -71,7 +71,7 @@ public final class HttpHeaderTypes implements HttpHeaderProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final HttpHeaderTypes PROVIDER = new HttpHeaderTypes();

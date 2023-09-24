@@ -25,11 +25,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.collections.HashTrieMap;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public class MetaCodecRegistry implements ToSource {
+public class MetaCodecRegistry implements WriteSource {
 
   HashTrieMap<MediaType, MetaCodec> metaCodecs = HashTrieMap.empty();
 
@@ -265,7 +265,7 @@ public class MetaCodecRegistry implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   /**

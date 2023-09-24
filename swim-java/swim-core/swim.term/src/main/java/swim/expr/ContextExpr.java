@@ -31,11 +31,11 @@ import swim.term.TermWriter;
 import swim.term.TermWriterOptions;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class ContextExpr implements Expr, ToSource {
+public final class ContextExpr implements Expr, WriteSource {
 
   private ContextExpr() {
     // singleton
@@ -59,7 +59,7 @@ public final class ContextExpr implements Expr, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final ContextExpr INSTANCE = new ContextExpr();

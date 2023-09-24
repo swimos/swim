@@ -33,8 +33,8 @@ import swim.util.Notation;
 import swim.util.PropertySetter;
 import swim.util.PropertyUpdater;
 import swim.util.Result;
-import swim.util.ToSource;
 import swim.util.UpdatableMap;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -197,7 +197,7 @@ public interface JsonFieldParser<V, T> extends PropertyUpdater<V, T> {
 
 }
 
-final class JsonDummyFieldParser<V, T> implements JsonFieldParser<V, T>, ToSource {
+final class JsonDummyFieldParser<V, T> implements JsonFieldParser<V, T>, WriteSource {
 
   @Override
   public JsonParser<V> valueParser() {
@@ -217,14 +217,14 @@ final class JsonDummyFieldParser<V, T> implements JsonFieldParser<V, T>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonDummyFieldParser<Object, Object> INSTANCE = new JsonDummyFieldParser<Object, Object>();
 
 }
 
-final class JsonFieldKeyParser<V, T extends Map<String, V>> implements JsonFieldParser<V, T>, ToSource {
+final class JsonFieldKeyParser<V, T extends Map<String, V>> implements JsonFieldParser<V, T>, WriteSource {
 
   final String key;
   final JsonParser<V> valueParser;
@@ -264,12 +264,12 @@ final class JsonFieldKeyParser<V, T extends Map<String, V>> implements JsonField
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonFieldIndexParser<V, T> implements JsonFieldParser<V, T>, ToSource {
+final class JsonFieldIndexParser<V, T> implements JsonFieldParser<V, T>, WriteSource {
 
   final VarHandle arrayHandle;
   final int index;
@@ -304,7 +304,7 @@ final class JsonFieldIndexParser<V, T> implements JsonFieldParser<V, T>, ToSourc
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   /**
@@ -319,7 +319,7 @@ final class JsonFieldIndexParser<V, T> implements JsonFieldParser<V, T>, ToSourc
 
 }
 
-final class JsonFieldHandleParser<V, T> implements JsonFieldParser<V, T>, ToSource {
+final class JsonFieldHandleParser<V, T> implements JsonFieldParser<V, T>, WriteSource {
 
   final VarHandle fieldHandle;
   final JsonParser<V> valueParser;
@@ -351,12 +351,12 @@ final class JsonFieldHandleParser<V, T> implements JsonFieldParser<V, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonFieldUpdaterParser<V, T> implements JsonFieldParser<V, T>, ToSource {
+final class JsonFieldUpdaterParser<V, T> implements JsonFieldParser<V, T>, WriteSource {
 
   final PropertyUpdater<V, T> updater;
   final JsonParser<V> valueParser;
@@ -392,12 +392,12 @@ final class JsonFieldUpdaterParser<V, T> implements JsonFieldParser<V, T>, ToSou
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonFieldSetterParser<V, T> implements JsonFieldParser<V, T>, ToSource {
+final class JsonFieldSetterParser<V, T> implements JsonFieldParser<V, T>, WriteSource {
 
   final PropertySetter<V, T> setter;
   final JsonParser<V> valueParser;
@@ -434,7 +434,7 @@ final class JsonFieldSetterParser<V, T> implements JsonFieldParser<V, T>, ToSour
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

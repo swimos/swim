@@ -28,12 +28,12 @@ import swim.codec.Write;
 import swim.codec.WriteException;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public final class HttpVersion implements ToSource, ToString {
+public final class HttpVersion implements WriteSource, WriteString {
 
   final int major;
   final int minor;

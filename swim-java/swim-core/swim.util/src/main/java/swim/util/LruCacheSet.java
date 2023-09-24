@@ -22,7 +22,7 @@ import swim.annotations.Since;
 
 @Public
 @Since("5.0")
-public class LruCacheSet<T> extends CacheSet<T> implements ToMarkup {
+public class LruCacheSet<T> extends CacheSet<T> implements WriteMarkup {
 
   final int capacity;
   int size;
@@ -243,7 +243,7 @@ public class LruCacheSet<T> extends CacheSet<T> implements ToMarkup {
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
   static int expand(int n) {
@@ -258,7 +258,7 @@ public class LruCacheSet<T> extends CacheSet<T> implements ToMarkup {
 
 }
 
-final class LruCacheSetEntry<T> implements ToMarkup {
+final class LruCacheSetEntry<T> implements WriteMarkup {
 
   int hash;
   T value;
@@ -298,7 +298,7 @@ final class LruCacheSetEntry<T> implements ToMarkup {
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
 }

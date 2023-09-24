@@ -29,7 +29,7 @@ import swim.http.HttpHeaderType;
 import swim.http.HttpMethod;
 import swim.http.HttpStatus;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -151,7 +151,7 @@ public final class AllowHeader extends HttpHeader {
 
 }
 
-final class AllowHeaderType implements HttpHeaderType<AllowHeader, FingerTrieList<HttpMethod>>, ToSource {
+final class AllowHeaderType implements HttpHeaderType<AllowHeader, FingerTrieList<HttpMethod>>, WriteSource {
 
   @Override
   public String name() {
@@ -190,7 +190,7 @@ final class AllowHeaderType implements HttpHeaderType<AllowHeader, FingerTrieLis
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

@@ -30,13 +30,13 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
 import swim.util.UpdatableMap;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, UpdatableMap<K, V>, ToMarkup, ToSource {
+public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, UpdatableMap<K, V>, WriteMarkup, WriteSource {
 
   final Object[] slots;
 
@@ -332,7 +332,7 @@ public final class ArrayMap<K, V> implements Iterable<Map.Entry<K, V>>, Updatabl
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final ArrayMap<Object, Object> EMPTY = new ArrayMap<Object, Object>(new Object[0]);

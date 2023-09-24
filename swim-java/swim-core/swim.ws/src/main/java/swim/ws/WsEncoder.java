@@ -23,11 +23,11 @@ import swim.codec.EncodeException;
 import swim.codec.OutputBuffer;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public class WsEncoder implements ToSource {
+public class WsEncoder implements WriteSource {
 
   protected final boolean masked;
 
@@ -155,7 +155,7 @@ public class WsEncoder implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WsEncoder CLIENT_ENCODER = new WsEncoder(true);

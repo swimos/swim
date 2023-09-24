@@ -20,11 +20,11 @@ import swim.annotations.Public;
 import swim.annotations.Since;
 import swim.term.Term;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class StringRepr implements Repr, Comparable<StringRepr>, ToSource {
+public final class StringRepr implements Repr, Comparable<StringRepr>, WriteSource {
 
   final Attrs attrs;
   final String value;
@@ -340,7 +340,7 @@ public final class StringRepr implements Repr, Comparable<StringRepr>, ToSource 
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final StringRepr EMPTY = new StringRepr(Attrs.empty(), "");

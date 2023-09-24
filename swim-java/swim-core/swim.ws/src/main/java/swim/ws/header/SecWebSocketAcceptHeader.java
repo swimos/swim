@@ -26,7 +26,7 @@ import swim.http.HttpHeader;
 import swim.http.HttpHeaderType;
 import swim.http.HttpStatus;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
@@ -100,7 +100,7 @@ public final class SecWebSocketAcceptHeader extends HttpHeader {
 
 }
 
-final class SecWebSocketAcceptHeaderType implements HttpHeaderType<SecWebSocketAcceptHeader, byte[]>, ToSource {
+final class SecWebSocketAcceptHeaderType implements HttpHeaderType<SecWebSocketAcceptHeader, byte[]>, WriteSource {
 
   @Override
   public String name() {
@@ -139,7 +139,7 @@ final class SecWebSocketAcceptHeaderType implements HttpHeaderType<SecWebSocketA
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

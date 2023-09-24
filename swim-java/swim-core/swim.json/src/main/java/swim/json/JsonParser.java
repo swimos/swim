@@ -31,7 +31,7 @@ import swim.term.TermParserOptions;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * A parser of values from JSON.
@@ -187,7 +187,7 @@ public interface JsonParser<@Covariant T> extends TermParser<T> {
 
 }
 
-final class JsonParserMapper<S, T> implements JsonParser<T>, ToSource {
+final class JsonParserMapper<S, T> implements JsonParser<T>, WriteSource {
 
   final JsonParser<S> parser;
   final Function<? super S, ? extends T> mapper;
@@ -263,12 +263,12 @@ final class JsonParserMapper<S, T> implements JsonParser<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class JsonDummyParser<T> implements JsonParser<T>, ToSource {
+final class JsonDummyParser<T> implements JsonParser<T>, WriteSource {
 
   private JsonDummyParser() {
     // singleton
@@ -322,14 +322,14 @@ final class JsonDummyParser<T> implements JsonParser<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonDummyParser<Object> INSTANCE = new JsonDummyParser<Object>();
 
 }
 
-final class JsonUnsupportedParser<T> implements JsonParser<T>, ToSource {
+final class JsonUnsupportedParser<T> implements JsonParser<T>, WriteSource {
 
   final Class<?> classType;
 
@@ -369,7 +369,7 @@ final class JsonUnsupportedParser<T> implements JsonParser<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

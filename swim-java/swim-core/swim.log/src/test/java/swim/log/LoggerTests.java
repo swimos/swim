@@ -15,6 +15,8 @@
 package swim.log;
 
 import org.junit.jupiter.api.Test;
+import swim.util.NotationOptions;
+import swim.util.WriteMarkup;
 
 public class LoggerTests {
 
@@ -25,7 +27,7 @@ public class LoggerTests {
     Log.forTopic("foo.bar");
     //Log.forTopic("foo").subscribe(new LogPrinter().threshold(Severity.TRACE));
     Log.forTopic("foo.bar.baz").debug("testing 1 2 3");
-    System.out.println(Logger.root().toMarkup(swim.util.NotationOptions.debug()));
+    System.out.println(WriteMarkup.toString(Logger.root(), NotationOptions.debug()));
   }
 
 }

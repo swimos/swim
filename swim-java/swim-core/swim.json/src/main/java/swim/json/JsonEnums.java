@@ -31,11 +31,11 @@ import swim.json.decl.JsonInitializer;
 import swim.json.decl.JsonTypeName;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class JsonEnums implements JsonProvider, ToSource {
+public final class JsonEnums implements JsonProvider, WriteSource {
 
   final int priority;
 
@@ -83,7 +83,7 @@ public final class JsonEnums implements JsonProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonEnums PROVIDER = new JsonEnums(GENERIC_PRIORITY);
@@ -174,7 +174,7 @@ public final class JsonEnums implements JsonProvider, ToSource {
 
 }
 
-final class JsonEnumFormat<T extends Enum<T>> implements JsonFormat<T>, JsonStringParser<StringBuilder, T>, JsonStringWriter<T>, ToSource {
+final class JsonEnumFormat<T extends Enum<T>> implements JsonFormat<T>, JsonStringParser<StringBuilder, T>, JsonStringWriter<T>, WriteSource {
 
   final Class<T> enumClass;
   final @Nullable String typeName;
@@ -231,7 +231,7 @@ final class JsonEnumFormat<T extends Enum<T>> implements JsonFormat<T>, JsonStri
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

@@ -19,6 +19,7 @@ import java.io.StringWriter;
 import org.junit.jupiter.api.Test;
 import swim.util.NotationOptions;
 import swim.util.Severity;
+import swim.util.WriteString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DiagnosticTests {
@@ -411,7 +412,7 @@ public class DiagnosticTests {
   }
 
   static void printDiagnostic(Diagnostic diagnostic) {
-    System.out.println(diagnostic.toString(NotationOptions.styled()));
+    System.out.println(WriteString.toString(diagnostic, NotationOptions.styled()));
   }
 
 }

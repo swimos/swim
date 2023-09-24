@@ -21,11 +21,11 @@ import swim.codec.Codec;
 import swim.codec.Encode;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class WsContinuation<T> extends WsFrame<T> implements ToSource {
+public final class WsContinuation<T> extends WsFrame<T> implements WriteSource {
 
   final WsDataFrame<T> frame;
   final Encode<?> encodePayload;
@@ -107,7 +107,7 @@ public final class WsContinuation<T> extends WsFrame<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static <T> WsContinuation<T> of(WsDataFrame<T> frame,

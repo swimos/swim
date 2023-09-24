@@ -34,12 +34,12 @@ import swim.util.CacheMap;
 import swim.util.LruCacheMap;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
-import swim.util.ToString;
+import swim.util.WriteSource;
+import swim.util.WriteString;
 
 @Public
 @Since("5.0")
-public final class UriFragment extends UriPart implements Comparable<UriFragment>, ToSource, ToString {
+public final class UriFragment extends UriPart implements Comparable<UriFragment>, WriteSource, WriteString {
 
   final @Nullable String identifier;
 
@@ -108,7 +108,7 @@ public final class UriFragment extends UriPart implements Comparable<UriFragment
   @Marshal
   @Override
   public String toString() {
-    return this.toString(null);
+    return WriteString.toString(this);
   }
 
   static final UriFragment UNDEFINED = new UriFragment(null);

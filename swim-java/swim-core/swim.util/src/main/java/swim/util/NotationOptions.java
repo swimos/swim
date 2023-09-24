@@ -21,7 +21,7 @@ import swim.annotations.Since;
 
 @Public
 @Since("5.0")
-public class NotationOptions implements ToSource {
+public class NotationOptions implements WriteSource {
 
   protected final boolean verbose;
   protected final boolean stylize;
@@ -150,7 +150,7 @@ public class NotationOptions implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   private static final NotationOptions COMPACT = new NotationOptions(false, false, false, null, null);

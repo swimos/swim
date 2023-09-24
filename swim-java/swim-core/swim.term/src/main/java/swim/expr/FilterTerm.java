@@ -22,11 +22,11 @@ import swim.term.Term;
 import swim.term.TermGenerator;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class FilterTerm implements Term, ToSource {
+public final class FilterTerm implements Term, WriteSource {
 
   final Term scope;
   final Term predicate;
@@ -89,7 +89,7 @@ public final class FilterTerm implements Term, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static FilterTerm of(Term scope, Term predicate) {

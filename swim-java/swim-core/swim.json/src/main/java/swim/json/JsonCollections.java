@@ -43,11 +43,11 @@ import swim.decl.FilterMode;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class JsonCollections implements JsonProvider, ToSource {
+public final class JsonCollections implements JsonProvider, WriteSource {
 
   final JsonMetaCodec metaCodec;
   final int priority;
@@ -100,7 +100,7 @@ public final class JsonCollections implements JsonProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static JsonCollections provider(JsonMetaCodec metaCodec, int priority) {
@@ -383,7 +383,7 @@ public final class JsonCollections implements JsonProvider, ToSource {
     return new MapFieldFormatIterator<V, T>(keys, keyWriter, valueWriter, filterMode);
   }
 
-  static final class ListFormat<E, T extends List<E>> implements JsonFormat<T>, JsonArrayParser<E, T, T>, JsonArrayWriter<E, T>, ToSource {
+  static final class ListFormat<E, T extends List<E>> implements JsonFormat<T>, JsonArrayParser<E, T, T>, JsonArrayWriter<E, T>, WriteSource {
 
     final Supplier<T> creator;
     final JsonFormat<E> elementFormat;
@@ -471,12 +471,12 @@ public final class JsonCollections implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
   }
 
-  static final class MapFormat<V, T extends Map<String, V>> implements JsonFormat<T>, JsonObjectFormat<V, T, T>, ToSource {
+  static final class MapFormat<V, T extends Map<String, V>> implements JsonFormat<T>, JsonObjectFormat<V, T, T>, WriteSource {
 
     final Supplier<T> creator;
     final JsonFormat<String> keyFormat;
@@ -595,7 +595,7 @@ public final class JsonCollections implements JsonProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
   }

@@ -28,7 +28,7 @@ import swim.util.Assume;
 import swim.util.Murmur3;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 /**
  * The state of an interruptible write operation. A {@code Write} instance
@@ -594,7 +594,7 @@ public abstract class Write<@Covariant T> extends Encode<T> {
 
 }
 
-final class WriteDone<@Covariant T> extends Write<T> implements ToSource {
+final class WriteDone<@Covariant T> extends Write<T> implements WriteSource {
 
   private final @Nullable T value;
 
@@ -749,12 +749,12 @@ final class WriteDone<@Covariant T> extends Write<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WriteError<@Covariant T> extends Write<T> implements ToSource {
+final class WriteError<@Covariant T> extends Write<T> implements WriteSource {
 
   private final Throwable error;
 
@@ -918,12 +918,12 @@ final class WriteError<@Covariant T> extends Write<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WriteAndThen<@Covariant T> extends Write<T> implements ToSource {
+final class WriteAndThen<@Covariant T> extends Write<T> implements WriteSource {
 
   private final Write<?> head;
   private final Write<T> tail;
@@ -974,12 +974,12 @@ final class WriteAndThen<@Covariant T> extends Write<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }
 
-final class WriteMapper<S, T> extends Write<T> implements ToSource {
+final class WriteMapper<S, T> extends Write<T> implements WriteSource {
 
   final Write<S> write;
   final Function<? super S, ? extends T> mapper;
@@ -1010,7 +1010,7 @@ final class WriteMapper<S, T> extends Write<T> implements ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
 }

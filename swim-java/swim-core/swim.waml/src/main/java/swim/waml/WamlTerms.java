@@ -27,11 +27,11 @@ import swim.repr.Repr;
 import swim.term.Term;
 import swim.util.Assume;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class WamlTerms implements WamlProvider, ToSource {
+public final class WamlTerms implements WamlProvider, WriteSource {
 
   final int priority;
 
@@ -67,7 +67,7 @@ public final class WamlTerms implements WamlProvider, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final WamlTerms PROVIDER = new WamlTerms(BUILTIN_PRIORITY);
@@ -87,7 +87,7 @@ public final class WamlTerms implements WamlProvider, ToSource {
     return TermFormat.INSTANCE;
   }
 
-  static final class TermFormat implements WamlFormat<Term>, ToSource {
+  static final class TermFormat implements WamlFormat<Term>, WriteSource {
 
     @Override
     public @Nullable String typeName() {
@@ -205,7 +205,7 @@ public final class WamlTerms implements WamlProvider, ToSource {
 
     @Override
     public String toString() {
-      return this.toSource();
+      return WriteSource.toString(this);
     }
 
     static final TermFormat INSTANCE = new TermFormat();

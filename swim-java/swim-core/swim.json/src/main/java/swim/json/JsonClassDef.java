@@ -66,10 +66,10 @@ import swim.term.Term;
 import swim.util.Assume;
 import swim.util.Notation;
 import swim.util.Result;
-import swim.util.ToMarkup;
-import swim.util.ToSource;
+import swim.util.WriteMarkup;
+import swim.util.WriteSource;
 
-final class JsonClassDef<T> implements ToMarkup {
+final class JsonClassDef<T> implements WriteMarkup {
 
   final JsonMetaCodec metaCodec;
   final Class<T> classType;
@@ -950,7 +950,7 @@ final class JsonClassDef<T> implements ToMarkup {
 
   @Override
   public String toString() {
-    return this.toMarkup();
+    return WriteMarkup.toString(this);
   }
 
   static final FilterMode INCLUDE_DEFAULT = FilterMode.DEFAULT;
@@ -1043,7 +1043,7 @@ final class JsonClassDef<T> implements ToMarkup {
 
 }
 
-final class JsonClassInitializer<T> implements Supplier<T>, ToSource {
+final class JsonClassInitializer<T> implements Supplier<T>, WriteSource {
 
   final @Nullable T value;
 
@@ -1066,7 +1066,7 @@ final class JsonClassInitializer<T> implements Supplier<T>, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   static final JsonClassInitializer<Object> NULL = new JsonClassInitializer<Object>(null);

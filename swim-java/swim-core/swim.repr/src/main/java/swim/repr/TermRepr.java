@@ -23,11 +23,11 @@ import swim.term.Term;
 import swim.term.TermGenerator;
 import swim.util.Murmur3;
 import swim.util.Notation;
-import swim.util.ToSource;
+import swim.util.WriteSource;
 
 @Public
 @Since("5.0")
-public final class TermRepr implements Repr, ToSource {
+public final class TermRepr implements Repr, WriteSource {
 
   final Attrs attrs;
   final Term term;
@@ -413,7 +413,7 @@ public final class TermRepr implements Repr, ToSource {
 
   @Override
   public String toString() {
-    return this.toSource();
+    return WriteSource.toString(this);
   }
 
   public static TermRepr of(Term term) {
