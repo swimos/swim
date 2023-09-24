@@ -20,7 +20,12 @@ pipeline {
             image: node:20
             command:
             - cat
-            tty: true     
+            tty: true
+          - name: gh
+            image: nstream/jenkins-github-gh-cli
+            command:
+            - cat
+            tty: true                   
         '''
         }
     }
