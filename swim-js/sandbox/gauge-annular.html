@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Annular Gauge</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-vis/dist/umd/swim-vis.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").style.set({
+  position: "relative",
+  width: "67%",
+  height: "67%",
+  touchAction: "none",
+  userSelect: "none",
+});
+
+const canvasView = swim.CanvasView.create().set({
+  style: {
+    touchAction: "manipulation",
+  },
+  mouseEvents: true,
+  pointerEvents: true,
+  touchEvents: true,
+});
+
+const gaugeView = canvasView.appendChild(swim.GaugeView).set({
+  font: "20px sans-serif",
+  title: "Gauge",
+});
+
+const dial0View = gaugeView.appendChild(swim.DialView).set({
+  arrangement: "manual",
+  innerRadius: "30%",
+  outerRadius: "35%",
+  dialColor: swim.Look.etchColor,
+});
+
+const dial1View = gaugeView.appendChild(swim.DialView).set({
+  arrangement: "manual",
+  innerRadius: "35%",
+  outerRadius: "40%",
+  dialColor: swim.Look.etchColor,
+});
+dial1View.modifyMood(swim.Feel.default, [[swim.Feel.contrasted, -0.6]]);
+
+const ringView = gaugeView.appendChild(swim.DialView).set({
+  arrangement: "manual",
+  innerRadius: "30%",
+  outerRadius: "40%",
+  dialColor: swim.Color.transparent(),
+  value: 0.33,
+  legend: "Legend",
+});
+ringView.addEventListener("pointerenter", function (event) {
+  ringView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+});
+ringView.addEventListener("pointerleave", function (event) {
+  ringView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+});
+
+setInterval(function () {
+  const timing = swim.Easing.linear.withDuration(1000);
+  ringView.value.set(Math.random(), timing);
+}, 1000);
+
+containerView.appendChild(canvasView);
+
+    </script>
+  </body>
+</html>

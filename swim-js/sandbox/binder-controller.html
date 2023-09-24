@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Binder Controller</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body swim-theme style="display: flex;">
+    <script src="../../node_modules/tslib/tslib.js"></script>
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-ux/dist/umd/swim-ux.js"></script>
+    <script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+class ExampleBinderController extends swim.BinderController {
+  constructor() {
+    super();
+    ExampleBinderController.initFasteners(this);
+  }
+}
+ExampleBinderController.defineField("tabBar", [swim.TraitViewControllerRef({
+  extends: true,
+  attachTabBarView(tabBarView, tabBarController) {
+    tabBarView.barHeight.set(48);
+    super.attachTabBarView(tabBarView, tabBarController);
+  },
+})]);
+ExampleBinderController.defineField("tabs", [swim.TraitViewControllerSet({
+  extends: true,
+  attachTabView(tabView, tabController) {
+    super.attachTabView(tabView, tabController);
+    const tabTrait = tabController.sheet.trait;
+    if (tabTrait !== null) {
+      ctabView.appendChild("h2", "header").set({
+        style: {
+          margin: 12,
+        },
+        text: tabTrait.title.value,
+      });
+    }
+  },
+})]);
+
+const binderController = new ExampleBinderController().set({
+  tabStyle: "bottom",
+});
+binderController.mount();
+const binderView = binderController.binder.attachView().style.set({
+  flexGrow: 1,
+});
+
+binderController.tabBar.insertController();
+
+const tab1Controller = new swim.SheetController();
+tab1Controller.title.set("Tab 1");
+tab1Controller.handle.setIcon(swim.PolygonIcon.create(4));
+const tab1View = tab1Controller.sheet.attachView();
+tab1View.appendChild("h2").set({
+  style: {
+    margin: 12,
+  },
+  text: "Tab 1",
+});
+binderController.tabs.addController(tab1Controller);
+
+const tab2Controller = new swim.SheetController();
+tab2Controller.title.set("Tab 2");
+tab2Controller.handle.setIcon(swim.PolygonIcon.create(6));
+const tab2View = tab2Controller.sheet.attachView();
+const header2View = tab2View.appendChild("h2").set({
+  style: {
+    margin: 12,
+  },
+  text: "Tab 2",
+});
+binderController.tabs.addController(tab2Controller);
+
+const tab3Controller = new swim.SheetController();
+tab3Controller.title.set("Tab 3");
+tab3Controller.handle.setIcon(swim.PolygonIcon.create(8));
+const tab3View = tab3Controller.sheet.attachView();
+const header3View = tab3View.appendChild("h2").set({
+  style: {
+    margin: 12,
+  },
+  text: "Tab 3",
+});
+binderController.tabs.addController(tab3Controller);
+
+binderController.binder.insertView(bodyView);
+
+    </script>
+  </body>
+</html>

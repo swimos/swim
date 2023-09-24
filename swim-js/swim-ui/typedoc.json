@@ -1,0 +1,16 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "out": "lib/doc",
+  "categorizeByGroup": false,
+  "excludeInternal": true,
+  "entryPointStrategy": "packages",
+  "entryPoints": [
+    "swim-model",
+    "swim-style",
+    "swim-theme",
+    "swim-view",
+    "swim-dom",
+    "swim-graphics",
+    "swim-controller"
+  ]
+}

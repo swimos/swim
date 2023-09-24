@@ -1,0 +1,52 @@
+{
+  "name": "@swim/macro",
+  "version": "4.0.0-dev.20230923",
+  "description": "Recon-based macro engine",
+  "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-macro",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2023 Nstream, inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim-js.git",
+  "type": "module",
+  "main": "./dist/swim-macro.js",
+  "types": "./dist/swim-macro.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-macro.js",
+      "types": "./dist/swim-macro.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20230923",
+    "@swim/codec": "4.0.0-dev.20230923",
+    "@swim/args": "4.0.0-dev.20230923",
+    "@swim/structure": "4.0.0-dev.20230923",
+    "@swim/recon": "4.0.0-dev.20230923",
+    "tslib": ">= 2.5"
+  },
+  "devDependencies": {
+    "@types/prismjs": "1",
+    "prismjs": "1.29"
+  },
+  "bin": {
+    "swim-macro": "./dist/swim-macro-cli.js"
+  },
+  "scripts": {
+    "main:compile": "tsc -b main && api-extractor run -l -c main/api-extractor.json",
+    "main:bundle": "cd main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "cli:compile": "tsc -b cli",
+    "cli:bundle": "cd cli && rollup -c",
+    "cli:build": "npm run cli:compile && npm run cli:bundle",
+    "test:compile": "tsc -b test",
+    "test:bundle": "cd test && rollup -c",
+    "test:build": "npm run test:compile && npm run test:bundle",
+    "compile": "npm run main:compile && npm run cli:compile",
+    "build": "npm run main:build && npm run cli:build",
+    "test": "npx swim-unit -m dist/swim-macro-test.js",
+    "cli": "node dist/swim-macro-cli.js",
+    "doc": "npx typedoc",
+    "clean": "rm -rf lib dist"
+  }
+}

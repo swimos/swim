@@ -1,0 +1,41 @@
+{
+  "name": "@swim/model",
+  "version": "4.0.0-dev.20230923",
+  "description": "Lifecycle-managed model hierarchy supporting dynamic scoping and service injection",
+  "homepage": "https://github.com/swimos/swim-js/tree/main/swim-ui/swim-model",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2023 Nstream, inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim-js.git",
+  "type": "module",
+  "main": "./dist/swim-model.js",
+  "types": "./dist/swim-model.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-model.js",
+      "types": "./dist/swim-model.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20230923",
+    "@swim/codec": "4.0.0-dev.20230923",
+    "@swim/component": "4.0.0-dev.20230923",
+    "@swim/collections": "4.0.0-dev.20230923",
+    "@swim/structure": "4.0.0-dev.20230923",
+    "@swim/recon": "4.0.0-dev.20230923",
+    "@swim/uri": "4.0.0-dev.20230923",
+    "@swim/warp": "4.0.0-dev.20230923",
+    "@swim/client": "4.0.0-dev.20230923",
+    "tslib": ">= 2.5"
+  },
+  "scripts": {
+    "main:compile": "tsc -b main && api-extractor run -l -c main/api-extractor.json",
+    "main:bundle": "cd main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "compile": "npm run main:compile",
+    "build": "npm run main:build",
+    "doc": "npx typedoc",
+    "clean": "rm -rf lib dist"
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "name": "@swim/client",
+  "version": "4.0.0-dev.20230923",
+  "description": "Streaming API client for linking to lanes of stateful Web Agents using the WARP protocol, enabling massively real-time applications that continuously synchronize all shared states with ping latency",
+  "homepage": "https://github.com/swimos/swim-js/tree/main/swim-host/swim-client",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2023 Nstream, inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim-js.git",
+  "type": "module",
+  "main": "./dist/swim-client.js",
+  "types": "./dist/swim-client.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/swim-client.js",
+      "types": "./dist/swim-client.d.ts"
+    },
+    "./worker": {
+      "import": "./dist/swim-client-worker.js",
+      "types": "./dist/swim-client-worker.d.ts"
+    },
+    "./webworker": {
+      "import": "./dist/swim-client-webworker.min.js",
+      "types": "./dist/swim-client-webworker.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "keywords": [
+    "client",
+    "protocol",
+    "recon",
+    "swim",
+    "warp",
+    "webagent",
+    "websocket"
+  ],
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20230923",
+    "@swim/codec": "4.0.0-dev.20230923",
+    "@swim/args": "4.0.0-dev.20230923",
+    "@swim/component": "4.0.0-dev.20230923",
+    "@swim/collections": "4.0.0-dev.20230923",
+    "@swim/structure": "4.0.0-dev.20230923",
+    "@swim/recon": "4.0.0-dev.20230923",
+    "@swim/uri": "4.0.0-dev.20230923",
+    "@swim/warp": "4.0.0-dev.20230923",
+    "tslib": ">= 2.5",
+    "ws": "8"
+  },
+  "devDependencies": {
+    "@types/ws": "8"
+  },
+  "bin": {
+    "swim-client": "./dist/swim-client-cli.js"
+  },
+  "scripts": {
+    "worker:compile": "tsc -b  && api-extractor run -l -c /api-extractor.json",
+    "worker:bundle": "cd  && rollup -c",
+    "worker:build": "npm run worker:compile && npm run worker:bundle",
+    "webworker:compile": "tsc -b webworker",
+    "webworker:bundle": "cd webworker && rollup -c",
+    "webworker:build": "npm run webworker:compile && npm run webworker:bundle",
+    "main:compile": "tsc -b main && api-extractor run -l -c main/api-extractor.json",
+    "main:bundle": "cd main && rollup -c",
+    "main:build": "npm run main:compile && npm run main:bundle",
+    "cli:compile": "tsc -b cli",
+    "cli:bundle": "cd cli && rollup -c",
+    "cli:build": "npm run cli:compile && npm run cli:bundle",
+    "test:compile": "tsc -b test",
+    "test:bundle": "cd test && rollup -c",
+    "test:build": "npm run test:compile && npm run test:bundle",
+    "compile": "npm run main:compile && npm run cli:compile",
+    "build": "npm run worker:build && npm run webworker:build && npm run main:build && npm run cli:build",
+    "test": "npx swim-unit -m dist/swim-client-test.js",
+    "cli": "node dist/swim-client-cli.js",
+    "doc": "npx typedoc",
+    "clean": "rm -rf lib dist"
+  }
+}

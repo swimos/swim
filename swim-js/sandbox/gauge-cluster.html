@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Gauge Cluster</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-vis/dist/umd/swim-vis.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").style.set({
+  position: "relative",
+  width: "67%",
+  height: "67%",
+  touchAction: "none",
+  userSelect: "none",
+});
+
+const canvasView = swim.CanvasView.create().set({
+  style: {
+    touchAction: "manipulation",
+  },
+  mouseEvents: true,
+  pointerEvents: true,
+  touchEvents: true,
+});
+
+const gaugeView = canvasView.appendChild(swim.GaugeView).set({
+  innerRadius: "25%",
+  startAngle: swim.Angle.rad(3 * Math.PI / 4),
+  sweepAngle: swim.Angle.rad(3 * Math.PI / 2),
+  font: "16px sans-serif",
+  title: "Gauge",
+});
+gaugeView.title.view.set({
+  font: "20px sans-serif",
+});
+gaugeView.addEventListener("pointerover", function (event) {
+  if (event.targetView instanceof swim.DialView) {
+    event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+  }
+});
+gaugeView.addEventListener("pointerout", function (event) {
+  if (event.targetView instanceof swim.DialView) {
+    event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+  }
+});
+
+const dial0View = gaugeView.appendChild(swim.DialView).set({
+  value: 0.33,
+  label: "label 0",
+});
+
+const dial1View = gaugeView.appendChild(swim.DialView).set({
+  value: 0.5,
+  label: "label 1",
+});
+
+const dial2View = gaugeView.appendChild(swim.DialView).set({
+  value: 0.67,
+  label: "label 2",
+});
+
+setInterval(function () {
+  const timing = swim.Easing.linear.withDuration(1000);
+  dial0View.value.set(Math.random(), timing);
+  dial1View.value.set(Math.random(), timing);
+  dial2View.value.set(Math.random(), timing);
+}, 1000);
+
+containerView.appendChild(canvasView);
+
+    </script>
+  </body>
+</html>

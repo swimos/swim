@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Gauge Controller</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../node_modules/tslib/tslib.js"></script>
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-vis/dist/umd/swim-vis.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").style.set({
+  position: "relative",
+  width: "67%",
+  height: "67%",
+  touchAction: "none",
+  userSelect: "none",
+});
+
+const canvasView = containerView.appendChild(swim.CanvasView).set({
+  style: {
+    touchAction: "manipulation",
+  },
+  mouseEvents: true,
+  pointerEvents: true,
+  touchEvents: true,
+});
+
+class ExampleGaugeController extends swim.GaugeController {
+  constructor() {
+    super();
+    ExampleGaugeController.initFasteners(this);
+  }
+}
+ExampleGaugeController.defineField("gauge", [swim.TraitViewRef({
+  extends: true,
+  initView(gaugeView) {
+    super.initView(gaugeView);
+    gaugeView.set({
+      innerRadius: "25%",
+      startAngle: swim.Angle.rad(3 * Math.PI / 4),
+      sweepAngle: swim.Angle.rad(3 * Math.PI / 2),
+      cornerRadius: 0,
+      tickAlign: 1,
+      font: "16px sans-serif",
+    });
+  },
+})]);
+ExampleGaugeController.defineField("dials", [swim.TraitViewControllerSet({
+  extends: true,
+  attachDialView(dialView, dialController) {
+    super.attachDialView(dialView, dialController);
+    dialView.addEventListener("pointerenter", function (event) {
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+    });
+    dialView.addEventListener("pointerleave", function (event) {
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+    });
+  },
+  controllerDidSetDialValue(dialValue, dialController, gaugeController) {
+    super.controllerDidSetDialValue(dialValue, dialController, gaugeController);
+    dialController.dial.trait.set({
+      label: Math.round(100 * dialValue).toString(),
+    });
+  },
+})]);
+
+const dial1Model = new swim.Model();
+const dial1Trait = new swim.DialTrait().set({
+  value: Math.random(),
+  legend: "Dial 1",
+});
+dial1Model.setTrait("dial", dial1Trait);
+
+const dial2Model = new swim.Model();
+const dial2Trait = new swim.DialTrait().set({
+  value: Math.random(),
+  legend: "Dial 2",
+});
+dial2Model.setTrait("dial", dial2Trait);
+
+const dial3Model = new swim.Model();
+const dial3Trait = new swim.DialTrait().set({
+  value: Math.random(),
+  legend: "Dial 3",
+});
+dial3Model.setTrait("dial", dial3Trait);
+
+const gaugeModel = new swim.Model();
+gaugeModel.mount();
+const gaugeTrait = new swim.GaugeTrait();
+gaugeModel.setTrait("gauge", gaugeTrait);
+gaugeModel.appendChild(dial1Model);
+gaugeModel.appendChild(dial2Model);
+gaugeModel.appendChild(dial3Model);
+
+const gaugeController = new ExampleGaugeController();
+gaugeController.mount();
+gaugeController.gauge.insertView(canvasView);
+gaugeController.gauge.setTrait(gaugeTrait);
+
+setInterval(function () {
+  dial1Trait.value.set(0.1 + 0.9 * Math.random());
+  dial2Trait.value.set(0.1 + 0.9 * Math.random());
+  dial3Trait.value.set(0.1 + 0.9 * Math.random());
+}, 1000);
+
+setInterval(function () {
+  if (dial3Model.mounted) {
+    dial3Model.remove();
+  } else {
+    gaugeModel.appendChild(dial3Model);
+  }
+}, 2500);
+
+    </script>
+  </body>
+</html>

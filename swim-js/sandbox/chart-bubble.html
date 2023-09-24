@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Bubble Chart</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body swim-theme style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; margin: 0; overflow: hidden;">
+    <script src="../swim-core/dist/umd/swim-core.js"></script>
+    <script src="../swim-host/dist/umd/swim-host.js"></script>
+    <script src="../swim-ui/dist/umd/swim-ui.js"></script>
+    <script src="../swim-vis/dist/umd/swim-vis.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.appendChild("div").style.set({
+  position: "relative",
+  width: "90%",
+  height: "90%",
+  touchAction: "none",
+  userSelect: "none",
+});
+
+const canvasView = swim.CanvasView.create().set({
+  style: {
+    touchAction: "manipulation",
+  },
+  wheelEvents: true,
+  mouseEvents: true,
+  pointerEvents: true,
+  touchEvents: true,
+});
+
+const chartView = canvasView.appendChild(swim.ChartView);
+const bottomAxisView = chartView.bottomAxis.insertView();
+const leftAxisView = chartView.leftAxis.insertView();
+
+chartView.xScaleGestures(true);
+chartView.yScaleGestures(true);
+//chartView.xRangePadding.set([20, 20]);
+//chartView.yRangePadding.set([20, 20]);
+chartView.xFitAlign(0.5);
+chartView.yFitAlign(0.5);
+chartView.fitAspectRatio.set(-1);
+chartView.preserveAspectRatio(true);
+chartView.domainTracking(true);
+chartView.font.set("12px sans-serif");
+chartView.rescaleTransition.set(void 0);
+
+leftAxisView.createTickLabel = function (tickValue) {
+  return tickValue + "%";
+};
+
+const graphView = chartView.graph.insertView();
+const plotView = graphView.appendChild(swim.BubblePlotView);
+plotView.addEventListener("pointerover", function (event) {
+  if (event.targetView instanceof swim.DataPointView) {
+    event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
+  }
+});
+plotView.addEventListener("pointerout", function (event) {
+  if (event.targetView instanceof swim.DataPointView) {
+    event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
+  }
+});
+plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
+
+const n = 10;
+for (let i = 0; i < n; i += 1) {
+  const key = "p" + i;
+  const bubbleView = new swim.DataPointView().set({
+    x: Math.round(100 * Math.random()),
+    y: Math.round(100 * Math.random()),
+    radius: 10 + Math.round(Math.random() * 10),
+    opacity: 0.5 + 0.5 * Math.random(),
+    color: swim.Look.accentColor,
+  });
+  plotView.appendChild(bubbleView, key);
+}
+
+containerView.appendChild(canvasView);
+
+setInterval(function () {
+  const timing = swim.Easing.linear.withDuration(2000);
+  for (let i = 0; i < n; i += 1) {
+    const key = "p" + i;
+    plotView.getChild(key).set({
+      x: Math.round(100 * Math.random()),
+      y: Math.round(100 * Math.random()),
+      radius: 10 + Math.round(Math.random() * 10),
+      opacity: 0.5 + 0.5 * Math.random(),
+    }, timing);
+  }
+}, 2000);
+
+    </script>
+  </body>
+</html>
