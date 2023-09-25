@@ -194,6 +194,8 @@ pipeline {
                         withEnv(["ORG_GRADLE_PROJECT_swimUsername=${username}", "ORG_GRADLE_PROJECT_swimPassword=${password}"]) {
                             dir('swim-java') {
                                 sh "./gradlew publish"
+                                sh "./gradlew closeRepository"
+                                sh "./gradlew releaseRepository"
                             }
                         }
                     }

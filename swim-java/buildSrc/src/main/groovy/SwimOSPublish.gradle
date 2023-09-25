@@ -1,6 +1,7 @@
 plugins {
   id 'maven-publish'
   id 'signing'
+  id 'io.codearte.nexus-staging'
 }
 
 java {
@@ -70,5 +71,12 @@ if (isReleaseVersion) {
   signing {
     required { gradle.taskGraph.hasTask('publish') }
     sign publishing.publications.mavenJava
+  }
+}
+
+if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')) {
+  nexusStaging {
+    username = swimUsername
+    password = swimPassword
   }
 }

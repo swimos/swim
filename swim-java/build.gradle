@@ -1,7 +1,20 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    //Needed only for SNAPSHOT versions
+    //maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
+  }
+  dependencies {
+    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0"
+  }
+}
+
+
 plugins {
   id 'SwimOSFramework'
   id 'SwimOSPublish'
 }
+
 
 description = 'SwimOS'
 ext.homepage = 'https://github.com/swimos/swim'
@@ -125,3 +138,5 @@ def localizeDependencies(subproject) {
     }
   }
 }
+
+
