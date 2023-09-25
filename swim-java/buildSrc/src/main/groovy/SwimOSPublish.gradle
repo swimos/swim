@@ -67,16 +67,19 @@ publishing {
   }
 }
 
-if (isReleaseVersion) {
-  signing {
-    required { gradle.taskGraph.hasTask('publish') }
-    sign publishing.publications.mavenJava
-  }
+
+signing {
+  required { gradle.taskGraph.hasTask('publish') }
+  sign publishing.publications.mavenJava
 }
 
 if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')) {
-  nexusStaging {
-    username = swimUsername
-    password = swimPassword
+  nexusPublishing {
+    repositories {
+      sonatype {
+        username = swimUsername
+        password = swimPassword
+      }
+    }
   }
 }

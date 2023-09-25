@@ -193,9 +193,9 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'sonatype-swim', passwordVariable: 'password', usernameVariable: 'username')]) {
                         withEnv(["ORG_GRADLE_PROJECT_swimUsername=${username}", "ORG_GRADLE_PROJECT_swimPassword=${password}"]) {
                             dir('swim-java') {
-                                sh "./gradlew publish"
-                                sh "./gradlew closeRepository"
-                                sh "./gradlew releaseRepository"
+                                sh "./gradlew publishToSonatype"
+                                sh "./gradlew findSonatypeStagingRepository closeSonatypeStagingRepository"
+                                sh "./gradlew findSonatypeStagingRepository releaseSonatypeStagingRepository"
                             }
                         }
                     }
