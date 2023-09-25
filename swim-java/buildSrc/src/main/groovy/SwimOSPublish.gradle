@@ -87,6 +87,8 @@ if (project.hasProperty('swimUsername') &&
       sonatype {
         username = swimUsername
         password = swimPassword
+        nexusUrl = uri("https://oss.sonatype.org/service/local/")
+        snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
 //        stagingProfileId = swimStagingProfileId
       }
     }
