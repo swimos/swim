@@ -1,7 +1,7 @@
 plugins {
   id 'SwimRuntimeLibrary'
   id 'SwimRuntimeExecutable'
-  id 'SwimRuntimePublish'
+  // id 'SwimRuntimePublish
 }
 
 description = 'Swim Command Line Interface'
