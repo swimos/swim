@@ -33,7 +33,7 @@ pipeline {
     environment {
         NO_COLOR = "false"
         GRADLE_OPTS = "-Dorg.gradle.daemon=false -Dorg.gradle.welcome=never"
-        ORG_GRADLE_PROJECT_gitCommit=env.GIT_COMMIT
+        ORG_GRADLE_PROJECT_gitCommit="${env.GIT_COMMIT}"
     }
 
     stages {
