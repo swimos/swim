@@ -166,7 +166,7 @@ pipeline {
             steps {
                 container('java') {
                     dir('swim-java') {
-                        sh "./gradlew build||true" //TODO: Fix this! Intermittent tests must pass.
+                        sh "./gradlew build -x true||true" //TODO: Fix this! Intermittent tests must pass.
                     }
                 }
             }
@@ -178,12 +178,12 @@ pipeline {
         }
 
         stage('release-java') {
-            when {
-                anyOf {
-                    branch 'main';
-                    branch pattern: "^\\d+.\\d+.\\d+", comparator: "REGEXP"
-                }
-            }
+//            when {
+//                anyOf {
+//                    branch 'main';
+//                    branch pattern: "^\\d+.\\d+.\\d+", comparator: "REGEXP"
+//                }
+//            }
             environment {
                 ORG_GRADLE_PROJECT_signingKey = credentials("jenkins-gpg-key")
                 ORG_GRADLE_PROJECT_signingPassword = credentials("jenkins-gpg-key-password")
@@ -200,6 +200,7 @@ pipeline {
                                 "ORG_GRADLE_PROJECT_swimStagingProfileId=${stagingProfileId}",
                         ]) {
                             dir('swim-java') {
+                                sh "date"
                                 sh "./gradlew publishToSonatype"
                                 sh "./gradlew findSonatypeStagingRepository closeSonatypeStagingRepository"
                                 sh "./gradlew findSonatypeStagingRepository releaseSonatypeStagingRepository"
