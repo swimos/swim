@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  // id 'SwimRuntimePublish
 }
 
 description = 'swim.api dynamic language bindings'
