@@ -17,6 +17,11 @@ publishing {
           name = project.name
           description = project.description
           url = project.homepage
+          if(project.hasProperty('gitCommit')) {
+            properties = [
+                    "git.commit": gitCommit
+            ]
+          }
           licenses {
             license {
               name = 'The Apache Software License, Version 2.0'
