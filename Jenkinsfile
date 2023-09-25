@@ -200,7 +200,7 @@ pipeline {
                                 "ORG_GRADLE_PROJECT_swimPassword=${password}",
                                 "ORG_GRADLE_PROJECT_swimStagingProfileId=${stagingProfileId}",
                         ]) {
-                            dir('swim-java') {
+                            dir('swim-java/swim-runtime') {
                                 sh "date"
                                 sh "./gradlew publishToSonatype"
                                 sh "./gradlew findSonatypeStagingRepository closeSonatypeStagingRepository"
