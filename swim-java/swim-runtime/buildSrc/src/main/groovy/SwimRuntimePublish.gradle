@@ -40,19 +40,19 @@ publishing {
     }
   }
 
-  repositories {
-    if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')) {
-      maven {
-        def releasesRepositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-        def snapshotsRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        name = 'Sonatype'
-        url = isReleaseVersion ? releasesRepositoryUrl : snapshotsRepositoryUrl
-        credentials {
-          username swimUsername
-          password swimPassword
-        }
-      }
-    }
+//  repositories {
+//    if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')) {
+//      maven {
+//        def releasesRepositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+//        def snapshotsRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+//        name = 'Sonatype'
+//        url = isReleaseVersion ? releasesRepositoryUrl : snapshotsRepositoryUrl
+//        credentials {
+//          username swimUsername
+//          password swimPassword
+//        }
+//      }
+//    }
     //if (project.hasProperty('githubUsername') && project.hasProperty('githubPassword')) {
     //  maven {
     //    name = 'GitHub'
@@ -75,3 +75,14 @@ publishing {
     sign publishing.publications.mavenJava
   }
 //}
+
+if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')) {
+  nexusPublishing {
+    repositories {
+      sonatype {
+        username = swimUsername
+        password = swimPassword
+      }
+    }
+  }
+}
