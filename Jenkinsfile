@@ -190,8 +190,15 @@ pipeline {
             }
             steps {
                 container('java') {
-                    withCredentials([usernamePassword(credentialsId: 'sonatype-swim', passwordVariable: 'password', usernameVariable: 'username')]) {
-                        withEnv(["ORG_GRADLE_PROJECT_swimUsername=${username}", "ORG_GRADLE_PROJECT_swimPassword=${password}"]) {
+                    withCredentials([
+                            usernamePassword(credentialsId: 'sonatype-swim', passwordVariable: 'password', usernameVariable: 'username'),
+                            string(credentialsId: 'sonatype-swim-repository', variable: 'stagingProfileId')
+                    ]) {
+                        withEnv([
+                                "ORG_GRADLE_PROJECT_swimUsername=${username}", 
+                                "ORG_GRADLE_PROJECT_swimPassword=${password}",
+                                "ORG_GRADLE_PROJECT_swimStagingProfileId=${stagingProfileId}",
+                        ]) {
                             dir('swim-java') {
                                 sh "./gradlew publishToSonatype"
                                 sh "./gradlew findSonatypeStagingRepository closeSonatypeStagingRepository"
