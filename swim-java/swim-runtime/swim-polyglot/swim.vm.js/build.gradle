@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  // id 'SwimRuntimePublish
+  
 }
 
 description = 'Swim JavaScript language integration'

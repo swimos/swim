@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  // id 'SwimRuntimePublish
+  
 }
 
 description = 'Java kernel runtime'
