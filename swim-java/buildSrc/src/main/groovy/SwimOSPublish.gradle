@@ -1,7 +1,7 @@
 plugins {
   id 'maven-publish'
   id 'signing'
-  id 'io.codearte.nexus-staging'
+  id 'io.github.gradle-nexus'
 }
 
 java {
