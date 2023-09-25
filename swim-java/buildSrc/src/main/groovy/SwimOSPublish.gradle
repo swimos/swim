@@ -74,7 +74,7 @@ signing {
 }
 
 
-if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')  && project.hasProperty('swimStagingProfileId') {
+if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')  && project.hasProperty('swimStagingProfileId')) {
   nexusPublishing {
     repositories {
       sonatype {
