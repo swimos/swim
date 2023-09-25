@@ -87,7 +87,7 @@ if (project.hasProperty('swimUsername') &&
       sonatype {
         username = swimUsername
         password = swimPassword
-        stagingProfileId = swimStagingProfileId
+//        stagingProfileId = swimStagingProfileId
       }
     }
   }
