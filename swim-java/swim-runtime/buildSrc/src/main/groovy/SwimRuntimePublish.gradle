@@ -80,19 +80,3 @@ publishing {
     sign publishing.publications.mavenJava
   }
 //}
-
-if (project.hasProperty('swimUsername') &&
-        project.hasProperty('swimPassword')  &&
-        project.hasProperty('swimStagingProfileId')) {
-  nexusPublishing {
-    repositories {
-      sonatype {
-        username = swimUsername
-        password = swimPassword
-        nexusUrl = uri("https://oss.sonatype.org/service/local/")
-        snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-//        stagingProfileId = swimStagingProfileId
-      }
-    }
-  }
-}

@@ -1,7 +1,6 @@
 plugins {
   id 'maven-publish'
   id 'signing'
-  id 'io.github.gradle-nexus.publish-plugin'
 }
 
 java {
@@ -45,52 +44,15 @@ publishing {
       }
     }
   }
-
-//  repositories {
-//    if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')) {
-//      maven {
-//        def releasesRepositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-//        def snapshotsRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
-//        name = 'Sonatype'
-//        url = isReleaseVersion ? releasesRepositoryUrl : snapshotsRepositoryUrl
-//        credentials {
-//          username swimUsername
-//          password swimPassword
-//        }
-//      }
-//    }
-    //if (project.hasProperty('githubUsername') && project.hasProperty('githubPassword')) {
-    //  maven {
-    //    name = 'GitHub'
-    //    url = 'https://maven.pkg.github.com/swimos/swim'
-    //    credentials {
-    //      username githubUsername
-    //      password githubPassword
-    //    }
-    //  }
-    //}
-//  }
 }
 
 
-signing {
-  required { gradle.taskGraph.hasTask('publish') }
-  sign publishing.publications.mavenJava
-}
-
-
-if (project.hasProperty('swimUsername') &&
-        project.hasProperty('swimPassword')  &&
-        project.hasProperty('swimStagingProfileId')) {
-  nexusPublishing {
-    repositories {
-      sonatype {
-        username = swimUsername
-        password = swimPassword
-        nexusUrl = uri("https://oss.sonatype.org/service/local/")
-        snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-//        stagingProfileId = swimStagingProfileId
-      }
-    }
+//if (isReleaseVersion) {
+  signing {
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    required { gradle.taskGraph.hasTask('publish') }
+    sign publishing.publications.mavenJava
   }
-}
+//}
