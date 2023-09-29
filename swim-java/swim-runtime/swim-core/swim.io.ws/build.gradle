@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  id 'SwimOSPublish'
 }
 
 description = 'WebSocket modem for concurrently transporting explicitly flow-controlled WebSocket streams over a network without blocking or intermediate buffering, and swim-io-http requesters and responders for upgrading HTTP client and server modems to WebSocket modems'

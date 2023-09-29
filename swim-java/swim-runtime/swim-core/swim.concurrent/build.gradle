@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  id 'SwimOSPublish'
 }
 
 description = 'Timer, task, and continuation passing style interfaces, with lightweight scheduler and execution stage implementations'

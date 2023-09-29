@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  id 'SwimOSPublish'
 }
 
 description = 'Immutable, structure sharing collections, including hash array mapped tries, finger tries, B-trees, and S-trees (sequence trees)'

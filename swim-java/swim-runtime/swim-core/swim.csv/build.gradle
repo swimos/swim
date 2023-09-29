@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  id 'SwimOSPublish'
 }
 
 description = 'Comma-Separated Values (CSV) codec that incrementally parses and writes swim-structure values'

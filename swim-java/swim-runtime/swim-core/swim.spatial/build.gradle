@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  id 'SwimOSPublish'
 }
 
 description = 'Geospatial projections and spatial collections, including sparse prefix Q-trees optimized for continuous n-body geofencing and real-time spatial clustering and reduction'

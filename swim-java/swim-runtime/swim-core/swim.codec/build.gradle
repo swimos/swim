@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  id 'SwimOSPublish'
 }
 
 description = 'Incremental I/O; functional parsers and writers; display, debug, and diagnostic formatters; and Unicode and binary codecs'

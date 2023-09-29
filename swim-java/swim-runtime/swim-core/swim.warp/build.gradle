@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  id 'SwimOSPublish'
 }
 
 description = 'WebSocket protocol for dynamically multiplexing large numbers of bidirectional links to streaming API endpoints, called lanes, of URI-addressed distributed objects, called nodes, that run stateful distributed processes, called Web Agents'

@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  id 'SwimOSPublish'
 }
 
 description = 'WARP socket modem for multiplexing and concurrently transporting prioritized, explicitly flow-controlled WARP treams over a network, without blocking or intermediate buffering'

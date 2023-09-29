@@ -166,7 +166,7 @@ pipeline {
             steps {
                 container('java') {
                     dir('swim-java') {
-                        sh "./gradlew build||true" //TODO: Fix this! Intermittent tests must pass.
+                        sh "./gradlew build || true" //TODO: Fix this! Intermittent tests must pass.
                     }
                 }
             }
@@ -178,22 +178,33 @@ pipeline {
         }
 
         stage('release-java') {
-//            when {
-//                anyOf {
-//                    branch 'main';
-//                    branch pattern: "^\\d+.\\d+.\\d+", comparator: "REGEXP"
-//                }
-//            }
+            when {
+                anyOf {
+                    branch 'main';
+                    branch pattern: "^\\d+.\\d+.\\d+", comparator: "REGEXP"
+                }
+            }
             environment {
                 ORG_GRADLE_PROJECT_signingKey = credentials("jenkins-gpg-key")
                 ORG_GRADLE_PROJECT_signingPassword = credentials("jenkins-gpg-key-password")
+                ORG_GRADLE_PROJECT_gitCommit="${env.GIT_COMMIT}"
             }
             steps {
                 container('java') {
-                    withCredentials([usernamePassword(credentialsId: 'sonatype-swim', passwordVariable: 'password', usernameVariable: 'username')]) {
-                        withEnv(["ORG_GRADLE_PROJECT_swimUsername=${username}", "ORG_GRADLE_PROJECT_swimPassword=${password}"]) {
+                    withCredentials([
+                            usernamePassword(credentialsId: 'sonatype-swim', passwordVariable: 'password', usernameVariable: 'username'),
+                            string(credentialsId: 'sonatype-swim-repository', variable: 'stagingProfileId')
+                    ]) {
+                        withEnv([
+                                "ORG_GRADLE_PROJECT_swimUsername=${username}", 
+                                "ORG_GRADLE_PROJECT_swimPassword=${password}",
+                                "ORG_GRADLE_PROJECT_swimStagingProfileId=${stagingProfileId}",
+                        ]) {
                             dir('swim-java') {
-                                sh "./gradlew publish"
+                                sh "date"
+                                sh "./gradlew publishToSonatype"
+                                sh "./gradlew findSonatypeStagingRepository closeSonatypeStagingRepository"
+                                sh "./gradlew findSonatypeStagingRepository releaseSonatypeStagingRepository"
                             }
                         }
                     }
@@ -232,3 +243,4 @@ pipeline {
 
     }
 }
+

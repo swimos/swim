@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  id 'SwimOSPublish'
 }
 
 description = 'HTTP client and server socket modems for pipelining and concurrently transporting explicitly flow-controlled HTTP streams over a network without blocking or intermediate buffering'

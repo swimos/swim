@@ -17,6 +17,11 @@ publishing {
           name = project.name
           description = project.description
           url = project.homepage
+          if(project.hasProperty('gitCommit')) {
+            properties = [
+                    "git.commit": gitCommit
+            ]
+          }
           licenses {
             license {
               name = 'The Apache Software License, Version 2.0'
@@ -40,19 +45,19 @@ publishing {
     }
   }
 
-  repositories {
-    if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')) {
-      maven {
-        def releasesRepositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-        def snapshotsRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        name = 'Sonatype'
-        url = isReleaseVersion ? releasesRepositoryUrl : snapshotsRepositoryUrl
-        credentials {
-          username swimUsername
-          password swimPassword
-        }
-      }
-    }
+//  repositories {
+//    if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')) {
+//      maven {
+//        def releasesRepositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+//        def snapshotsRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+//        name = 'Sonatype'
+//        url = isReleaseVersion ? releasesRepositoryUrl : snapshotsRepositoryUrl
+//        credentials {
+//          username swimUsername
+//          password swimPassword
+//        }
+//      }
+//    }
     //if (project.hasProperty('githubUsername') && project.hasProperty('githubPassword')) {
     //  maven {
     //    name = 'GitHub'
@@ -63,7 +68,7 @@ publishing {
     //    }
     //  }
     //}
-  }
+//  }
 }
 
 //if (isReleaseVersion) {

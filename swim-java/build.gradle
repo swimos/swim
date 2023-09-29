@@ -1,6 +1,13 @@
+buildscript {
+  dependencies {
+    classpath("io.github.gradle-nexus:publish-plugin:2.0.0-rc-1")
+  }
+}
+
 plugins {
   id 'SwimOSFramework'
   id 'SwimOSPublish'
+  id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
 }
 
 description = 'SwimOS'
@@ -121,6 +128,22 @@ def localizeDependencies(subproject) {
         subproject.dependencies {
           testImplementation project(':' + dependency.name)
         }
+      }
+    }
+  }
+}
+
+if (project.hasProperty('swimUsername') &&
+        project.hasProperty('swimPassword')  &&
+        project.hasProperty('swimStagingProfileId')) {
+  nexusPublishing {
+    repositories {
+      sonatype {
+        username = swimUsername
+        password = swimPassword
+        nexusUrl = uri("https://oss.sonatype.org/service/local/")
+        snapshotRepositoryUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+//        stagingProfileId = swimStagingProfileId
       }
     }
   }

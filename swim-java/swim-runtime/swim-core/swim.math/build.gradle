@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeLibrary'
-  id 'SwimRuntimePublish'
+  id 'SwimOSPublish'
 }
 
 description = 'Mathematical and geometric structures, including rings, fields, vector modules and spaces, affine spaces, tensor spaces, probability distributions, and associated operators'

@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeFramework'
-  id 'SwimRuntimePublish'
+  
 }
 
 description = 'Swim Polyglot Framework'

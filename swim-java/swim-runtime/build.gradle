@@ -1,6 +1,6 @@
 plugins {
   id 'SwimRuntimeFramework'
-  id 'SwimRuntimePublish'
+//  id 'SwimRuntimePublish'
 }
 
 description = 'Swim Runtime'
