@@ -181,7 +181,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'main';
-                    branch pattern: "^\\d+.\\d+.\\d+", comparator: "REGEXP"
+                    branch pattern: "^\\d+.\\d+", comparator: "REGEXP"
                 }
             }
             environment {
