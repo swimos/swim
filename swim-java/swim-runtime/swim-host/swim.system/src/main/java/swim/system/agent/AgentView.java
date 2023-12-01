@@ -39,6 +39,7 @@ import swim.api.lane.ValueLane;
 import swim.api.policy.Policy;
 import swim.api.ws.WsLane;
 import swim.collections.FingerTrieSeq;
+import swim.collections.HashTrieMap;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.math.R2Shape;
@@ -48,6 +49,7 @@ import swim.store.StoreBinding;
 import swim.structure.Text;
 import swim.structure.Value;
 import swim.system.AbstractTierBinding;
+import swim.system.LaneBinding;
 import swim.system.LaneView;
 import swim.system.LinkBinding;
 import swim.system.Metric;
@@ -209,6 +211,10 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   @Override
   public FingerTrieSeq<Agent> agents() {
     return this.node.agents();
+  }
+
+  public HashTrieMap<Uri, LaneBinding> lanes() {
+    return this.node.lanes();
   }
 
   @Override
