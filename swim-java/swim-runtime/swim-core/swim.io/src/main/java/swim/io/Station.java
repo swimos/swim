@@ -686,7 +686,7 @@ final class StationTransport implements TransportContext, TransportRef {
           // Output bytes were successfully written to the transport channel.
           if (!writeBuffer.hasRemaining()) {
             // The output buffer has no more bytes to be written.
-            continue;
+            this.transport.didWrite();
           } else {
             // The output buffer still has bytes remaining to be written;
             // synchronize the transport's flow control state with the
@@ -713,10 +713,7 @@ final class StationTransport implements TransportContext, TransportRef {
             // output buffer.
             this.transport.doWrite();
             final int newPosition = writeBuffer.position();
-            if (oldPosition != newPosition) {
-              // Inform the transport binding that the write completed.
-              this.transport.didWrite();
-            } else {
+            if (oldPosition == newPosition) {
               break;
             }
           }

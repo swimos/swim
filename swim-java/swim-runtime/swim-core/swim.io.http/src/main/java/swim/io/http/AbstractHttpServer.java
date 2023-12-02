@@ -30,6 +30,7 @@ import swim.io.IpSocket;
 public abstract class AbstractHttpServer implements HttpServer, IpContext, FlowContext {
 
   protected HttpServerContext context;
+  private boolean close = false;
 
   public AbstractHttpServer() {
     // nop
@@ -63,8 +64,7 @@ public abstract class AbstractHttpServer implements HttpServer, IpContext, FlowC
     final ConnectionHeader connectionHeader = request.getHeader(ConnectionHeader.class);
     if (connectionHeader != null) {
       if (connectionHeader.contains("close")) {
-        this.close();
-        return;
+        this.close = true;
       } else if (connectionHeader.contains("Upgrade")) {
         return;
       }
@@ -79,7 +79,9 @@ public abstract class AbstractHttpServer implements HttpServer, IpContext, FlowC
 
   @Override
   public void didRespond(HttpResponse<?> response) {
-    // hook
+    if (this.close) {
+      this.close();
+    }
   }
 
   @Override
