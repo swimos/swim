@@ -47,7 +47,7 @@ export abstract class RemoteHost extends Host {
     this.sendBuffer = [];
     this.downlinks = new BTree();
     this.downlinkCount = 0;
-    this.uriCache = new UriCache(hostUri);
+    this.uriCache = new UriCache(hostUri.endpoint());
     this.reconnectTimer = 0;
     this.reconnectTimeout = 0;
     this.idleTimer = 0;

@@ -1,6 +1,6 @@
 {
   "name": "@swim/window",
-  "version": "4.0.0-dev.20210927.1",
+  "version": "4.0.0-dev.20210927.3",
   "description": "Popovers, drawers, and other view containers",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,18 +11,18 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20210927.1",
-    "@swim/codec": "4.0.0-dev.20210927.1",
-    "@swim/mapping": "4.0.0-dev.20210927.1",
-    "@swim/constraint": "4.0.0-dev.20210927.1",
-    "@swim/structure": "4.0.0-dev.20210927.1",
-    "@swim/math": "4.0.0-dev.20210927.1",
-    "@swim/time": "4.0.0-dev.20210927.1",
-    "@swim/style": "4.0.0-dev.20210927.1",
-    "@swim/theme": "4.0.0-dev.20210927.1",
-    "@swim/view": "4.0.0-dev.20210927.1",
-    "@swim/dom": "4.0.0-dev.20210927.1",
-    "@swim/graphics": "4.0.0-dev.20210927.1",
-    "@swim/button": "4.0.0-dev.20210927.1"
+    "@swim/util": "4.0.0-dev.20210927.3",
+    "@swim/codec": "4.0.0-dev.20210927.3",
+    "@swim/mapping": "4.0.0-dev.20210927.3",
+    "@swim/constraint": "4.0.0-dev.20210927.3",
+    "@swim/structure": "4.0.0-dev.20210927.3",
+    "@swim/math": "4.0.0-dev.20210927.3",
+    "@swim/time": "4.0.0-dev.20210927.3",
+    "@swim/style": "4.0.0-dev.20210927.3",
+    "@swim/theme": "4.0.0-dev.20210927.3",
+    "@swim/view": "4.0.0-dev.20210927.3",
+    "@swim/dom": "4.0.0-dev.20210927.3",
+    "@swim/graphics": "4.0.0-dev.20210927.3",
+    "@swim/button": "4.0.0-dev.20210927.3"
   }
 }

@@ -256,15 +256,18 @@ export abstract class UriPath implements HashCode, Compare, Debug, Display {
     }
   }
 
-  unmerge(relative: UriPath, root: UriPath = relative): UriPath {
+  unmerge(that: UriPath): UriPath {
     let base: UriPath = this;
+    let relative = that;
+    if (base.isEmpty()) {
+      return relative
+    }
     do {
       if (base.isEmpty()) {
-        if (!relative.isEmpty() && !relative.tail().isEmpty()) {
-          return relative.tail();
-        } else {
+        if (relative.isEmpty() || relative.tail().isEmpty()) {
           return relative;
         }
+        return relative.tail();
       } else if (base.isRelative()) {
         return relative;
       } else if (relative.isRelative()) {
@@ -280,7 +283,7 @@ export abstract class UriPath implements HashCode, Compare, Debug, Display {
           a = a.tail();
           b = b.tail();
           if (!a.isEmpty() && b.isEmpty()) {
-            return root;
+            return that;
           } else {
             base = a;
             relative = b;

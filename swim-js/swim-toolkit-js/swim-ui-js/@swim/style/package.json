@@ -1,6 +1,6 @@
 {
   "name": "@swim/style",
-  "version": "4.0.0-dev.20210927.1",
+  "version": "4.0.0-dev.20210927.3",
   "description": "Font, color, gradient, shadow and related types and parsers",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-toolkit-js/swim-ui-js/@swim/style",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,11 +11,11 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20210927.1",
-    "@swim/codec": "4.0.0-dev.20210927.1",
-    "@swim/mapping": "4.0.0-dev.20210927.1",
-    "@swim/structure": "4.0.0-dev.20210927.1",
-    "@swim/math": "4.0.0-dev.20210927.1",
-    "@swim/time": "4.0.0-dev.20210927.1"
+    "@swim/util": "4.0.0-dev.20210927.3",
+    "@swim/codec": "4.0.0-dev.20210927.3",
+    "@swim/mapping": "4.0.0-dev.20210927.3",
+    "@swim/structure": "4.0.0-dev.20210927.3",
+    "@swim/math": "4.0.0-dev.20210927.3",
+    "@swim/time": "4.0.0-dev.20210927.3"
   }
 }

@@ -62,6 +62,6 @@ const ux = [
 ];
 
 export default {
-  version: "4.0.0-dev.20210927.1",
+  version: "4.0.0-dev.20210927.3",
   projects: ux,
 };
