@@ -13,7 +13,9 @@
 
 # ignore folders
 build
+**/bin/test
 
 # ignore files
 out
 *~
+*.class
