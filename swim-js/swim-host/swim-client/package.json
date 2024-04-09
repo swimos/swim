@@ -8,20 +8,44 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-client.js",
+  "main": "./dist/swim-client.mjs",
   "types": "./dist/swim-client.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-client.js",
-      "types": "./dist/swim-client.d.ts"
+      "module": "./dist/swim-client.mjs",
+      "import": {
+        "types": "./dist/swim-client.d.ts",
+        "default": "./dist/swim-client.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-client.d.ts",
+        "default": "./dist/umd/swim-client.umd.cjs"
+      },
+      "default": "./dist/swim-client.mjs"
     },
     "./worker": {
-      "import": "./dist/swim-client-worker.js",
-      "types": "./dist/swim-client-worker.d.ts"
+      "module": "./dist/swim-client-worker.mjs",
+      "import": {
+        "types": "./dist/swim-client-worker.d.ts",
+        "default": "./dist/swim-client-worker.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-client-worker.d.ts",
+        "default": "./dist/umd/swim-client-worker.umd.cjs"
+      },
+      "default": "./dist/swim-client-worker.mjs"
     },
     "./webworker": {
-      "import": "./dist/swim-client-webworker.min.js",
-      "types": "./dist/swim-client-webworker.d.ts"
+      "module": "./dist/swim-client-webworker.mjs",
+      "import": {
+        "types": "./dist/swim-client-webworker.d.ts",
+        "default": "./dist/swim-client-webworker.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-client-webworker.d.ts",
+        "default": "./dist/umd/swim-client-webworker.umd.cjs"
+      },
+      "default": "./dist/swim-client-webworker.mjs"
     }
   },
   "sideEffects": false,
@@ -54,8 +78,8 @@
     "swim-client": "./dist/swim-client-cli.js"
   },
   "scripts": {
-    "worker:compile": "tsc -b  && api-extractor run -l -c /api-extractor.json",
-    "worker:bundle": "cd  && rollup -c",
+    "worker:compile": "tsc -b worker && api-extractor run -l -c worker/api-extractor.json",
+    "worker:bundle": "cd worker && rollup -c",
     "worker:build": "npm run worker:compile && npm run worker:bundle",
     "webworker:compile": "tsc -b webworker",
     "webworker:bundle": "cd webworker && rollup -c",

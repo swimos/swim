@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-panel.js",
+  "main": "./dist/swim-panel.mjs",
   "types": "./dist/swim-panel.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-panel.js",
-      "types": "./dist/swim-panel.d.ts"
+      "module": "./dist/swim-panel.mjs",
+      "import": {
+        "types": "./dist/swim-panel.d.ts",
+        "default": "./dist/swim-panel.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-panel.d.ts",
+        "default": "./dist/umd/swim-panel.umd.cjs"
+      },
+      "default": "./dist/swim-panel.mjs"
     }
   },
   "sideEffects": false,

@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-recon.js",
+  "main": "./dist/swim-recon.mjs",
   "types": "./dist/swim-recon.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-recon.js",
-      "types": "./dist/swim-recon.d.ts"
+      "module": "./dist/swim-recon.mjs",
+      "import": {
+        "types": "./dist/swim-recon.d.ts",
+        "default": "./dist/swim-recon.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-recon.d.ts",
+        "default": "./dist/umd/swim-recon.umd.cjs"
+      },
+      "default": "./dist/swim-recon.mjs"
     }
   },
   "sideEffects": false,

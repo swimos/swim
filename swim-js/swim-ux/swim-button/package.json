@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-button.js",
+  "main": "./dist/swim-button.mjs",
   "types": "./dist/swim-button.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-button.js",
-      "types": "./dist/swim-button.d.ts"
+      "module": "./dist/swim-button.mjs",
+      "import": {
+        "types": "./dist/swim-button.d.ts",
+        "default": "./dist/swim-button.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-button.d.ts",
+        "default": "./dist/umd/swim-button.umd.cjs"
+      },
+      "default": "./dist/swim-button.mjs"
     }
   },
   "sideEffects": false,

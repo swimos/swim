@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-geo.js",
+  "main": "./dist/swim-geo.mjs",
   "types": "./dist/swim-geo.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-geo.js",
-      "types": "./dist/swim-geo.d.ts"
+      "module": "./dist/swim-geo.mjs",
+      "import": {
+        "types": "./dist/swim-geo.d.ts",
+        "default": "./dist/swim-geo.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-geo.d.ts",
+        "default": "./dist/umd/swim-geo.umd.cjs"
+      },
+      "default": "./dist/swim-geo.mjs"
     }
   },
   "sideEffects": false,

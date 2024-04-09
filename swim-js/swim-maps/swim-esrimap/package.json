@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-esrimap.js",
+  "main": "./dist/swim-esrimap.mjs",
   "types": "./dist/swim-esrimap.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-esrimap.js",
-      "types": "./dist/swim-esrimap.d.ts"
+      "module": "./dist/swim-esrimap.mjs",
+      "import": {
+        "types": "./dist/swim-esrimap.d.ts",
+        "default": "./dist/swim-esrimap.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-esrimap.d.ts",
+        "default": "./dist/umd/swim-esrimap.umd.cjs"
+      },
+      "default": "./dist/swim-esrimap.mjs"
     }
   },
   "sideEffects": false,

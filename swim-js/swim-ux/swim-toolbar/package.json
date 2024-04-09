@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-toolbar.js",
+  "main": "./dist/swim-toolbar.mjs",
   "types": "./dist/swim-toolbar.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-toolbar.js",
-      "types": "./dist/swim-toolbar.d.ts"
+      "module": "./dist/swim-toolbar.mjs",
+      "import": {
+        "types": "./dist/swim-toolbar.d.ts",
+        "default": "./dist/swim-toolbar.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-toolbar.d.ts",
+        "default": "./dist/umd/swim-toolbar.umd.cjs"
+      },
+      "default": "./dist/swim-toolbar.mjs"
     }
   },
   "sideEffects": false,

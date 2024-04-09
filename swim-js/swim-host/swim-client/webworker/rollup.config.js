@@ -7,6 +7,13 @@ import {createRequire} from "node:module";
 const require = createRequire(import.meta.url);
 const pkg = createRequire(import.meta.url)("../package.json");
 
+const globals = function (name) {
+  if (/^@swim\//.test(name)) {
+    return "swim";
+  }
+  return void 0;
+};
+
 function shimImport(importId, code) {
   if (code === void 0) {
     code = "export default void 0";
@@ -119,7 +126,7 @@ export default [
   {
     input: "../lib/webworker/webworker.js",
     output: {
-      file: "../dist/swim-client-webworker.js",
+      file: "../dist/swim-client-webworker.mjs",
       format: "esm",
       generatedCode: {
         preset: "es2015",
@@ -145,8 +152,59 @@ export default [
   {
     input: "../lib/webworker/webworker.min.js",
     output: {
-      file: "../dist/swim-client-webworker.min.js",
+      file: "../dist/swim-client-webworker.min.mjs",
       format: "esm",
+      generatedCode: {
+        preset: "es2015",
+        constBindings: true,
+      },
+      plugins: [
+        terser({
+          output: {
+            preamble: `// ${pkg.name}/webworker v${pkg.version} (c) ${pkg.copyright}`,
+            comments: false,
+          },
+        }),
+      ],
+    },
+  },
+  {
+    input: "../lib/webworker/webworker.js",
+    output: {
+      file: "../dist/umd/swim-client-webworker.umd.cjs",
+      format: "umd",
+      name: "swim",
+      globals,
+      interop: "esModule",
+      generatedCode: {
+        preset: "es2015",
+        constBindings: true,
+      },
+      plugins: [
+        terser({
+          compress: false,
+          mangle: false,
+          output: {
+            preamble: `// ${pkg.name}/webworker v${pkg.version} (c) ${pkg.copyright}`,
+            beautify: true,
+            comments: false,
+            indent_level: 2,
+          },
+        }),
+      ],
+    },
+    plugins: [
+      copyFile("index.d.ts", "../dist/swim-client-webworker-cjs.d.ts"),
+    ],
+  },
+  {
+    input: "../lib/webworker/webworker.min.js",
+    output: {
+      file: "../dist/umd/swim-client-webworker.umd.min.js",
+      format: "umd",
+      name: "swim",
+      globals,
+      interop: "esModule",
       generatedCode: {
         preset: "es2015",
         constBindings: true,

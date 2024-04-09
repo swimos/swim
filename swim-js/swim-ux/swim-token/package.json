@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-token.js",
+  "main": "./dist/swim-token.mjs",
   "types": "./dist/swim-token.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-token.js",
-      "types": "./dist/swim-token.d.ts"
+      "module": "./dist/swim-token.mjs",
+      "import": {
+        "types": "./dist/swim-token.d.ts",
+        "default": "./dist/swim-token.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-token.d.ts",
+        "default": "./dist/umd/swim-token.umd.cjs"
+      },
+      "default": "./dist/swim-token.mjs"
     }
   },
   "sideEffects": false,

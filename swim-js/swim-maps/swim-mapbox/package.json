@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-mapbox.js",
+  "main": "./dist/swim-mapbox.mjs",
   "types": "./dist/swim-mapbox.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-mapbox.js",
-      "types": "./dist/swim-mapbox.d.ts"
+      "module": "./dist/swim-mapbox.mjs",
+      "import": {
+        "types": "./dist/swim-mapbox.d.ts",
+        "default": "./dist/swim-mapbox.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-mapbox.d.ts",
+        "default": "./dist/umd/swim-mapbox.umd.cjs"
+      },
+      "default": "./dist/swim-mapbox.mjs"
     }
   },
   "sideEffects": false,

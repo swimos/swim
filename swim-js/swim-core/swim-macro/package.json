@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-macro.js",
+  "main": "./dist/swim-macro.mjs",
   "types": "./dist/swim-macro.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-macro.js",
-      "types": "./dist/swim-macro.d.ts"
+      "module": "./dist/swim-macro.mjs",
+      "import": {
+        "types": "./dist/swim-macro.d.ts",
+        "default": "./dist/swim-macro.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-macro.d.ts",
+        "default": "./dist/umd/swim-macro.umd.cjs"
+      },
+      "default": "./dist/swim-macro.mjs"
     }
   },
   "sideEffects": false,
