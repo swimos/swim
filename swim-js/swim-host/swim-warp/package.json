@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-warp.js",
+  "main": "./dist/swim-warp.mjs",
   "types": "./dist/swim-warp.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-warp.js",
-      "types": "./dist/swim-warp.d.ts"
+      "module": "./dist/swim-warp.mjs",
+      "import": {
+        "types": "./dist/swim-warp.d.ts",
+        "default": "./dist/swim-warp.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-warp.d.ts",
+        "default": "./dist/umd/swim-warp.umd.cjs"
+      },
+      "default": "./dist/swim-warp.mjs"
     }
   },
   "sideEffects": false,

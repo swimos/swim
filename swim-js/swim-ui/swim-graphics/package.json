@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-graphics.js",
+  "main": "./dist/swim-graphics.mjs",
   "types": "./dist/swim-graphics.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-graphics.js",
-      "types": "./dist/swim-graphics.d.ts"
+      "module": "./dist/swim-graphics.mjs",
+      "import": {
+        "types": "./dist/swim-graphics.d.ts",
+        "default": "./dist/swim-graphics.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-graphics.d.ts",
+        "default": "./dist/umd/swim-graphics.umd.cjs"
+      },
+      "default": "./dist/swim-graphics.mjs"
     }
   },
   "sideEffects": false,

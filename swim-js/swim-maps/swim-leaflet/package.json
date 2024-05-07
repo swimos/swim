@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-leaflet.js",
+  "main": "./dist/swim-leaflet.mjs",
   "types": "./dist/swim-leaflet.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-leaflet.js",
-      "types": "./dist/swim-leaflet.d.ts"
+      "module": "./dist/swim-leaflet.mjs",
+      "import": {
+        "types": "./dist/swim-leaflet.d.ts",
+        "default": "./dist/swim-leaflet.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-leaflet.d.ts",
+        "default": "./dist/umd/swim-leaflet.umd.cjs"
+      },
+      "default": "./dist/swim-leaflet.mjs"
     }
   },
   "sideEffects": false,

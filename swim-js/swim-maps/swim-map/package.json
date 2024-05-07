@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-map.js",
+  "main": "./dist/swim-map.mjs",
   "types": "./dist/swim-map.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-map.js",
-      "types": "./dist/swim-map.d.ts"
+      "module": "./dist/swim-map.mjs",
+      "import": {
+        "types": "./dist/swim-map.d.ts",
+        "default": "./dist/swim-map.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-map.d.ts",
+        "default": "./dist/umd/swim-map.umd.cjs"
+      },
+      "default": "./dist/swim-map.mjs"
     }
   },
   "sideEffects": false,

@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-pie.js",
+  "main": "./dist/swim-pie.mjs",
   "types": "./dist/swim-pie.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-pie.js",
-      "types": "./dist/swim-pie.d.ts"
+      "module": "./dist/swim-pie.mjs",
+      "import": {
+        "types": "./dist/swim-pie.d.ts",
+        "default": "./dist/swim-pie.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-pie.d.ts",
+        "default": "./dist/umd/swim-pie.umd.cjs"
+      },
+      "default": "./dist/swim-pie.mjs"
     }
   },
   "sideEffects": false,

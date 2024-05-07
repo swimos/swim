@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-googlemap.js",
+  "main": "./dist/swim-googlemap.mjs",
   "types": "./dist/swim-googlemap.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-googlemap.js",
-      "types": "./dist/swim-googlemap.d.ts"
+      "module": "./dist/swim-googlemap.mjs",
+      "import": {
+        "types": "./dist/swim-googlemap.d.ts",
+        "default": "./dist/swim-googlemap.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-googlemap.d.ts",
+        "default": "./dist/umd/swim-googlemap.umd.cjs"
+      },
+      "default": "./dist/swim-googlemap.mjs"
     }
   },
   "sideEffects": false,

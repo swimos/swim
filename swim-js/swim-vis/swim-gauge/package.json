@@ -8,12 +8,20 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-gauge.js",
+  "main": "./dist/swim-gauge.mjs",
   "types": "./dist/swim-gauge.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-gauge.js",
-      "types": "./dist/swim-gauge.d.ts"
+      "module": "./dist/swim-gauge.mjs",
+      "import": {
+        "types": "./dist/swim-gauge.d.ts",
+        "default": "./dist/swim-gauge.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-gauge.d.ts",
+        "default": "./dist/umd/swim-gauge.umd.cjs"
+      },
+      "default": "./dist/swim-gauge.mjs"
     }
   },
   "sideEffects": false,
