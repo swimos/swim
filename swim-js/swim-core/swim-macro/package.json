@@ -1,10 +1,10 @@
 {
   "name": "@swim/macro",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Recon-based macro engine",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-macro",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
@@ -26,11 +26,11 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
-    "@swim/args": "4.0.0-dev.20230923",
-    "@swim/structure": "4.0.0-dev.20230923",
-    "@swim/recon": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
+    "@swim/args": "4.0.0",
+    "@swim/structure": "4.0.0",
+    "@swim/recon": "4.0.0",
     "tslib": ">= 2.5"
   },
   "devDependencies": {
