@@ -159,6 +159,8 @@ public class SelectorSpec {
     assertEquals(Selector.identity().get("a").get("b").filter().evaluate(Record.of(Attr.of("a", Record.of(Slot.of("b", 2), Slot.of("c", 3))))), Record.of(Attr.of("a", Record.of(Slot.of("b", 2), Slot.of("c", 3)))));
     assertEquals(Selector.identity().get("a").get("c").filter().evaluate(Record.of(Attr.of("a", Record.of(Slot.of("b", 2), Slot.of("c", 3))))), Record.of(Attr.of("a", Record.of(Slot.of("b", 2), Slot.of("c", 3)))));
     assertEquals(Selector.identity().get("a").get("d").filter().evaluate(Record.of(Attr.of("a", Record.of(Slot.of("b", 2), Slot.of("c", 3))))), Value.absent());
+    assertEquals(Selector.identity().get("a").filter().evaluate(Record.of(Attr.of("a", Value.extant()))), Record.of(Attr.of("a", Value.extant())));
+    assertEquals(Selector.identity().get("a").filter().evaluate(Record.of(Attr.of("a", false))), Value.absent());
   }
 
   @Test
@@ -179,11 +181,13 @@ public class SelectorSpec {
   public void filterEqual() {
     assertEquals(Selector.identity().get("a").eq(Text.from("foo")).filter().evaluate(Record.of(Slot.of("a", "foo"))), Record.of(Slot.of("a", "foo")));
     assertEquals(Selector.identity().get("a").eq(Text.from("foo")).filter().evaluate(Record.of(Slot.of("a", "bar"))), Value.absent());
+    assertEquals(Selector.identity().get("a").eq(Text.from("foo")).filter().evaluate(Record.of(Slot.of("a", Value.extant()))), Value.absent());
   }
 
   @Test
   public void filterNotEqual() {
     assertEquals(Selector.identity().get("a").ne(Text.from("foo")).filter().evaluate(Record.of(Slot.of("a", "foo"))), Value.absent());
+    assertEquals(Selector.identity().get("a").ne(Text.from("foo")).filter().evaluate(Record.of(Slot.of("a", "bar"))), Record.of(Slot.of("a", "bar")));
     assertEquals(Selector.identity().get("a").ne(Text.from("foo")).filter().evaluate(Record.of(Slot.of("a", "bar"))), Record.of(Slot.of("a", "bar")));
   }
 

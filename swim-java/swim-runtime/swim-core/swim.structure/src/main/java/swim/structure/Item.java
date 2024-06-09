@@ -586,20 +586,19 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   public Item lt(Item that) {
     return this.typeOrder() == that.typeOrder()
         ? (this.compareTo(that) < 0 ? Bool.from(true) : Bool.from(false))
-        : !this.isDefined() || !that.isDefined() ? absent() : extant();
+        : absent();
   }
 
   public Item le(Item that) {
     return this.typeOrder() == that.typeOrder()
         ? (this.compareTo(that) <= 0 ? Bool.from(true) : Bool.from(false))
-        : !this.isDefined() || !that.isDefined() ? absent() : extant();
+        : absent();
   }
 
   public Item eq(Item that) {
     return this.equals(that) ? Bool.from(true)
-        : !this.isDefined() || !that.isDefined() ? absent()
         : this.typeOrder() == that.typeOrder() ? Bool.from(false)
-        : extant();
+        : absent();
   }
 
   public Item ne(Item that) {
@@ -611,13 +610,13 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   public Item ge(Item that) {
     return this.typeOrder() == that.typeOrder()
         ? (this.compareTo(that) >= 0 ? Bool.from(true) : Bool.from(false))
-        : !this.isDefined() || !that.isDefined() ? absent() : extant();
+        : absent();
   }
 
   public Item gt(Item that) {
     return this.typeOrder() == that.typeOrder()
         ? (this.compareTo(that) > 0 ? Bool.from(true) : Bool.from(false))
-        : !this.isDefined() || !that.isDefined() ? absent() : extant();
+        : absent();
   }
 
   public abstract Item plus(Item that);
