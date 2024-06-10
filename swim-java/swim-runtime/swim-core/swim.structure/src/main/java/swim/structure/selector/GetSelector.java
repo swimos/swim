@@ -28,9 +28,10 @@ import swim.util.Murmur3;
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated}, searches all
  * variables in its evaluation scope and yields the most recent {@link Value}
- * that corresponds to {@code key}. Note that {@code key} itself can be an
- * {@link Expression}, in which case it will be {@code evaluated} against {@code
- * stack} prior to any concrete selection logic.
+ * that corresponds to {@code key}.
+ *
+ * <p>If {@code key} itself is an {@link Expression}, then it is eagerly {@code
+ * evaluated} against {@code stack} prior to any concrete selection logic.
  */
 public final class GetSelector extends Selector {
 
