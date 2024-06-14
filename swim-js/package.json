@@ -19,10 +19,10 @@
   "sideEffects": false,
   "dependencies": {
     "@swim/core": "4.0.0",
-    "@swim/host": "4.0.03",
+    "@swim/host": "4.0.0",
     "@swim/ui": "4.0.0",
     "@swim/ux": "4.0.0",
-    "@swim/vis": "4.0.03",
+    "@swim/vis": "4.0.0",
     "@swim/maps": "4.0.0",
     "tslib": ">= 2.5"
   },

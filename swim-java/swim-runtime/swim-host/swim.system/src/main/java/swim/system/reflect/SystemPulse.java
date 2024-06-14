@@ -1,4 +1,4 @@
-// Copyright 2015-2023 Nstream, inc.
+// Copyright 2015-2024 Nstream, inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -57,9 +57,8 @@ public class SystemPulse extends Pulse {
 
   @Override
   public boolean isDefined() {
-    return this.cpuUsage != 0L || this.cpuTotal != 0 || this.memTotal != 0L
-        || this.memTotal != 0 || this.diskUsage != 0L || this.diskTotal != 0L
-        || this.startTime != 0;
+    return this.cpuUsage != 0 || this.cpuTotal != 0 || this.memTotal != 0 || this.diskUsage != 0 || this.diskTotal != 0
+          || this.startTime != 0;
   }
 
   public int cpuUsage() {
@@ -91,15 +90,15 @@ public class SystemPulse extends Pulse {
   }
 
   private static SystemPulse latestPulse;
-  private static AtomicLong lastReportTime = new AtomicLong(0L);
+  private static final AtomicLong LAST_REPORT_TIME = new AtomicLong(0L);
 
   public static SystemPulse latest() {
     do {
       final long newReportTime = System.currentTimeMillis();
-      final long oldReportTime = lastReportTime.get();
+      final long oldReportTime = LAST_REPORT_TIME.get();
       final long dt = newReportTime - oldReportTime;
       if (dt >= Metric.REPORT_INTERVAL) {
-        if (lastReportTime.compareAndSet(oldReportTime, newReportTime)) {
+        if (LAST_REPORT_TIME.compareAndSet(oldReportTime, newReportTime)) {
           try {
             latestPulse = latestPulse();
           } catch (Throwable error) {
