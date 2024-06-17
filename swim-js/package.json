@@ -1,10 +1,10 @@
 {
   "name": "@swim/swim",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Swim Frontend Stack",
   "homepage": "https://github.com/swimos/swim-js",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
@@ -18,12 +18,12 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@swim/core": "4.0.0-dev.20230923",
-    "@swim/host": "4.0.0-dev.20230923",
-    "@swim/ui": "4.0.0-dev.20230923",
-    "@swim/ux": "4.0.0-dev.20230923",
-    "@swim/vis": "4.0.0-dev.20230923",
-    "@swim/maps": "4.0.0-dev.20230923",
+    "@swim/core": "4.0.0",
+    "@swim/host": "4.0.0",
+    "@swim/ui": "4.0.0",
+    "@swim/ux": "4.0.0",
+    "@swim/vis": "4.0.0",
+    "@swim/maps": "4.0.0",
     "tslib": ">= 2.5"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-// Copyright 2015-2023 Nstream, inc.
+// Copyright 2015-2024 Nstream, inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,15 +28,9 @@ import swim.structure.selector.LiteralSelector;
 import swim.structure.selector.ValuesSelector;
 
 /**
- * An {@link Expression} that returns references to {@code Items} when it is
- * {@link #evaluate evaluated}. Because most application-level {@code Items}
- * are {@link Record Records}, a way to only extract certain parts of {@code
- * Records} is often required. Technically, this can be accomplished without
- * {@code Selectors} to some extent because the {@code Record} class implements
- * {@link java.util.List java.util.List&lt;Item&gt;} and (implicitly) {@link
- * java.util.Map java.util.Map&lt;Value,Value&gt;}; however, {@code Selectors}
- * additionally expose functional patterns that enhance composability, providing
- * a foundation on top of which expression languages can be built.
+ * A composable {@link Expression} that returns references to {@code Items} when
+ * it is {@link #evaluate evaluated}, providing a foundation on top of which
+ * expression languages may be built.
  */
 public abstract class Selector extends Expression {
 
@@ -86,25 +80,23 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * The means to chain {@code Selectors}. By intention, this is NOT a strict
-   * functional composition: for two {@code Selectors} {@code s1} and {@code
-   * s2}, {@code s1.andThen(s2)} DOES NOT NECESSARILY return a new {@code
-   * Selector} {@code s3} such that {@code s3.evaluate(args)} is equivalent to
-   * {@code s2.evaluate(s1.evaluate(args))}.
-   * <p>
-   * The reason for this is that for {@code Selectors} like {@link
-   * ChildrenSelector} that yield (logical) collections, we wish to invoke the
-   * next {@code Selector}, say a {@link GetSelector}, against every result.
-   * Under strict functional rules,
-   * {@code ChildrenSelector.andThen(someGetSelector).evaluate(args)} would
-   * instead return at most one defined value regardless of the number of
-   * children.
+   * The means to chain {@code Selectors}.
+   *
+   * <p>By design, this is not a strict functional composition. For two {@code
+   * Selectors} {@code s1} and {@code s2}, {@code s1.andThen(s2)} <i>does not
+   * necessarily</i> return a new {@code Selector} {@code s3} such that {@code
+   * s3.evaluate(args)} is equivalent to {@code s2.evaluate(s1.evaluate(args))}.
+   *
+   * <p> The reason for this is that for <i>result set</i> yielding {@code
+   * Selectors} (e.g. {@code ChildrenSelector}), we wish to invoke the {@code
+   * then} against every result. Under strict functional rules, {@code
+   * ChildrenSelector#andThen(getSelector).evaluate(args)} would instead
+   * return at most one defined value regardless of the number of children.
    */
   public abstract Selector andThen(Selector then);
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is a {@link
-   * GetSelector}.
+   * Shorthand to {@link #andThen} where {@code then} is a {@link GetSelector}.
    *
    * @param key the {@code key} field in the composing {@code GetSelector}.
    */
@@ -114,8 +106,7 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is a {@link
-   * GetSelector}.
+   * Shorthand to {@link #andThen} where {@code then} is a {@link GetSelector}.
    *
    * @param key the {@code key} field in the composing {@code GetSelector}.
    */
@@ -125,7 +116,7 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is a {@link
+   * Shorthand to {@link #andThen} where {@code then} is a {@link
    * GetAttrSelector}.
    *
    * @param key the {@code key} field in the composing {@code GetAttrSelector}.
@@ -136,7 +127,7 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is a {@link
+   * Shorthand to {@link #andThen} where {@code then} is a {@link
    * GetAttrSelector}.
    *
    * @param key the {@code key} field in the composing {@code GetAttrSelector}.
@@ -147,7 +138,7 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is a {@link
+   * Shorthand to {@link #andThen} where {@code then} is a {@link
    * GetItemSelector}.
    *
    * @param index the {@code index} field in the composing {@code
@@ -158,7 +149,7 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is a {@link
+   * Shorthand to {@link #andThen} where {@code then} is a {@link
    * GetItemSelector}.
    *
    * @param index the {@code index} field in the composing {@code
@@ -170,7 +161,7 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is the {@link
+   * Shorthand to {@link #andThen} where {@code then} is the {@link
    * KeysSelector}.
    */
   public Selector keys() {
@@ -178,7 +169,7 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is the {@link
+   * Shorthand to {@link #andThen} where {@code then} is the {@link
    * ValuesSelector}.
    */
   public Selector values() {
@@ -186,7 +177,7 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is the {@link
+   * Shorthand to {@link #andThen} where {@code then} is the {@link
    * ChildrenSelector}.
    */
   public Selector children() {
@@ -194,7 +185,7 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is the {@link
+   * Shorthand to {@link #andThen} where {@code then} is the {@link
    * DescendantsSelector}.
    */
   public Selector descendants() {
@@ -211,7 +202,7 @@ public abstract class Selector extends Expression {
   }
 
   /**
-   * An abstraction over {@link #andThen} where {@code then} is a {@link
+   * Shorthand to {@link #andThen} where {@code then} is a {@link
    * FilterSelector}.
    */
   @Override

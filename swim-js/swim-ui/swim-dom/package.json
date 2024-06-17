@@ -1,33 +1,41 @@
 {
   "name": "@swim/dom",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "HTML and SVG views, with procedural attribute and style animators",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-ui/swim-dom",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-dom.js",
+  "main": "./dist/swim-dom.mjs",
   "types": "./dist/swim-dom.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-dom.js",
-      "types": "./dist/swim-dom.d.ts"
+      "module": "./dist/swim-dom.mjs",
+      "import": {
+        "types": "./dist/swim-dom.d.ts",
+        "default": "./dist/swim-dom.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-dom.d.ts",
+        "default": "./dist/umd/swim-dom.umd.cjs"
+      },
+      "default": "./dist/swim-dom.mjs"
     }
   },
   "sideEffects": false,
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
-    "@swim/component": "4.0.0-dev.20230923",
-    "@swim/constraint": "4.0.0-dev.20230923",
-    "@swim/structure": "4.0.0-dev.20230923",
-    "@swim/math": "4.0.0-dev.20230923",
-    "@swim/time": "4.0.0-dev.20230923",
-    "@swim/style": "4.0.0-dev.20230923",
-    "@swim/theme": "4.0.0-dev.20230923",
-    "@swim/view": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
+    "@swim/component": "4.0.0",
+    "@swim/constraint": "4.0.0",
+    "@swim/structure": "4.0.0",
+    "@swim/math": "4.0.0",
+    "@swim/time": "4.0.0",
+    "@swim/style": "4.0.0",
+    "@swim/theme": "4.0.0",
+    "@swim/view": "4.0.0",
     "@types/w3c-css-typed-object-model-level-1": ">= 20180410",
     "tslib": ">= 2.5"
   },

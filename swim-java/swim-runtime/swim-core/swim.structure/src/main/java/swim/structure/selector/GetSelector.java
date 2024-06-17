@@ -1,4 +1,4 @@
-// Copyright 2015-2023 Nstream, inc.
+// Copyright 2015-2024 Nstream, inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,9 +28,10 @@ import swim.util.Murmur3;
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated}, searches all
  * variables in its evaluation scope and yields the most recent {@link Value}
- * that corresponds to {@code key}. Note that {@code key} itself can be an
- * {@link Expression}, in which case it will be {@code evaluated} against {@code
- * stack} prior to any concrete selection logic.
+ * that corresponds to {@code key}.
+ *
+ * <p>If {@code key} itself is an {@link Expression}, then it is eagerly {@code
+ * evaluated} against {@code stack} prior to any concrete selection logic.
  */
 public final class GetSelector extends Selector {
 

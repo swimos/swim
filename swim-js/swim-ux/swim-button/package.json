@@ -1,37 +1,45 @@
 {
   "name": "@swim/button",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Button-like user interface controls",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-ux/swim-button",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-button.js",
+  "main": "./dist/swim-button.mjs",
   "types": "./dist/swim-button.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-button.js",
-      "types": "./dist/swim-button.d.ts"
+      "module": "./dist/swim-button.mjs",
+      "import": {
+        "types": "./dist/swim-button.d.ts",
+        "default": "./dist/swim-button.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-button.d.ts",
+        "default": "./dist/umd/swim-button.umd.cjs"
+      },
+      "default": "./dist/swim-button.mjs"
     }
   },
   "sideEffects": false,
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
-    "@swim/component": "4.0.0-dev.20230923",
-    "@swim/constraint": "4.0.0-dev.20230923",
-    "@swim/structure": "4.0.0-dev.20230923",
-    "@swim/math": "4.0.0-dev.20230923",
-    "@swim/time": "4.0.0-dev.20230923",
-    "@swim/warp": "4.0.0-dev.20230923",
-    "@swim/client": "4.0.0-dev.20230923",
-    "@swim/style": "4.0.0-dev.20230923",
-    "@swim/theme": "4.0.0-dev.20230923",
-    "@swim/view": "4.0.0-dev.20230923",
-    "@swim/dom": "4.0.0-dev.20230923",
-    "@swim/graphics": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
+    "@swim/component": "4.0.0",
+    "@swim/constraint": "4.0.0",
+    "@swim/structure": "4.0.0",
+    "@swim/math": "4.0.0",
+    "@swim/time": "4.0.0",
+    "@swim/warp": "4.0.0",
+    "@swim/client": "4.0.0",
+    "@swim/style": "4.0.0",
+    "@swim/theme": "4.0.0",
+    "@swim/view": "4.0.0",
+    "@swim/dom": "4.0.0",
+    "@swim/graphics": "4.0.0",
     "tslib": ">= 2.5"
   },
   "scripts": {

@@ -1,26 +1,34 @@
 {
   "name": "@swim/time",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Date-time, time zone, and time interval data types, with strptime/strftime-style parsers and formatters",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-time",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-time.js",
+  "main": "./dist/swim-time.mjs",
   "types": "./dist/swim-time.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-time.js",
-      "types": "./dist/swim-time.d.ts"
+      "module": "./dist/swim-time.mjs",
+      "import": {
+        "types": "./dist/swim-time.d.ts",
+        "default": "./dist/swim-time.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-time.d.ts",
+        "default": "./dist/umd/swim-time.umd.cjs"
+      },
+      "default": "./dist/swim-time.mjs"
     }
   },
   "sideEffects": false,
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
-    "@swim/structure": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
+    "@swim/structure": "4.0.0",
     "tslib": ">= 2.5"
   },
   "scripts": {

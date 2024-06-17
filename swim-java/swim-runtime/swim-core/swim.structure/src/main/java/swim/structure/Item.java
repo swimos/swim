@@ -1,4 +1,4 @@
-// Copyright 2015-2023 Nstream, inc.
+// Copyright 2015-2024 Nstream, inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -584,27 +584,39 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   public abstract Item bitwiseAnd(Item that);
 
   public Item lt(Item that) {
-    return this.compareTo(that) < 0 ? Bool.from(true) : Item.absent();
+    return this.typeOrder() == that.typeOrder()
+        ? (this.compareTo(that) < 0 ? Bool.from(true) : Bool.from(false))
+        : absent();
   }
 
   public Item le(Item that) {
-    return this.compareTo(that) <= 0 ? Bool.from(true) : Item.absent();
+    return this.typeOrder() == that.typeOrder()
+        ? (this.compareTo(that) <= 0 ? Bool.from(true) : Bool.from(false))
+        : absent();
   }
 
   public Item eq(Item that) {
-    return this.equals(that) ? Bool.from(true) : Item.absent();
+    return this.equals(that) ? Bool.from(true)
+        : this.typeOrder() == that.typeOrder() ? Bool.from(false)
+        : absent();
   }
 
   public Item ne(Item that) {
-    return !this.equals(that) ? Bool.from(true) : Item.absent();
+    return this.equals(that) ? Bool.from(false)
+        : !this.isDefined() || !that.isDefined() ? absent()
+        : Bool.from(true);
   }
 
   public Item ge(Item that) {
-    return this.compareTo(that) >= 0 ? Bool.from(true) : Item.absent();
+    return this.typeOrder() == that.typeOrder()
+        ? (this.compareTo(that) >= 0 ? Bool.from(true) : Bool.from(false))
+        : absent();
   }
 
   public Item gt(Item that) {
-    return this.compareTo(that) > 0 ? Bool.from(true) : Item.absent();
+    return this.typeOrder() == that.typeOrder()
+        ? (this.compareTo(that) > 0 ? Bool.from(true) : Bool.from(false))
+        : absent();
   }
 
   public abstract Item plus(Item that);

@@ -1,4 +1,4 @@
-// Copyright 2015-2023 Nstream, inc.
+// Copyright 2015-2024 Nstream, inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 package swim.structure.selector;
 
 import swim.codec.Output;
+import swim.structure.Bool;
 import swim.structure.Interpreter;
 import swim.structure.Item;
 import swim.structure.Selectee;
@@ -24,17 +25,15 @@ import swim.util.Murmur3;
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated}, yields each {@code
  * Item} in {@code interpreter} such that {@code evaluating} {@code predicate}
- * against this {@code Item} would select at least one defined result. This is
- * fundamentally different from returning the result itself; for
- * example,
- * <p>
- * {@code FilterSelector(predicate=GetSelector(key="a")).evaluate(Record(Slot("a",5))}
- * <p>
- * yields the {@code Record} itself, NOT just {@code 5}.
+ * against this {@code Item} would select at least one defined result.
+ *
+ * <p>This is different from returning the result itself; for example,
+ * {@code FilterSelector(predicate=GetSelector(key="a")).evaluate(Record(Slot("a",5)))}
+ * yields the {@code Record} itself, not just {@code 5}.
  * <p>
  * To accomplish this, {@code FilterSelector} itself implements {@link Selectee
- * Selectee&lt;Item&gt;.selected} by always returning {@link
- * swim.structure.Extant} which, crucially, is never null. {@link #forSelected
+ * Selectee&lt;Item&gt;#selected} by <i>always</i> returning {@link
+ * swim.structure.Extant} (never {@code null}). {@link #forSelected
  * forSelected} still takes the form "if (condition) then subselect"; here,
  * "condition" is true only if {@code predicate.forSelected(interpreter,this)}
  * is not null. Thus, the responsibility to ensure that {@code this.selected}
@@ -108,6 +107,10 @@ public final class FilterSelector extends Selector implements Selectee<Item> {
   }
 
   protected boolean filterSelected(Interpreter interpreter) {
+    final Item result = this.predicate.evaluate(interpreter);
+    if (!result.isDefined() || result.equals(Bool.from(false))) {
+      return false;
+    }
     return this.predicate.forSelected(interpreter, this) != null;
   }
 

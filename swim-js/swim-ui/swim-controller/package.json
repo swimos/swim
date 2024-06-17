@@ -1,40 +1,48 @@
 {
   "name": "@swim/controller",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Componentized controller layer with application lifecycle and service management",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-ui/swim-controller",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-controller.js",
+  "main": "./dist/swim-controller.mjs",
   "types": "./dist/swim-controller.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-controller.js",
-      "types": "./dist/swim-controller.d.ts"
+      "module": "./dist/swim-controller.mjs",
+      "import": {
+        "types": "./dist/swim-controller.d.ts",
+        "default": "./dist/swim-controller.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-controller.d.ts",
+        "default": "./dist/umd/swim-controller.umd.cjs"
+      },
+      "default": "./dist/swim-controller.mjs"
     }
   },
   "sideEffects": false,
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
-    "@swim/component": "4.0.0-dev.20230923",
-    "@swim/collections": "4.0.0-dev.20230923",
-    "@swim/constraint": "4.0.0-dev.20230923",
-    "@swim/structure": "4.0.0-dev.20230923",
-    "@swim/recon": "4.0.0-dev.20230923",
-    "@swim/uri": "4.0.0-dev.20230923",
-    "@swim/math": "4.0.0-dev.20230923",
-    "@swim/time": "4.0.0-dev.20230923",
-    "@swim/warp": "4.0.0-dev.20230923",
-    "@swim/client": "4.0.0-dev.20230923",
-    "@swim/model": "4.0.0-dev.20230923",
-    "@swim/style": "4.0.0-dev.20230923",
-    "@swim/theme": "4.0.0-dev.20230923",
-    "@swim/view": "4.0.0-dev.20230923",
-    "@swim/dom": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
+    "@swim/component": "4.0.0",
+    "@swim/collections": "4.0.0",
+    "@swim/constraint": "4.0.0",
+    "@swim/structure": "4.0.0",
+    "@swim/recon": "4.0.0",
+    "@swim/uri": "4.0.0",
+    "@swim/math": "4.0.0",
+    "@swim/time": "4.0.0",
+    "@swim/warp": "4.0.0",
+    "@swim/client": "4.0.0",
+    "@swim/model": "4.0.0",
+    "@swim/style": "4.0.0",
+    "@swim/theme": "4.0.0",
+    "@swim/view": "4.0.0",
+    "@swim/dom": "4.0.0",
     "tslib": ">= 2.5"
   },
   "scripts": {

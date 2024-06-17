@@ -1,4 +1,4 @@
-// Copyright 2015-2023 Nstream, inc.
+// Copyright 2015-2024 Nstream, inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,19 +26,21 @@ public class HostPulse extends Pulse {
   protected final AgentPulse agents;
   protected final WarpDownlinkPulse downlinks;
   protected final WarpUplinkPulse uplinks;
+  protected final SystemPulse system;
 
   public HostPulse(long nodeCount, AgentPulse agents,
-                   WarpDownlinkPulse downlinks, WarpUplinkPulse uplinks) {
+                   WarpDownlinkPulse downlinks, WarpUplinkPulse uplinks, SystemPulse system) {
     this.nodeCount = nodeCount;
     this.agents = agents;
     this.downlinks = downlinks;
     this.uplinks = uplinks;
+    this.system = system;
   }
 
   @Override
   public boolean isDefined() {
     return this.nodeCount != 0L || this.agents.isDefined()
-        || this.downlinks.isDefined() || this.uplinks.isDefined();
+        || this.downlinks.isDefined() || this.uplinks.isDefined() || this.system.isDefined();
   }
 
   public final long nodeCount() {
@@ -55,6 +57,10 @@ public class HostPulse extends Pulse {
 
   public final WarpUplinkPulse uplinks() {
     return this.uplinks;
+  }
+
+  public SystemPulse system() {
+    return this.system;
   }
 
   @Override
@@ -97,6 +103,9 @@ final class HostPulseForm extends Form<HostPulse> {
       if (pulse.uplinks.isDefined()) {
         record.slot("uplinks", pulse.uplinks.toValue());
       }
+      if (pulse.system != null && pulse.system.isDefined()) {
+        record.slot("system", pulse.system.toValue());
+      }
       return record;
     } else {
       return Item.extant();
@@ -110,7 +119,8 @@ final class HostPulseForm extends Form<HostPulse> {
     final AgentPulse agents = value.get("agents").coerce(AgentPulse.form());
     final WarpDownlinkPulse downlinks = value.get("downlinks").coerce(WarpDownlinkPulse.form());
     final WarpUplinkPulse uplinks = value.get("uplinks").coerce(WarpUplinkPulse.form());
-    return new HostPulse(nodeCount, agents, downlinks, uplinks);
+    final SystemPulse system = value.get("system").coerce(SystemPulse.form());
+    return new HostPulse(nodeCount, agents, downlinks, uplinks, system);
   }
 
 }

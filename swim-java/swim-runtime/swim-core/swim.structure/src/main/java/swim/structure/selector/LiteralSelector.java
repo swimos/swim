@@ -1,4 +1,4 @@
-// Copyright 2015-2023 Nstream, inc.
+// Copyright 2015-2024 Nstream, inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,20 +23,20 @@ import swim.util.Murmur3;
 
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated}, evaluates and
- * yields {@code item} against {@code interpreter}. This allows us to express
- * various selection criteria without having to implement the corresponding
+ * yields {@code this.item} against {@code interpreter}, enabling the expression
+ * of various selection criteria without having to implement the corresponding
  * dedicated {@code Selectors}.
  * <p>
- * Such behavior is <i>especially</i> useful in conjunction with {@link
- * FilterSelector FilterSelectors}. For example, to select {@code Items} in some
- * {@code Interpreter} such that the sum of the results of {@code selecting} "a"
- * and "b" is less than 5, we could do
+ * Such behavior is especially useful in conjunction with {@link FilterSelector
+ * FilterSelectors}. For example, to select {@code Items} in some {@code
+ * Interpreter} such that the sum of the results of {@code selecting} "a" and
+ * "b" is less than 5, we could do
  * <p>
  * {@code Selector.literal(Selector.get("a").plus(Selector.get("b")).lt(5))}
  * <p>
- * This, notably, does not require a "ConditionalSelector" and only needs
- * correct implementations of {@link swim.structure.operator.LtOperator} and
- * {@link swim.structure.operator.PlusOperator}.
+ * Note that this circumvents a "ConditionalSelector" and only needs correct
+ * implementations of {@link swim.structure.operator.LtOperator} and {@link
+ * swim.structure.operator.PlusOperator}.
  */
 public final class LiteralSelector extends Selector {
 

@@ -1,25 +1,33 @@
 {
   "name": "@swim/unit",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Specializable unit testing framework",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-unit",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-unit.js",
+  "main": "./dist/swim-unit.mjs",
   "exports": {
     ".": {
-      "import": "./dist/swim-unit.js",
-      "types": "./dist/swim-unit.d.ts"
+      "module": "./dist/swim-unit.mjs",
+      "import": {
+        "types": "./dist/swim-unit.d.ts",
+        "default": "./dist/swim-unit.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-unit.d.ts",
+        "default": "./dist/umd/swim-unit.umd.cjs"
+      },
+      "default": "./dist/swim-unit.mjs"
     }
   },
   "types": "./dist/swim-unit.d.ts",
   "sideEffects": false,
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
     "tslib": ">= 2.5"
   },
   "scripts": {

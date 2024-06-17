@@ -1,26 +1,34 @@
 {
   "name": "@swim/sys",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Host system integration components",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-sys",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-sys.js",
+  "main": "./dist/swim-sys.mjs",
   "types": "./dist/swim-sys.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-sys.js",
-      "types": "./dist/swim-sys.d.ts"
+      "module": "./dist/swim-sys.mjs",
+      "import": {
+        "types": "./dist/swim-sys.d.ts",
+        "default": "./dist/swim-sys.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-sys.d.ts",
+        "default": "./dist/umd/swim-sys.umd.cjs"
+      },
+      "default": "./dist/swim-sys.mjs"
     }
   },
   "sideEffects": false,
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
-    "@swim/component": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
+    "@swim/component": "4.0.0",
     "tslib": ">= 2.5"
   },
   "scripts": {

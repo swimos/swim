@@ -1,19 +1,27 @@
 {
   "name": "@swim/util",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Interfaces for ordering, equality, hashing, type conversions, functional maps, interpolators, scales, iterators, builders, key-value maps, caches, and assertions",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-util",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-util.js",
+  "main": "./dist/swim-util.mjs",
   "types": "./dist/swim-util.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-util.js",
-      "types": "./dist/swim-util.d.ts"
+      "module": "./dist/swim-util.mjs",
+      "import": {
+        "types": "./dist/swim-util.d.ts",
+        "default": "./dist/swim-util.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-util.d.ts",
+        "default": "./dist/umd/swim-util.umd.cjs"
+      },
+      "default": "./dist/swim-util.mjs"
     }
   },
   "sideEffects": false,

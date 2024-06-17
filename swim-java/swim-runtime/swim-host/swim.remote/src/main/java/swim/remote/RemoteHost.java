@@ -1,4 +1,4 @@
-// Copyright 2015-2023 Nstream, inc.
+// Copyright 2015-2024 Nstream, inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ import swim.system.agent.AgentNode;
 import swim.system.profile.HostProfile;
 import swim.system.reflect.AgentPulse;
 import swim.system.reflect.HostPulse;
+import swim.system.reflect.SystemPulse;
 import swim.system.reflect.WarpDownlinkPulse;
 import swim.system.reflect.WarpUplinkPulse;
 import swim.uri.Uri;
@@ -1455,7 +1456,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
     final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
                                                             uplinkCommandRate, uplinkCommandCount);
-    this.pulse = new HostPulse(nodeCount, agentPulse, downlinkPulse, uplinkPulse);
+    this.pulse = new HostPulse(nodeCount, agentPulse, downlinkPulse, uplinkPulse, SystemPulse.latest());
     final DemandLane<HostPulse> metaPulse = this.metaPulse;
     if (metaPulse != null) {
       metaPulse.cue();

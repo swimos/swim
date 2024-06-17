@@ -1,28 +1,36 @@
 {
   "name": "@swim/build",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Swim build tool",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-build",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-build.js",
+  "main": "./dist/swim-build.mjs",
   "types": "./dist/swim-build.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-build.js",
-      "types": "./dist/swim-build.d.ts"
+      "module": "./dist/swim-build.mjs",
+      "import": {
+        "types": "./dist/swim-build.d.ts",
+        "default": "./dist/swim-build.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-build.d.ts",
+        "default": "./dist/umd/swim-build.umd.cjs"
+      },
+      "default": "./dist/swim-build.mjs"
     }
   },
   "sideEffects": false,
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
-    "@swim/component": "4.0.0-dev.20230923",
-    "@swim/sys": "4.0.0-dev.20230923",
-    "@swim/args": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
+    "@swim/component": "4.0.0",
+    "@swim/sys": "4.0.0",
+    "@swim/args": "4.0.0",
     "chokidar": "3",
     "tslib": ">= 2.5"
   },

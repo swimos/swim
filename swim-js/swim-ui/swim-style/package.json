@@ -1,29 +1,37 @@
 {
   "name": "@swim/style",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Font, color, gradient, shadow and related types and parsers",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-ui/swim-style",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-style.js",
+  "main": "./dist/swim-style.mjs",
   "types": "./dist/swim-style.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-style.js",
-      "types": "./dist/swim-style.d.ts"
+      "module": "./dist/swim-style.mjs",
+      "import": {
+        "types": "./dist/swim-style.d.ts",
+        "default": "./dist/swim-style.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-style.d.ts",
+        "default": "./dist/umd/swim-style.umd.cjs"
+      },
+      "default": "./dist/swim-style.mjs"
     }
   },
   "sideEffects": false,
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
-    "@swim/component": "4.0.0-dev.20230923",
-    "@swim/structure": "4.0.0-dev.20230923",
-    "@swim/math": "4.0.0-dev.20230923",
-    "@swim/time": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
+    "@swim/component": "4.0.0",
+    "@swim/structure": "4.0.0",
+    "@swim/math": "4.0.0",
+    "@swim/time": "4.0.0",
     "@types/w3c-css-typed-object-model-level-1": ">= 20180410",
     "tslib": ">= 2.5"
   },

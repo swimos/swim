@@ -6,10 +6,17 @@ import {createRequire} from "node:module";
 const require = createRequire(import.meta.url);
 const pkg = createRequire(import.meta.url)("../package.json");
 
-export default {
+const globals = function (name) {
+  if (/^@swim\//.test(name)) {
+    return "swim";
+  }
+  return void 0;
+};
+
+export default [{
   input: "../lib/main/index.js",
   output: {
-    file: "../dist/swim-macro.js",
+    file: "../dist/swim-macro.mjs",
     format: "esm",
     generatedCode: {
       preset: "es2015",
@@ -45,4 +52,45 @@ export default {
     if (warning.code === "CIRCULAR_DEPENDENCY") return;
     warn(warning);
   },
-};
+}, {
+  input: "../lib/main/index.js",
+  output: {
+    file: "../dist/umd/swim-macro.umd.cjs",
+    name: "swim",
+    globals,
+    format: "umd",
+    generatedCode: {
+      preset: "es2015",
+      constBindings: true,
+    },
+    sourcemap: true,
+    plugins: [
+      terser({
+        compress: false,
+        mangle: false,
+        output: {
+          preamble: `// ${pkg.name} v${pkg.version} (c) ${pkg.copyright}`,
+          beautify: true,
+          comments: false,
+          indent_level: 2,
+        },
+      }),
+    ],
+  },
+  external: [
+    /^@swim\//,
+    "fs",
+    "node:module",
+    "path",
+    "prismjs",
+    "tslib",
+  ],
+  plugins: [
+    nodeResolve(),
+    sourcemaps(),
+  ],
+  onwarn(warning, warn) {
+    if (warning.code === "CIRCULAR_DEPENDENCY") return;
+    warn(warning);
+  },
+}];

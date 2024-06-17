@@ -1,27 +1,35 @@
 {
   "name": "@swim/geo",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Geospatial coordinate, projection, and geometry types",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-geo",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-geo.js",
+  "main": "./dist/swim-geo.mjs",
   "types": "./dist/swim-geo.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-geo.js",
-      "types": "./dist/swim-geo.d.ts"
+      "module": "./dist/swim-geo.mjs",
+      "import": {
+        "types": "./dist/swim-geo.d.ts",
+        "default": "./dist/swim-geo.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-geo.d.ts",
+        "default": "./dist/umd/swim-geo.umd.cjs"
+      },
+      "default": "./dist/swim-geo.mjs"
     }
   },
   "sideEffects": false,
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
-    "@swim/structure": "4.0.0-dev.20230923",
-    "@swim/math": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
+    "@swim/structure": "4.0.0",
+    "@swim/math": "4.0.0",
     "tslib": ">= 2.5"
   },
   "scripts": {

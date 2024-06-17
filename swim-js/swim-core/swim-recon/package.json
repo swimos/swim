@@ -1,19 +1,27 @@
 {
   "name": "@swim/recon",
-  "version": "4.0.0-dev.20230923",
+  "version": "4.0.0",
   "description": "Object notation with attributes, like if JSON and XML had a baby",
   "homepage": "https://github.com/swimos/swim-js/tree/main/swim-core/swim-recon",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2023 Nstream, inc.",
+  "copyright": "2015-2024 Nstream, inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim-js.git",
   "type": "module",
-  "main": "./dist/swim-recon.js",
+  "main": "./dist/swim-recon.mjs",
   "types": "./dist/swim-recon.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/swim-recon.js",
-      "types": "./dist/swim-recon.d.ts"
+      "module": "./dist/swim-recon.mjs",
+      "import": {
+        "types": "./dist/swim-recon.d.ts",
+        "default": "./dist/swim-recon.mjs"
+      },
+      "require": {
+        "types": "./dist/swim-recon.d.ts",
+        "default": "./dist/umd/swim-recon.umd.cjs"
+      },
+      "default": "./dist/swim-recon.mjs"
     }
   },
   "sideEffects": false,
@@ -26,9 +34,9 @@
     "swim"
   ],
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20230923",
-    "@swim/codec": "4.0.0-dev.20230923",
-    "@swim/structure": "4.0.0-dev.20230923",
+    "@swim/util": "4.0.0",
+    "@swim/codec": "4.0.0",
+    "@swim/structure": "4.0.0",
     "tslib": ">= 2.5"
   },
   "scripts": {
